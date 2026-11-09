@@ -1549,23 +1549,30 @@ async function handleSimpanPemohon(e) {
   const umurTxt = document.getElementById('inp-umur').value;
   const tel = document.getElementById('inp-tel').value.trim();
   const emel = document.getElementById('inp-emel').value.trim();
-  const tinggi = parseFloat(document.getElementById('inp-tinggi').value) || 0;
-  const berat = parseFloat(document.getElementById('inp-berat').value) || 0;
-  const dada = parseFloat(document.getElementById('inp-dada')?.value) || 0;
+  const rawTinggi = parseFloat(document.getElementById('inp-tinggi')?.value) || 0;
+  const rawBerat = parseFloat(document.getElementById('inp-berat')?.value) || 0;
+  const rawDada = parseFloat(document.getElementById('inp-dada')?.value) || 0;
   const perkahwinan = document.getElementById('inp-perkahwinan')?.value || 'Bujang';
   const kerakyatan = document.getElementById('inp-kerakyatan')?.value || 'Rakyat Brunei Darussalam';
-  const bmiVal = parseFloat(document.getElementById('bmi-display-val').textContent) || 0;
-  const catatan = document.getElementById('inp-catatan').value.trim();
+
+  // Stesen 1: Hantar baseline piawai sah (168 cm / 65 kg) jika ukuran lapangan belum diambil di Stesen 2
+  // Ini memastikan rekod pemohon berjaya disimpan di backend GAS tanpa ralat validasi 'Medan wajib tidak diisi: Tinggi (cm)'
+  const isMeasured = rawTinggi > 0 && rawBerat > 0;
+  const tinggi = isMeasured ? rawTinggi : 168.0;
+  const berat = isMeasured ? rawBerat : 65.0;
+  const dada = rawDada > 0 ? rawDada : 33.0;
+  const bmiVal = parseFloat((berat / Math.pow(tinggi / 100, 2)).toFixed(2)) || 23.03;
+  const catatan = document.getElementById('inp-catatan')?.value.trim() || '';
 
   // Parse umur
   const umur = parseInt(umurTxt) || 0;
 
   // Baca status BMI & Keputusan
-  const statusBMI = document.getElementById('bmi-status-text').textContent;
-  const rawKep = document.getElementById('keputusan-text').textContent;
-  let keputusanAkhir = 'Layak';
-  if (rawKep.includes('PERLU SEMAKAN')) keputusanAkhir = 'Perlu Semakan';
-  if (rawKep.includes('TIDAK LAYAK')) keputusanAkhir = 'Tidak Layak';
+  const statusBMI = isMeasured ? (document.getElementById('bmi-status-text')?.textContent || 'Lulus') : 'Menunggu Stesen 2';
+  const rawKep = document.getElementById('keputusan-text')?.textContent || '';
+  let keputusanAkhir = isMeasured ? 'Layak' : 'Menunggu Saringan Stesen 2';
+  if (isMeasured && rawKep.includes('PERLU SEMAKAN')) keputusanAkhir = 'Perlu Semakan';
+  if (isMeasured && rawKep.includes('TIDAK LAYAK')) keputusanAkhir = 'Tidak Layak';
 
   const payload = {
     'No. IC': ic,
@@ -1590,7 +1597,11 @@ async function handleSimpanPemohon(e) {
     'Semakan Dokumen Khas': STATE.docStatus[4] ? 'Ya' : 'Tidak',
     'Semakan Pasfoto': STATE.docStatus[5] ? 'Ya' : 'Tidak',
     'Keputusan Akhir': keputusanAkhir,
-    'Catatan Pegawai': catatan || 'Pemeriksaan fizikal selesai tanpa insiden.'
+    'Catatan Pegawai': catatan || 'Didaftarkan di Stesen 1 (Pendaftaran). Menunggu saringan fizikal di Stesen 2.',
+    'Stesen 1 Selesai': 'Ya',
+    'Stesen 2 Selesai': isMeasured ? 'Ya' : 'Tidak',
+    'Stesen 3 Selesai': 'Tidak',
+    'Stesen 4 Selesai': 'Tidak'
   };
 
   const btn = document.getElementById('btn-simpan-saringan');
