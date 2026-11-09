@@ -1616,7 +1616,7 @@ async function handleSimpanPemohon(e) {
     showToast('Ralat rangkaian semasa menyimpan rekod.', 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<i data-lucide="printer"></i><span>Simpan & Cetak Laporan Rasmi</span>`;
+    btn.innerHTML = `<i data-lucide="qr-code"></i><span>SIMPAN & JANA KAD QR CALON</span>`;
     refreshIcons();
   }
 }
@@ -1650,6 +1650,7 @@ function resetFormSaringan() {
   generateDraftId();
   calcBMI();
   updateFormProgress();
+  updateStation1TopBanner();
   broadcastCandidateToiPad(true);
 }
 
@@ -2259,14 +2260,49 @@ function setupEventListeners() {
     }
   });
 
-  // Segerakkan maklumat pemohon ke iPad secara automatik semasa ditaip di PC
+  // Segerakkan maklumat pemohon ke iPad secara automatik dan kemas kini kad calon di bahagian atas
   ['inp-nama', 'inp-ic', 'inp-jawatan'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      el.addEventListener('input', () => broadcastCandidateToiPad(false));
-      el.addEventListener('change', () => broadcastCandidateToiPad(false));
+      el.addEventListener('input', () => {
+        updateStation1TopBanner();
+        broadcastCandidateToiPad(false);
+      });
+      el.addEventListener('change', () => {
+        updateStation1TopBanner();
+        broadcastCandidateToiPad(false);
+      });
     }
   });
+}
+
+/**
+ * Kemas kini paparan Nama Calon dan IC di bahagian paling atas Stesen 1 secara langsung
+ */
+function updateStation1TopBanner() {
+  const inpNama = document.getElementById('inp-nama');
+  const inpIc = document.getElementById('inp-ic');
+  const inpJawatan = document.getElementById('inp-jawatan');
+  const txtRef = document.getElementById('txt-form-ref-id');
+
+  const topNama = document.getElementById('s1-top-nama');
+  const topIc = document.getElementById('s1-top-ic');
+  const topAvatar = document.getElementById('s1-top-avatar');
+  const topJawatan = document.getElementById('s1-top-jawatan');
+  const topId = document.getElementById('s1-top-id');
+  const topJantina = document.getElementById('s1-top-jantina');
+
+  const rawNama = inpNama && inpNama.value ? inpNama.value.trim().toUpperCase() : '';
+  const rawIc = inpIc && inpIc.value ? inpIc.value.trim() : '';
+  const rawJawatan = inpJawatan && inpJawatan.value ? inpJawatan.value : 'Ahli Bomba dan Penyelamat';
+  const refId = txtRef ? txtRef.textContent : 'BFRD-20261109-0001';
+
+  if (topNama) topNama.textContent = rawNama || '(Sila Masukkan Nama Calon)';
+  if (topIc) topIc.textContent = rawIc || '(Belum Diisi)';
+  if (topAvatar) topAvatar.textContent = rawNama ? rawNama.charAt(0) : '?';
+  if (topJawatan) topJawatan.textContent = rawJawatan;
+  if (topId) topId.textContent = refId;
+  if (topJantina) topJantina.textContent = STATE.jantina || 'Lelaki';
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2837,13 +2873,8 @@ function applyExtractedDataToKaunter() {
   updateFormProgress();
 
   closeSideBySideModal();
-  showToast('Data pemohon berjaya diterapkan ke Kaunter Saringan!', 'success');
-
-  // Skrol ke bahagian ukuran stesen
-  const stationSec = document.querySelector('.tactile-physical-card');
-  if (stationSec) {
-    stationSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  updateStation1TopBanner();
+  showToast('Data pemohon berjaya diterapkan ke Kaunter Saringan Stesen 1!', 'success');
 }
 
 /**
@@ -2877,10 +2908,10 @@ async function verifyAndSaveToGoogleSheets() {
     if (m < 0 || (m === 0 && td.getDate() < bd.getDate())) umur--;
   }
 
-  const tinggi = currentHeight || 168.0;
-  const berat = currentWeight || 65.0;
-  const tMeter = tinggi / 100;
-  const bmiVal = parseFloat((berat / (tMeter * tMeter)).toFixed(2));
+  const tinggi = currentHeight || 0;
+  const berat = currentWeight || 0;
+  const tMeter = tinggi > 0 ? tinggi / 100 : 1;
+  const bmiVal = (tinggi > 0 && berat > 0) ? parseFloat((berat / (tMeter * tMeter)).toFixed(2)) : 0;
 
   const payload = {
     'No. IC': ic,
@@ -2896,18 +2927,21 @@ async function verifyAndSaveToGoogleSheets() {
     'Tinggi (cm)': tinggi,
     'Berat (kg)': berat,
     'Nilai BMI': bmiVal,
-    'Status BMI': (bmiVal >= 19.0 && bmiVal <= 27.0) ? 'Lulus' : 'Perhatian',
-    'Ukuran Dada (inci)': (jantina === 'Lelaki') ? (currentChest || 33.0) : 0,
-    'Status Dokumen': '6/6 Disahkan',
-    'Keputusan Akhir': 'Layak',
-    'Catatan': 'Disahkan & disimpan menerusi AI Vision Extraction Workflow.'
+    'Status BMI': 'Menunggu Stesen 2',
+    'Ukuran Dada (inci)': 0,
+    'Status Dokumen': 'Menunggu Stesen 3',
+    'Keputusan Akhir': 'Menunggu Stesen 2',
+    'Catatan': 'Didaftarkan melalui AI Vision Extraction Workflow.'
   };
 
   try {
     const res = await apiPost('simpanPemohon', payload);
     if (res && res.success) {
-      showToast(`Rekod ${nama} berjaya disimpan ke Google Sheets! ID: ${res.id || 'BFRD'}`, 'success');
+      const candRecord = { ...payload, 'ID Pendaftaran': res.id || 'BFRD-NEW' };
+      showToast(`Rekod ${nama} berjaya disimpan! ID: ${res.id || 'BFRD'}`, 'success');
       closeSideBySideModal();
+      showCandidateQrPass(candRecord);
+      resetFormSaringan();
 
       // Muat semula rekod pemohon
       await loadPemohonData();
