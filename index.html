@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ms-BN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BFRD System — Body Fitness & Requirement Data System</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- ============================================================
+       PAGE 1: LOGIN (Pegawai Bertugas)
+       ============================================================ -->
+  <div id="page-login">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-fallback">🔥</div>
+        <h1>BFRD SYSTEM</h1>
+        <p>Body Fitness & Requirement Data System<br><strong>Jabatan Bomba dan Penyelamat Brunei</strong></p>
+        <div class="login-divider"></div>
+      </div>
+
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-id">ID Pegawai Pemeriksa</label>
+          <div class="input-wrapper">
+            <span class="input-icon"><i data-lucide="user"></i></span>
+            <input type="text" id="login-id" placeholder="cth: p001 atau admin01" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="login-pin">Kata Laluan / PIN Keselamatan</label>
+          <div class="input-wrapper">
+            <span class="input-icon"><i data-lucide="lock"></i></span>
+            <input type="password" id="login-pin" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="btn-toggle-pass" onclick="togglePassVisibility('login-pin')" title="Tunjuk/Sembunyi PIN">
+              <i data-lucide="eye" id="login-pin-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn-primary">
+          <i data-lucide="log-in"></i>
+          <span>Log Masuk Kaunter</span>
+        </button>
+      </form>
+
+      <div class="login-footer">
+        Akses terhad untuk pegawai bertugas BFRD sahaja.<br>
+        Sistem dioptimumkan untuk mod saringan fizikal tanpa lag.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       APP SHELL (Sidebar + Topbar + Page Content)
+       ============================================================ -->
+  <div id="app-shell" style="display: none;">
+    <!-- Overlay for mobile drawer -->
+    <div id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon">🔥</div>
+          <div>
+            <h2>BFRD SYSTEM</h2>
+            <p>Bomba & Penyelamat Brunei</p>
+          </div>
+        </div>
+        <span class="role-pill" id="user-role-badge"><i data-lucide="shield" style="width:12px;height:12px;"></i> Pegawai</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Menu Utama</div>
+        <button type="button" class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+          <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
+          <span>Papan Pemuka</span>
+        </button>
+        <button type="button" class="nav-item" data-page="kaunter" onclick="navigateTo('kaunter')">
+          <span class="nav-icon"><i data-lucide="user-plus"></i></span>
+          <span>Kaunter Saringan</span>
+        </button>
+        <button type="button" class="nav-item" data-page="senarai" onclick="navigateTo('senarai')">
+          <span class="nav-icon"><i data-lucide="users"></i></span>
+          <span>Senarai Pemohon</span>
+          <span class="nav-badge" id="nav-count-pemohon">0</span>
+        </button>
+
+        <div class="nav-section-label">Pengurusan</div>
+        <button type="button" class="nav-item" data-page="syarat" onclick="navigateTo('syarat')">
+          <span class="nav-icon"><i data-lucide="sliders"></i></span>
+          <span>Syarat Jawatan</span>
+        </button>
+        <button type="button" class="nav-item" data-page="aktiviti" onclick="navigateTo('aktiviti')">
+          <span class="nav-icon"><i data-lucide="history"></i></span>
+          <span>Rekod Aktiviti</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="officer-card">
+          <div class="officer-avatar" id="officer-avatar-text">P</div>
+          <div class="officer-info">
+            <div class="officer-name" id="officer-display-name">Pegawai Bertugas</div>
+            <div class="officer-rank" id="officer-display-id">ID: p001</div>
+          </div>
+        </div>
+        <button type="button" class="btn-logout" onclick="handleLogout()">
+          <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+          <span>Keluar Sesi</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div id="main-area">
+      <!-- TOP BAR -->
+      <header id="topbar">
+        <button type="button" class="hamburger-btn" onclick="toggleSidebar(true)" title="Menu">
+          <i data-lucide="menu"></i>
+        </button>
+        <h1 class="topbar-title" id="page-title">Papan Pemuka Kaunter</h1>
+        <div class="session-badge" id="session-date-badge">
+          <i data-lucide="calendar" style="width:14px;height:14px;"></i>
+          <span id="txt-session-date">09 Nov 2026</span>
+        </div>
+        <button type="button" class="btn-daftar" onclick="navigateTo('kaunter')">
+          <i data-lucide="plus" style="width:16px;height:16px;"></i>
+          <span>+ Saringan Baharu</span>
+        </button>
+      </header>
+
+      <!-- PAGE CONTENT WRAPPER -->
+      <main id="page-content">
+
+        <!-- ============================================================
+             PAGE 2: DASHBOARD
+             ============================================================ -->
+        <section id="page-dashboard" class="page active">
+          <!-- KPI Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card blue">
+              <div class="kpi-icon"><i data-lucide="users"></i></div>
+              <div>
+                <div class="kpi-label">Jumlah Hadir Hari Ini</div>
+                <div class="kpi-value" id="kpi-hadir">0</div>
+                <div class="kpi-sub">Pemohon Berdaftar</div>
+              </div>
+            </div>
+            <div class="kpi-card green">
+              <div class="kpi-icon"><i data-lucide="check-circle-2"></i></div>
+              <div>
+                <div class="kpi-label">Layak / Melepasi Syarat</div>
+                <div class="kpi-value" id="kpi-layak">0</div>
+                <div class="kpi-sub" id="kpi-layak-pct">0% daripada hadir</div>
+              </div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-icon"><i data-lucide="alert-triangle"></i></div>
+              <div>
+                <div class="kpi-label">Perlu Semakan</div>
+                <div class="kpi-value" id="kpi-semakan">0</div>
+                <div class="kpi-sub" id="kpi-semakan-pct">0% daripada hadir</div>
+              </div>
+            </div>
+            <div class="kpi-card red">
+              <div class="kpi-icon"><i data-lucide="x-circle"></i></div>
+              <div>
+                <div class="kpi-label">Tidak Layak / Gagal</div>
+                <div class="kpi-value" id="kpi-gagal">0</div>
+                <div class="kpi-sub" id="kpi-gagal-pct">0% daripada hadir</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts and Activity -->
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="card-title">
+                <span class="card-icon blue"><i data-lucide="bar-chart-2"></i></span>
+                <span>Pecahan Status Kelayakan Hari Ini</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chartStatus"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">
+                <span class="card-icon amber"><i data-lucide="clock"></i></span>
+                <span>Aktiviti Kaunter Terkini</span>
+              </div>
+              <ul class="activity-list" id="dashboard-recent-activity">
+                <li class="activity-item">
+                  <div class="activity-dot green"></div>
+                  <div class="activity-info">
+                    <div class="activity-name">Memuatkan aktiviti...</div>
+                    <div class="activity-meta">Sila tunggu sebentar</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             PAGE 3: KAUNTER (Screening Form)
+             ============================================================ -->
+        <section id="page-kaunter" class="page">
+          <div class="breadcrumb">
+            <span>Kaunter Saringan</span>
+            <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+            <span>Borang Penilaian Fizikal</span>
+          </div>
+
+          <div class="page-header">
+            <div class="page-header-left">
+              <h2>Borang Pemeriksaan Fizikal & Dokumen Pemohon</h2>
+              <p>Masukkan data peribadi, ukuran fizikal secara reaktif, dan semak 6 dokumen rasmi BFRD.</p>
+            </div>
+            <div class="ref-badge" id="form-ref-badge">
+              <i data-lucide="file-text" style="width:14px;height:14px;"></i>
+              <span id="txt-form-ref-id">BFRD-20261109-0001</span>
+            </div>
+          </div>
+
+          <form id="form-saringan" onsubmit="handleSimpanPemohon(event)">
+            <!-- Bahagian 1: Data Peribadi -->
+            <div class="card form-section">
+              <div class="form-section-title">
+                <span class="step-num">1</span>
+                <span>Maklumat Peribadi Pemohon</span>
+              </div>
+
+              <div class="grid-3">
+                <div class="field-group">
+                  <label class="field-label" for="inp-ic">No. Kad Pengenalan (IC) <span class="req">*</span></label>
+                  <input type="text" class="field-input" id="inp-ic" placeholder="01-123456" required autocomplete="off">
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="inp-nama">Nama Penuh (Huruf Besar) <span class="req">*</span></label>
+                  <input type="text" class="field-input" id="inp-nama" placeholder="AWANG / DAYANG NAMA PENUH" required style="text-transform:uppercase;">
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="inp-jawatan">Jawatan Dipohon <span class="req">*</span></label>
+                  <select class="field-input" id="inp-jawatan" required onchange="handleJawatanChange()">
+                    <option value="">-- Pilih Jawatan --</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid-4">
+                <div class="field-group">
+                  <label class="field-label" for="inp-tlahir">Tarikh Lahir <span class="req">*</span></label>
+                  <input type="date" class="field-input" id="inp-tlahir" required onchange="handleTarikhLahirChange()">
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="inp-umur">Umur (Auto)</label>
+                  <input type="text" class="field-input" id="inp-umur" placeholder="0 Tahun" readonly>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Jantina <span class="req">*</span></label>
+                  <div class="segmented" id="segmented-jantina">
+                    <button type="button" class="segmented-btn active" data-val="Lelaki" onclick="setJantina('Lelaki')">Lelaki</button>
+                    <button type="button" class="segmented-btn" data-val="Perempuan" onclick="setJantina('Perempuan')">Perempuan</button>
+                  </div>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="inp-tel">No. Telefon <span class="req">*</span></label>
+                  <input type="tel" class="field-input" id="inp-tel" placeholder="+673 8xxxxxx" required>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="inp-emel">Alamat Emel</label>
+                <input type="email" class="field-input" id="inp-emel" placeholder="pemohon@domain.com">
+              </div>
+            </div>
+
+            <!-- Bahagian 2: Ukuran Fizikal & BMI -->
+            <div class="card form-section" style="border: 1.5px solid var(--gold);">
+              <div class="form-section-title">
+                <span class="step-num" style="background:var(--gold-dark);">2</span>
+                <span>Ukuran Fizikal & Kalkulator BMI Reaktif (Masa Nyata)</span>
+              </div>
+
+              <div class="grid-2">
+                <div>
+                  <div class="field-group">
+                    <label class="field-label">Tinggi Badan (cm) <span class="req">*</span></label>
+                    <div class="stepper-wrapper">
+                      <button type="button" class="stepper-btn" onclick="stepVal('inp-tinggi', -0.5)">−</button>
+                      <input type="number" step="0.1" min="120" max="220" class="stepper-input" id="inp-tinggi" value="168.0" required oninput="calcBMI()">
+                      <button type="button" class="stepper-btn" onclick="stepVal('inp-tinggi', 0.5)">+</button>
+                    </div>
+                    <small id="syarat-tinggi-info" style="color:var(--slate-muted);font-size:11.5px;margin-top:4px;display:block;">Syarat minimum jawatan: -</small>
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Berat Badan (kg) <span class="req">*</span></label>
+                    <div class="stepper-wrapper">
+                      <button type="button" class="stepper-btn" onclick="stepVal('inp-berat', -0.5)">−</button>
+                      <input type="number" step="0.1" min="30" max="180" class="stepper-input" id="inp-berat" value="65.0" required oninput="calcBMI()">
+                      <button type="button" class="stepper-btn" onclick="stepVal('inp-berat', 0.5)">+</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Live BMI Panel -->
+                <div class="bmi-panel">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                      <div class="bmi-value-big" id="bmi-display-val">23.03</div>
+                      <div class="bmi-unit">kg/m² (Indeks Jisim Badan)</div>
+                    </div>
+                    <div class="badge" id="bmi-status-badge" style="background:var(--green-bg);color:var(--green-text);font-size:13px;padding:6px 14px;">
+                      <i data-lucide="check" style="width:14px;height:14px;"></i>
+                      <span id="bmi-status-text">LULUS</span>
+                    </div>
+                  </div>
+
+                  <div class="bmi-gauge">
+                    <div class="bmi-gauge-fill" id="bmi-gauge-fill" style="width:50%;background:var(--green);"></div>
+                  </div>
+                  <div class="bmi-gauge-labels">
+                    <span>Kurang (&lt;18.5)</span>
+                    <span>Ideal (18.5 - 25.0)</span>
+                    <span>Perhatian (25 - 27.5)</span>
+                    <span>Obes (&gt;27.5)</span>
+                  </div>
+
+                  <div style="margin-top:14px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;font-size:12px;color:var(--slate-dark);">
+                    <strong>Syarat Jawatan Terpilih:</strong> <span id="syarat-julat-bmi">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bahagian 3: Senarai Semak 6 Dokumen Rasmi -->
+            <div class="card form-section">
+              <div class="form-section-title">
+                <span class="step-num">3</span>
+                <span>Senarai Semak 6 Dokumen Rasmi BFRD</span>
+              </div>
+              <p style="font-size:12.5px;color:var(--slate-muted);margin-bottom:14px;">
+                Tandakan dokumen fizikal yang telah diperiksa dan disahkan di hadapan kaunter:
+              </p>
+
+              <div class="doc-grid" id="doc-checklist-container">
+                <div class="doc-card checked" data-idx="0" onclick="toggleDoc(0)">
+                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+                  <div class="doc-label">1. Surat Panggilan Pemeriksaan / Bukti Pendaftaran Rasmi <span class="req">*</span></div>
+                </div>
+                <div class="doc-card checked" data-idx="1" onclick="toggleDoc(1)">
+                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+                  <div class="doc-label">2. Kad Pengenalan Pintar Brunei Asal / Pasport Sah <span class="req">*</span></div>
+                </div>
+                <div class="doc-card checked" data-idx="2" onclick="toggleDoc(2)">
+                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+                  <div class="doc-label">3. Salinan Diakui Sah Sijil Akademik & Transkrip</div>
+                </div>
+                <div class="doc-card checked" data-idx="3" onclick="toggleDoc(3)">
+                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+                  <div class="doc-label">4. Curriculum Vitae (CV) & Surat Permohonan Terkini</div>
+                </div>
+                <div class="doc-card" data-idx="4" onclick="toggleDoc(4)">
+                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;display:none;"></i></div>
+                  <div class="doc-label">5. Sijil Kebolehan Khas / Lesen Memandu (Jika ada)</div>
+                </div>
+                <div class="doc-card checked" data-idx="5" onclick="toggleDoc(5)">
+                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+                  <div class="doc-label">6. Pasfoto Terkini Berukuran Pasport</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bahagian 4: Keputusan Kelayakan & Catatan -->
+            <div class="card form-section">
+              <div class="form-section-title">
+                <span class="step-num">4</span>
+                <span>Keputusan Kelayakan Sistem & Catatan Pegawai</span>
+              </div>
+
+              <div class="keputusan-banner layak" id="keputusan-banner">
+                <i data-lucide="check-circle" id="keputusan-icon" style="width:24px;height:24px;"></i>
+                <div>
+                  <div style="font-size:16px;" id="keputusan-text">KEPUTUSAN: LAYAK KE PERINGKAT SETERUSNYA</div>
+                  <div style="font-size:12px;font-weight:400;opacity:0.9;" id="keputusan-subtext">Memenuhi kriteria ketinggian, BMI, serta 6 dokumen lengkap disahkan.</div>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="inp-catatan">Catatan / Ulasan Khas Pegawai Pemeriksa</label>
+                <textarea class="field-input" id="inp-catatan" rows="3" placeholder="Contoh: Keadaan fizikal cergas dan memenuhi syarat asas bomba. Tiada sebarang kecacatan ketara."></textarea>
+              </div>
+            </div>
+
+            <!-- Sticky Bottom Action Bar -->
+            <div class="sticky-bar">
+              <div class="progress-label" id="txt-form-progress">Kemajuan: 100% Lengkap</div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" id="form-progress-bar" style="width:100%;"></div>
+              </div>
+              <div class="sticky-actions">
+                <button type="button" class="btn btn-outlined" onclick="resetFormSaringan()">Kosongkan</button>
+                <button type="submit" id="btn-simpan-saringan" class="btn btn-red">
+                  <i data-lucide="printer"></i>
+                  <span>Simpan & Cetak Laporan Rasmi</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- ============================================================
+             PAGE 4: SENARAI PEMOHON (Directory / Table)
+             ============================================================ -->
+        <section id="page-senarai" class="page">
+          <div class="page-header">
+            <div class="page-header-left">
+              <h2>Pangkalan Data & Rekod Pemohon</h2>
+              <p>Senarai lengkap rekod saringan fizikal BFRD dengan carian pantas dan eksport Excel/CSV.</p>
+            </div>
+            <div>
+              <button type="button" class="btn btn-outlined" onclick="exportDataExcel()">
+                <i data-lucide="download"></i>
+                <span>Eksport Excel (.csv)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter Bar -->
+          <div class="filter-bar">
+            <div class="search-wrapper">
+              <span class="search-icon"><i data-lucide="search"></i></span>
+              <input type="text" id="filter-search" placeholder="Cari No. IC atau Nama Pemohon..." oninput="handleFilterChange()">
+            </div>
+            <select class="filter-select" id="filter-jawatan" onchange="handleFilterChange()">
+              <option value="">Semua Jawatan</option>
+            </select>
+            <select class="filter-select" id="filter-status" onchange="handleFilterChange()">
+              <option value="">Semua Status</option>
+              <option value="Layak">Layak</option>
+              <option value="Perlu Semakan">Perlu Semakan</option>
+              <option value="Tidak Layak">Tidak Layak</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outlined" onclick="refreshPemohonData()" title="Muat Semula">
+              <i data-lucide="rotate-cw"></i>
+            </button>
+          </div>
+
+          <!-- Table Wrap -->
+          <div class="table-wrap">
+            <table class="data-table" id="table-pemohon">
+              <thead>
+                <tr>
+                  <th>ID Pendaftaran</th>
+                  <th>Tarikh & Masa</th>
+                  <th>No. IC</th>
+                  <th>Nama Penuh</th>
+                  <th>Jawatan Dipohon</th>
+                  <th>Tinggi</th>
+                  <th>Berat</th>
+                  <th>BMI</th>
+                  <th>Keputusan Akhir</th>
+                  <th style="text-align:right;">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-pemohon">
+                <tr>
+                  <td colspan="10" style="text-align:center;padding:40px;color:var(--slate-muted);">
+                    Memuatkan data rekod pemohon...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination-wrap">
+              <div class="pagination-info" id="pagination-info">Menunjukkan 0 daripada 0 rekod</div>
+              <div class="pagination-btns" id="pagination-btns"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             PAGE 5: SYARAT JAWATAN (Super Admin Only)
+             ============================================================ -->
+        <section id="page-syarat" class="page">
+          <div class="page-header">
+            <div class="page-header-left">
+              <h2>Konfigurasi Syarat Fizikal Jawatan BFRD</h2>
+              <p>Kelola ambang had ketinggian minimum dan julat BMI mengikut jawatan yang ditawarkan.</p>
+            </div>
+            <button type="button" id="btn-tambah-syarat" class="btn btn-navy" onclick="openModalSyarat()">
+              <i data-lucide="plus"></i>
+              <span>+ Tambah Jawatan Baharu</span>
+            </button>
+          </div>
+
+          <div id="syarat-content-area">
+            <div class="table-wrap">
+              <table class="data-table" id="table-syarat">
+                <thead>
+                  <tr>
+                    <th>Kod</th>
+                    <th>Nama Jawatan</th>
+                    <th>Min Tinggi (Lelaki)</th>
+                    <th>Min Tinggi (Wanita)</th>
+                    <th>Min BMI</th>
+                    <th>Maks BMI</th>
+                    <th>Syarat Tambahan</th>
+                    <th style="text-align:right;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-syarat">
+                  <tr>
+                    <td colspan="8" style="text-align:center;padding:40px;color:var(--slate-muted);">
+                      Memuatkan data syarat jawatan...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             PAGE 6: REKOD AKTIVITI (Audit Log)
+             ============================================================ -->
+        <section id="page-aktiviti" class="page">
+          <div class="page-header">
+            <div class="page-header-left">
+              <h2>Jejak Audit & Rekod Aktiviti Sistem</h2>
+              <p>Log keselamatan automatik bagi operasi pendaftaran, cetakan laporan, dan perubahan data.</p>
+            </div>
+            <button type="button" class="btn btn-sm btn-outlined" onclick="loadAktivitiData()" title="Muat Semula">
+              <i data-lucide="rotate-cw"></i>
+              <span>Muat Semula</span>
+            </button>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table" id="table-aktiviti">
+              <thead>
+                <tr>
+                  <th>Tarikh & Masa</th>
+                  <th>ID Pemohon</th>
+                  <th>Pegawai Bertugas</th>
+                  <th>Tindakan</th>
+                  <th>Keterangan Operasi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-aktiviti">
+                <tr>
+                  <td colspan="5" style="text-align:center;padding:40px;color:var(--slate-muted);">
+                    Memuatkan log rekod aktiviti...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: DETAIL PEMOHON
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-detail" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-detail')">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Maklumat Terperinci Pemohon</h3>
+        <button type="button" class="modal-close" onclick="closeModal('modal-detail')"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" id="modal-detail-body">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outlined" onclick="closeModal('modal-detail')">Tutup</button>
+        <button type="button" class="btn btn-red" id="btn-modal-cetak-detail" onclick="cetakDariDetail()">
+          <i data-lucide="printer"></i>
+          <span>Cetak Laporan Rasmi</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: TAMBAH / KEMASKINI SYARAT JAWATAN
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-syarat" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-syarat')">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-syarat-title">Tetapan Syarat Jawatan BFRD</h3>
+        <button type="button" class="modal-close" onclick="closeModal('modal-syarat')"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-syarat" onsubmit="handleSimpanSyarat(event)">
+        <div class="modal-body">
+          <div class="field-group">
+            <label class="field-label" for="inp-syarat-kod">Kod Jawatan <span class="req">*</span></label>
+            <input type="text" class="field-input" id="inp-syarat-kod" placeholder="cth: AB-01" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="inp-syarat-nama">Nama Jawatan <span class="req">*</span></label>
+            <input type="text" class="field-input" id="inp-syarat-nama" placeholder="cth: Ahli Bomba Lelaki Gred AB1" required>
+          </div>
+          <div class="grid-2">
+            <div class="field-group">
+              <label class="field-label" for="inp-syarat-min-tl">Min. Tinggi Lelaki (cm)</label>
+              <input type="number" step="0.5" class="field-input" id="inp-syarat-min-tl" placeholder="165.0">
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="inp-syarat-min-tp">Min. Tinggi Wanita (cm)</label>
+              <input type="number" step="0.5" class="field-input" id="inp-syarat-min-tp" placeholder="157.0">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field-group">
+              <label class="field-label" for="inp-syarat-min-bmi">Min. BMI <span class="req">*</span></label>
+              <input type="number" step="0.1" class="field-input" id="inp-syarat-min-bmi" placeholder="18.5" required>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="inp-syarat-max-bmi">Maks. BMI <span class="req">*</span></label>
+              <input type="number" step="0.1" class="field-input" id="inp-syarat-max-bmi" placeholder="25.0" required>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="inp-syarat-khas">Syarat Tambahan / Nota Khas</label>
+            <textarea class="field-input" id="inp-syarat-khas" rows="2" placeholder="cth: Memegang Lesen Memandu Kelas 3 & 4"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outlined" onclick="closeModal('modal-syarat')">Batal</button>
+          <button type="submit" class="btn btn-navy">Simpan Syarat</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: PRATINJAU CETAK LAPORAN RASMI A4 (Brunei Malay)
+       ============================================================ -->
+  <div class="print-modal-overlay" id="modal-print" style="display:none;">
+    <div class="print-toolbar">
+      <div class="print-toolbar-title">
+        <i data-lucide="printer" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;"></i>
+        <span>Pratinjau Dokumen Rasmi A4 — BFRD Brunei</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-outlined" style="color:#FFF;border-color:rgba(255,255,255,0.4);" onclick="closePrintModal()">
+        Tutup
+      </button>
+      <button type="button" class="btn btn-sm btn-red" onclick="window.print()">
+        <i data-lucide="printer"></i>
+        <span>Cetak Sekarang (A4)</span>
+      </button>
+    </div>
+
+    <div class="print-scroll-area">
+      <div class="a4-sheet" id="a4-printable-content">
+        <!-- A4 Header -->
+        <div class="a4-header">
+          <div class="a4-logo">🔥</div>
+          <div class="a4-org-title">
+            <h1>JABATAN BOMBA DAN PENYELAMAT BRUNEI</h1>
+            <h2>KEMENTERIAN HAL EHWAL DALAM NEGERI, NEGARA BRUNEI DARUSSALAM</h2>
+            <div class="a4-double-line">CAWANGAN PENGAMBILAN & LATIHAN KESELAMATAN KEBAKARAN</div>
+          </div>
+        </div>
+
+        <!-- Doc Title -->
+        <div class="a4-doc-title">
+          <h3>LAPORAN PENILAIAN FIZIKAL DAN KELAYAKAN PEMOHON</h3>
+          <p>BFRD SYSTEM — BODY FITNESS & REQUIREMENT DATA SYSTEM</p>
+        </div>
+
+        <!-- Reference Row -->
+        <div class="a4-ref-row">
+          <div>No. Rujukan Pendaftaran: <strong id="print-ref-id">BFRD-20261109-0001</strong></div>
+          <div>Tarikh & Masa: <span id="print-tarikh-masa">09/11/2026 10:15 AM</span></div>
+        </div>
+
+        <!-- Bahagian 1: Maklumat Pemohon -->
+        <div class="a4-section">
+          <div class="a4-section-header">BAHAGIAN 1: MAKLUMAT PERIBADI PEMOHON</div>
+          <div class="a4-section-body">
+            <div class="a4-field-row">
+              <div class="a4-field" style="flex:2;">
+                <div class="a4-field-label">Nama Penuh Pemohon</div>
+                <div class="a4-field-value" id="print-nama">AWANG MOHAMMAD HARIS BIN ABDULLAH</div>
+              </div>
+              <div class="a4-field">
+                <div class="a4-field-label">No. Kad Pengenalan (IC)</div>
+                <div class="a4-field-value" id="print-ic">01-123456</div>
+              </div>
+            </div>
+            <div class="a4-field-row">
+              <div class="a4-field">
+                <div class="a4-field-label">Tarikh Lahir / Umur</div>
+                <div class="a4-field-value" id="print-umur">14/05/2003 (23 Tahun)</div>
+              </div>
+              <div class="a4-field">
+                <div class="a4-field-label">Jantina</div>
+                <div class="a4-field-value" id="print-jantina">Lelaki</div>
+              </div>
+              <div class="a4-field">
+                <div class="a4-field-label">No. Telefon</div>
+                <div class="a4-field-value" id="print-tel">+673 8765432</div>
+              </div>
+            </div>
+            <div class="a4-field-row" style="margin-bottom:0;">
+              <div class="a4-field">
+                <div class="a4-field-label">Jawatan yang Dipohon</div>
+                <div class="a4-field-value" id="print-jawatan" style="color:var(--navy);">Ahli Bomba Lelaki Gred AB1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bahagian 2: Keputusan Ukuran Fizikal & BMI -->
+        <div class="a4-section">
+          <div class="a4-section-header">BAHAGIAN 2: KEPUTUSAN UKURAN FIZIKAL & INDEKS JISIM BADAN (BMI)</div>
+          <div class="a4-section-body">
+            <div class="a4-bmi-row">
+              <div class="a4-bmi-box">
+                <div class="val" id="print-tinggi">172.0 cm</div>
+                <div class="lbl">Tinggi Badan</div>
+              </div>
+              <div class="a4-bmi-box">
+                <div class="val" id="print-berat">68.5 kg</div>
+                <div class="lbl">Berat Badan</div>
+              </div>
+              <div class="a4-bmi-box">
+                <div class="val" id="print-bmi">23.15</div>
+                <div class="lbl">Indeks Jisim Badan (BMI)</div>
+              </div>
+              <div class="a4-status-box a4-status-lulus" id="print-status-bmi">
+                LULUS
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bahagian 3: Status Semakan 6 Dokumen -->
+        <div class="a4-section">
+          <div class="a4-section-header">BAHAGIAN 3: STATUS SEMAKAN DOKUMEN RASMI PEMOHON</div>
+          <div class="a4-section-body">
+            <ul class="a4-doc-list">
+              <li class="a4-doc-item">
+                <span>1. Surat Panggilan Pemeriksaan / Bukti Pendaftaran Rasmi</span>
+                <span class="a4-doc-status-ok" id="print-doc-0">[ LENGKAP ]</span>
+              </li>
+              <li class="a4-doc-item">
+                <span>2. Kad Pengenalan Pintar Brunei Asal / Pasport Sah</span>
+                <span class="a4-doc-status-ok" id="print-doc-1">[ LENGKAP ]</span>
+              </li>
+              <li class="a4-doc-item">
+                <span>3. Salinan Diakui Sah Sijil Akademik & Transkrip</span>
+                <span class="a4-doc-status-ok" id="print-doc-2">[ LENGKAP ]</span>
+              </li>
+              <li class="a4-doc-item">
+                <span>4. Curriculum Vitae (CV) & Surat Permohonan Terkini</span>
+                <span class="a4-doc-status-ok" id="print-doc-3">[ LENGKAP ]</span>
+              </li>
+              <li class="a4-doc-item">
+                <span>5. Sijil Kebolehan Khas / Lesen Memandu (Jika berkaitan)</span>
+                <span class="a4-doc-status-ok" id="print-doc-4">[ LENGKAP ]</span>
+              </li>
+              <li class="a4-doc-item">
+                <span>6. Pasfoto Terkini Berukuran Pasport</span>
+                <span class="a4-doc-status-ok" id="print-doc-5">[ LENGKAP ]</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bahagian 4: Keputusan Keseluruhan -->
+        <div class="a4-section">
+          <div class="a4-section-header">BAHAGIAN 4: KEPUTUSAN KESELURUHAN & CATATAN PEGAWAI</div>
+          <div class="a4-section-body">
+            <div class="a4-keputusan layak" id="print-keputusan-box">
+              <div class="a4-keputusan-emoji">✅</div>
+              <div class="a4-keputusan-text">
+                <h4 id="print-keputusan-title">STATUS: LAYAK KE PERINGKAT SETERUSNYA</h4>
+                <p id="print-keputusan-desc">Pemohon melepasi keseluruhan standard fizikal BFRD dan menyerahkan dokumen yang sah.</p>
+              </div>
+            </div>
+
+            <div class="a4-field-label">Catatan & Ulasan Pegawai Pemeriksa:</div>
+            <div class="a4-catatan-box" id="print-catatan">
+              Calon dalam keadaan fizikal cergas dan bersemangat. Tiada sebarang masalah kecergasan dikesan semasa sesi saringan.
+            </div>
+          </div>
+        </div>
+
+        <!-- Bahagian 5: Pengesahan & Tandatangan -->
+        <div class="a4-sign-row">
+          <div class="a4-qr">
+            <img id="print-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=BFRD-SAMPLE" alt="QR Code">
+            <p>Imbas untuk Pengesahan Integriti<br>Rekod BFRD Brunei</p>
+          </div>
+          <div class="a4-sign">
+            <p style="font-weight:bold;color:var(--navy);">Disemak dan Disahkan Oleh:</p>
+            <div class="a4-sign-line"></div>
+            <p><strong>Nama Pegawai:</strong> <span id="print-officer-name">HJ. RAZALI BIN HJ. MAHMUD</span></p>
+            <p><strong>Jawatan / Pangkat:</strong> <span id="print-officer-rank">Pegawai Bomba Kanan</span></p>
+            <p><strong>Tarikh Pemeriksaan:</strong> <span id="print-sign-date">09 / 11 / 2026</span></p>
+            <div class="cop">[ RUANG COP RASMI JABATAN BOMBA DAN PENYELAMAT BRUNEI ]</div>
+          </div>
+        </div>
+
+        <!-- A4 Footer -->
+        <div class="a4-footer">
+          <span>Dicetak secara automatik oleh BFRD System (Body Fitness & Requirement Data System)</span>
+          <span>Halaman 1 daripada 1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- App Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
