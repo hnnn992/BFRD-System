@@ -530,14 +530,12 @@
 
                     <!-- LED Display Box -->
                     <div class="led-display-box">
-                      <span class="led-indicator"><i data-lucide="edit-3" style="width:11px;height:11px;"></i> Input Manual Ketinggian</span>
+                      <span class="led-indicator"><i data-lucide="edit-3" style="width:11px;height:11px;"></i> Taip Terus / Input Manual Ketinggian</span>
                       <div class="led-digits-wrap">
-                        <span class="led-digit" id="height-val">168.0</span>
+                        <input type="number" inputmode="decimal" step="0.1" id="inp-tinggi" class="led-digit-input" value="168.0" oninput="onDirectMeasureInput('height', this.value)" onfocus="this.select()" title="Klik untuk taip ketinggian dengan papan kekunci">
                         <span class="led-unit">CM</span>
                       </div>
                       <div class="led-sub-badge" id="height-sub-msg">Memenuhi Syarat Fizikal BFRD</div>
-                      <!-- Hidden Form Input -->
-                      <input type="hidden" id="inp-tinggi" value="168.0">
                     </div>
 
                     <!-- Tactile Step Calibration -->
@@ -594,14 +592,12 @@
 
                     <!-- LED Display Box -->
                     <div class="led-display-box">
-                      <span class="led-indicator"><i data-lucide="edit-3" style="width:11px;height:11px;"></i> Input Manual Penimbang Mekanikal</span>
+                      <span class="led-indicator"><i data-lucide="edit-3" style="width:11px;height:11px;"></i> Taip Terus / Input Manual Berat Badan</span>
                       <div class="led-digits-wrap">
-                        <span class="led-digit" id="weight-val">65.0</span>
+                        <input type="number" inputmode="decimal" step="0.1" id="inp-berat" class="led-digit-input" value="65.0" oninput="onDirectMeasureInput('weight', this.value)" onfocus="this.select()" title="Klik untuk taip berat dengan papan kekunci">
                         <span class="led-unit">KG</span>
                       </div>
                       <div class="led-sub-badge tare" id="weight-tare-note">Penentukuran Manual Disahkan oleh Pegawai (Tare 0.0 kg)</div>
-                      <!-- Hidden Form Input -->
-                      <input type="hidden" id="inp-berat" value="65.0">
                     </div>
 
                     <!-- Tactile Step Calibration -->
@@ -655,12 +651,11 @@
 
                     <!-- LED Display Box -->
                     <div class="led-display-box compact">
+                      <span class="led-indicator"><i data-lucide="edit-3" style="width:11px;height:11px;"></i> Taip Terus / Input Manual Dada</span>
                       <div class="led-digits-wrap">
-                        <span class="led-digit" id="chest-val">33.0</span>
+                        <input type="number" inputmode="decimal" step="0.1" id="inp-dada" class="led-digit-input" value="33.0" oninput="onDirectMeasureInput('chest', this.value)" onfocus="this.select()" title="Klik untuk taip ukuran dada dengan papan kekunci">
                         <span class="led-unit">INCI</span>
                       </div>
-                      <!-- Hidden Form Input -->
-                      <input type="hidden" id="inp-dada" value="33.0">
                     </div>
 
                     <!-- Stepper Grid -->
@@ -1848,7 +1843,7 @@
         </div>
 
         <div class="remote-led-display">
-          <span class="remote-led-num" id="remote-height-val">168.0</span>
+          <input type="number" inputmode="decimal" step="0.1" class="remote-led-input" id="remote-height-val" value="168.0" oninput="onRemoteDirectInput('height', this.value)" onfocus="this.select()" title="Ketik ketinggian terus">
           <span class="remote-led-unit">CM</span>
         </div>
 
@@ -1881,7 +1876,7 @@
         </div>
 
         <div class="remote-led-display">
-          <span class="remote-led-num" id="remote-weight-val">65.0</span>
+          <input type="number" inputmode="decimal" step="0.1" class="remote-led-input" id="remote-weight-val" value="65.0" oninput="onRemoteDirectInput('weight', this.value)" onfocus="this.select()" title="Ketik berat terus">
           <span class="remote-led-unit">KG</span>
         </div>
 
@@ -1917,7 +1912,7 @@
         </div>
 
         <div class="remote-led-display compact">
-          <span class="remote-led-num" id="remote-chest-val">33.0</span>
+          <input type="number" inputmode="decimal" step="0.1" class="remote-led-input" id="remote-chest-val" value="33.0" oninput="onRemoteDirectInput('chest', this.value)" onfocus="this.select()" title="Ketik ukuran dada terus">
           <span class="remote-led-unit">INCI</span>
         </div>
 

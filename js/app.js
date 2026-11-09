@@ -866,10 +866,12 @@ function setHeight(val) {
 }
 
 function updateHeightDisplay() {
+  const inp = document.getElementById('inp-tinggi');
+  if (inp && document.activeElement !== inp) {
+    inp.value = currentHeight.toFixed(1);
+  }
   const el = document.getElementById('height-val');
   if (el) el.textContent = currentHeight.toFixed(1);
-  const inp = document.getElementById('inp-tinggi');
-  if (inp) inp.value = currentHeight.toFixed(1);
 
   // Kemas kini butang preset aktif
   document.querySelectorAll('#height-presets-row .preset-pill').forEach(btn => {
@@ -885,7 +887,7 @@ function updateHeightDisplay() {
 function adjustWeight(delta) {
   currentWeight = Math.round((currentWeight + delta) * 10) / 10;
   if (currentWeight < 30) currentWeight = 30;
-  if (currentWeight > 200) currentWeight = 200;
+  if (currentWeight > 250) currentWeight = 250;
   updateWeightDisplay();
   calcBMI();
 }
@@ -894,13 +896,6 @@ function setWeight(val) {
   currentWeight = parseFloat(val) || 65.0;
   updateWeightDisplay();
   calcBMI();
-}
-
-function updateWeightDisplay() {
-  const el = document.getElementById('weight-val');
-  if (el) el.textContent = currentWeight.toFixed(1);
-  const inp = document.getElementById('inp-berat');
-  if (inp) inp.value = currentWeight.toFixed(1);
 }
 
 function adjustChest(delta) {
@@ -917,11 +912,56 @@ function setChest(val) {
   calcBMI();
 }
 
+function updateWeightDisplay() {
+  const inp = document.getElementById('inp-berat');
+  if (inp && document.activeElement !== inp) {
+    inp.value = currentWeight.toFixed(1);
+  }
+  const el = document.getElementById('weight-val');
+  if (el) el.textContent = currentWeight.toFixed(1);
+}
+
 function updateChestDisplay() {
+  const inp = document.getElementById('inp-dada');
+  if (inp && document.activeElement !== inp) {
+    inp.value = currentChest.toFixed(1);
+  }
   const el = document.getElementById('chest-val');
   if (el) el.textContent = currentChest.toFixed(1);
-  const inp = document.getElementById('inp-dada');
-  if (inp) inp.value = currentChest.toFixed(1);
+}
+
+/**
+ * Input Manual Taip Terus (Keyboard / On-screen Numpad) di PC
+ */
+function onDirectMeasureInput(field, val) {
+  const num = parseFloat(val);
+  if (isNaN(num) || num <= 0) return;
+
+  if (field === 'height') {
+    currentHeight = num;
+    updateHeightDisplay();
+  } else if (field === 'weight') {
+    currentWeight = num;
+    updateWeightDisplay();
+  } else if (field === 'chest') {
+    currentChest = num;
+    updateChestDisplay();
+  }
+
+  calcBMI();
+
+  // Segerakkan ke iPad jika bersambung
+  if (activeCompanionConn && activeCompanionConn.open) {
+    try {
+      activeCompanionConn.send({
+        type: 'LIVE_MEASUREMENT',
+        height: currentHeight,
+        weight: currentWeight,
+        chest: currentChest,
+        sessionId: hostSessionCode
+      });
+    } catch (e) {}
+  }
 }
 
 function toggleTare() {
@@ -3241,9 +3281,18 @@ function updateRemoteDisplay() {
   const wEl = document.getElementById('remote-weight-val');
   const cEl = document.getElementById('remote-chest-val');
 
-  if (hEl) hEl.textContent = remoteHeight.toFixed(1);
-  if (wEl) wEl.textContent = remoteWeight.toFixed(1);
-  if (cEl) cEl.textContent = remoteChest.toFixed(1);
+  if (hEl && document.activeElement !== hEl) {
+    if (hEl.tagName === 'INPUT') hEl.value = remoteHeight.toFixed(1);
+    else hEl.textContent = remoteHeight.toFixed(1);
+  }
+  if (wEl && document.activeElement !== wEl) {
+    if (wEl.tagName === 'INPUT') wEl.value = remoteWeight.toFixed(1);
+    else wEl.textContent = remoteWeight.toFixed(1);
+  }
+  if (cEl && document.activeElement !== cEl) {
+    if (cEl.tagName === 'INPUT') cEl.value = remoteChest.toFixed(1);
+    else cEl.textContent = remoteChest.toFixed(1);
+  }
 
   // Kira BMI di iPad
   const tM = remoteHeight / 100;
@@ -3265,6 +3314,41 @@ function updateRemoteDisplay() {
       statusEl.textContent = 'GAGAL';
     }
   }
+}
+
+/**
+ * Input Taip Terus di iPad / Telefon Pintar (Keypad Sentuh Skrin)
+ */
+function onRemoteDirectInput(field, val) {
+  const num = parseFloat(val);
+  if (isNaN(num) || num <= 0) return;
+
+  if (field === 'height') remoteHeight = num;
+  if (field === 'weight') remoteWeight = num;
+  if (field === 'chest') remoteChest = num;
+
+  const tM = remoteHeight / 100;
+  const bmi = (remoteWeight / (tM * tM)).toFixed(2);
+  const bmiEl = document.getElementById('remote-bmi-num');
+  const statusEl = document.getElementById('remote-bmi-status');
+
+  if (bmiEl) bmiEl.textContent = bmi;
+  if (statusEl) {
+    const b = parseFloat(bmi);
+    if (b >= 19.0 && b <= 27.0) {
+      statusEl.className = 'badge-tag pass';
+      statusEl.textContent = 'LULUS';
+    } else if (b > 27.0 && b <= 29.5) {
+      statusEl.className = 'badge-tag warn';
+      statusEl.textContent = 'PERHATIAN';
+    } else {
+      statusEl.className = 'badge-tag fail';
+      statusEl.textContent = 'GAGAL';
+    }
+  }
+
+  // Segerakkan ke PC serta-merta
+  sendRemoteLiveBroadcast();
 }
 
 function sendRemoteLiveBroadcast() {

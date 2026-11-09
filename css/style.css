@@ -2472,6 +2472,53 @@ select.field-input { cursor: pointer; }
   color: var(--slate-dark);
 }
 
+.led-digit-input {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--slate-dark);
+  background: transparent;
+  border: 1px dashed transparent;
+  border-bottom: 2px solid #CBD5E1;
+  width: 155px;
+  padding: 2px 4px;
+  outline: none;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  border-radius: 4px;
+}
+
+.led-digit-input:hover,
+.led-digit-input:focus {
+  border-color: var(--navy);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+
+.remote-led-input {
+  font-size: 46px;
+  font-weight: 900;
+  line-height: 1;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border-bottom: 2px solid #60A5FA;
+  width: 175px;
+  padding: 4px 8px;
+  outline: none;
+  text-align: center;
+  font-family: inherit;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.remote-led-input:focus {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: #60A5FA;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.3);
+}
+
 .led-unit {
   font-size: 16px;
   font-weight: 800;
