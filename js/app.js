@@ -1594,6 +1594,21 @@ async function handleSimpanPemohon(e) {
     'Jantina': STATE.jantina,
     'Status Perkahwinan': perkahwinan,
     'Status Kerakyatan': kerakyatan,
+    'Alamat Sekarang': document.getElementById('inp-alamat')?.value.trim().toUpperCase() || '',
+    'Poskod': document.getElementById('inp-poskod')?.value.trim().toUpperCase() || '',
+    'Warna Kad Pintar': document.getElementById('inp-warna-ic')?.value || 'Kuning',
+    'Bangsa': document.getElementById('inp-bangsa')?.value || 'Melayu',
+    'Agama': document.getElementById('inp-agama')?.value || 'Islam',
+    'No. Tel (Hp)': tel,
+    'No. Tel (Rumah)': document.getElementById('inp-tel-rumah')?.value.trim() || '-',
+    'No. Tel (Pejabat)': document.getElementById('inp-tel-pejabat')?.value.trim() || '-',
+    'Kemahiran Berenang': document.getElementById('inp-berenang')?.value || 'Stronger',
+    'Pekerjaan Sekarang': document.getElementById('inp-pekerjaan')?.value.trim().toUpperCase() || 'PEKERJA SENDIRI',
+    'Institusi / Sekolah': document.getElementById('inp-institusi')?.value.trim().toUpperCase() || 'SEKOLAH MENENGAH SAYYIDINA HUSAIN',
+    'Tahun Tamat': document.getElementById('inp-tahun-institusi')?.value || '2022',
+    'Kelulusan Tertinggi': document.getElementById('inp-kelulusan')?.value.trim().toUpperCase() || 'GCE \'O\' LEVEL (4 KREDIT)',
+    'Kod Pemeriksa S1': document.getElementById('inp-kod-s1')?.value.trim().toUpperCase() || 'P-001',
+    'Ukuran Dada (cm)': rawDada > 0 ? rawDada : 84.0,
     'Ukuran Dada (inci)': (STATE.jantina === 'Lelaki') ? dada : 0,
     'No. Telefon': tel,
     'Emel': emel,
@@ -1684,103 +1699,125 @@ function resetFormSaringan() {
 
 function openPrintModal(p) {
   const modal = document.getElementById('modal-print');
-  if (!modal) return;
+  if (!modal || !p) return;
 
-  // Isi data ke dokumen A4
-  document.getElementById('print-ref-id').textContent = p['ID Pendaftaran'] || 'BFRD-20261109-0001';
-  document.getElementById('print-tarikh-masa').textContent = p['Tarikh & Masa'] || new Date().toLocaleString('ms-BN');
-
-  document.getElementById('print-nama').textContent = p['Nama Penuh'] || '-';
-  document.getElementById('print-ic').textContent = p['No. IC'] || '-';
-  document.getElementById('print-umur').textContent = `${p['Tarikh Lahir'] || '-'} (${p['Umur'] || 0} Tahun)`;
-  
-  const jantinaStr = p['Jantina'] || 'Lelaki';
-  const perkahwinanStr = p['Status Perkahwinan'] || 'Bujang';
-  document.getElementById('print-jantina').textContent = `${jantinaStr} (${perkahwinanStr})`;
-
-  const elKerakyatan = document.getElementById('print-kerakyatan');
-  if (elKerakyatan) elKerakyatan.textContent = p['Status Kerakyatan'] || 'Rakyat Brunei Darussalam';
-
-  document.getElementById('print-tel').textContent = p['No. Telefon'] || '-';
-  document.getElementById('print-jawatan').textContent = p['Jawatan Dipohon'] || '-';
-
-  document.getElementById('print-tinggi').textContent = `${parseFloat(p['Tinggi (cm)'] || 0).toFixed(1)} cm`;
-  document.getElementById('print-berat').textContent = `${parseFloat(p['Berat (kg)'] || 0).toFixed(1)} kg`;
-  document.getElementById('print-bmi').textContent = parseFloat(p['Nilai BMI'] || 0).toFixed(2);
-
-  // Ukuran Dada (Lelaki sahaja)
-  const boxDada = document.getElementById('print-box-dada');
-  const elDada = document.getElementById('print-dada');
-  if (boxDada && elDada) {
-    if (jantinaStr === 'Lelaki') {
-      const dInci = parseFloat(p['Ukuran Dada (inci)']) || 33.0;
-      boxDada.style.display = 'block';
-      elDada.textContent = `${dInci}" (${Math.round(dInci * 2.54)} cm)`;
-    } else {
-      boxDada.style.display = 'none';
-    }
-  }
-
-  const elStatBMI = document.getElementById('print-status-bmi');
-  const sBmi = (p['Status BMI'] || 'Lulus').toUpperCase();
-  elStatBMI.textContent = sBmi;
-  elStatBMI.className = `a4-status-box ${sBmi.includes('LULUS') ? 'a4-status-lulus' : (sBmi.includes('PERHATIAN') ? 'a4-status-perhatian' : 'a4-status-gagal')}`;
-
-  // 6 Dokumen status
-  const docFields = [
-    'Semakan Surat Panggilan',
-    'Semakan Kad Pengenalan',
-    'Semakan Sijil Akademik',
-    'Semakan CV & Surat',
-    'Semakan Dokumen Khas',
-    'Semakan Pasfoto'
-  ];
-  docFields.forEach((field, i) => {
-    const el = document.getElementById(`print-doc-${i}`);
-    const isOk = p[field] === 'Ya';
-    if (el) {
-      el.textContent = isOk ? '[ LENGKAP ]' : '[ TIDAK LENGKAP ]';
-      el.className = isOk ? 'a4-doc-status-ok' : 'a4-doc-status-miss';
-    }
-  });
-
-  // Keputusan akhir
-  const kep = p['Keputusan Akhir'] || 'Layak';
-  const boxKep = document.getElementById('print-keputusan-box');
-  const titleKep = document.getElementById('print-keputusan-title');
-  const descKep = document.getElementById('print-keputusan-desc');
-
-  if (kep === 'Layak') {
-    boxKep.className = 'a4-keputusan layak';
-    titleKep.textContent = 'STATUS: LAYAK KE PERINGKAT SETERUSNYA';
-    descKep.textContent = 'Pemohon melepasi keseluruhan standard kecergasan fizikal BFRD dan menyerahkan dokumen rasmi yang sah.';
-  } else if (kep === 'Perlu Semakan') {
-    boxKep.className = 'a4-keputusan semakan';
-    titleKep.textContent = 'STATUS: PERLU SEMAKAN LANJUT';
-    descKep.textContent = 'Keputusan memerlukan kelulusan khas pegawai atasan atau penyerahan dokumen sokongan tambahan.';
-  } else {
-    boxKep.className = 'a4-keputusan tidak';
-    titleKep.textContent = 'STATUS: TIDAK MELEPASI SYARAT (GAGAL)';
-    descKep.textContent = 'Pemohon tidak memenuhi kriteria minimum fizikal (ketinggian/BMI) atau ketiadaan dokumen identiti asas.';
-  }
-
-  document.getElementById('print-catatan').textContent = p['Catatan Pegawai'] || 'Tiada catatan tambahan.';
-
-  // Pegawai Bertugas & QR Code
-  const officerName = (STATE.user && STATE.user.nama) || 'HJ. RAZALI BIN HJ. MAHMUD';
-  document.getElementById('print-officer-name').textContent = officerName;
-
+  // Format tarikh hari ini
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
-  document.getElementById('print-sign-date').textContent = `${pad(now.getDate())} / ${pad(now.getMonth()+1)} / ${now.getFullYear()}`;
+  const todayStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
 
-  // QR Code URL
-  const qrData = encodeURIComponent(`BFRD|${p['ID Pendaftaran']}|${p['No. IC']}|${kep}`);
-  const qrImg = document.getElementById('print-qr-img');
-  if (qrImg) {
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrData}`;
+  // Top Section: Bil Pendaftaran, Jawatan
+  const elBil = document.getElementById('bfrd-print-bil-pendaftaran');
+  if (elBil) elBil.textContent = p['ID Pendaftaran'] || 'BFRD-20261109-0001';
+
+  const elJawatan = document.getElementById('bfrd-print-jawatan');
+  if (elJawatan) elJawatan.textContent = (p['Jawatan Dipohon'] || 'AHLI BOMBA DAN PENYELAMAT').toUpperCase();
+
+  // Helper pengisian teks & tanda pangkah/tick (font Arial)
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val || '-';
+  };
+  const setTick = (id, cond) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = cond ? '✓' : '';
+  };
+
+  // 1. Keterangan Pemohon (Applicant Information)
+  setTxt('bfrd-print-nama', (p['Nama Penuh'] || '-').toUpperCase());
+  setTxt('bfrd-print-alamat', (p['Alamat Sekarang'] || 'NO. 12, SIMPANG 45, KAMPONG BERIBI, GADONG').toUpperCase());
+  setTxt('bfrd-print-poskod', p['Poskod'] || 'BE1118');
+  setTxt('bfrd-print-ic', p['No. IC'] || '-');
+
+  // Warna Kad Pintar (Kuning, Merah, Hijau)
+  const warna = (p['Warna Kad Pintar'] || 'Kuning').toLowerCase();
+  setTick('bfrd-print-box-k', warna.includes('kuning') || warna === 'k');
+  setTick('bfrd-print-box-m', warna.includes('merah') || warna === 'm');
+  setTick('bfrd-print-box-h', warna.includes('hijau') || warna === 'h');
+
+  setTxt('bfrd-print-tlahir', p['Tarikh Lahir'] || '-');
+  setTxt('bfrd-print-umur', String(p['Umur'] || '22'));
+  setTxt('bfrd-print-bangsa', (p['Bangsa'] || 'MELAYU').toUpperCase());
+  setTxt('bfrd-print-kerakyatan', (p['Status Kerakyatan'] || 'BRUNEI DARUSSALAM').toUpperCase());
+  setTxt('bfrd-print-agama', (p['Agama'] || 'ISLAM').toUpperCase());
+
+  // Jantina
+  const isMale = (p['Jantina'] || 'Lelaki') === 'Lelaki';
+  setTick('bfrd-print-box-lelaki', isMale);
+  setTick('bfrd-print-box-wanita', !isMale);
+
+  // Taraf Kelamin
+  const taraf = (p['Status Perkahwinan'] || 'Bujang').toLowerCase();
+  setTick('bfrd-print-box-bujang', taraf.includes('bujang'));
+  setTick('bfrd-print-box-kahwin', taraf.includes('kahwin') || taraf.includes('berkahwin'));
+  setTick('bfrd-print-box-janda', taraf.includes('janda'));
+  setTick('bfrd-print-box-duda', taraf.includes('duda'));
+
+  // No Tel
+  setTxt('bfrd-print-tel-hp', p['No. Telefon'] || p['No. Tel (Hp)'] || '-');
+  setTxt('bfrd-print-tel-rumah', p['No. Tel (Rumah)'] || '-');
+  setTxt('bfrd-print-tel-pejabat', p['No. Tel (Pejabat)'] || '-');
+
+  // Kemahiran Berenang
+  const renang = (p['Kemahiran Berenang'] || 'Stronger').toLowerCase();
+  setTick('bfrd-print-box-renang-tidak', renang.includes('tidak'));
+  setTick('bfrd-print-box-renang-beginner', renang.includes('beginner'));
+  setTick('bfrd-print-box-renang-weak', renang.includes('weak'));
+  setTick('bfrd-print-box-renang-stronger', renang.includes('stronger') || renang.includes('mahir'));
+
+  setTxt('bfrd-print-pekerjaan', (p['Pekerjaan Sekarang'] || 'PEKERJA SENDIRI').toUpperCase());
+
+  // 2. Keterangan Kelulusan (Qualification)
+  setTxt('bfrd-print-institusi', (p['Institusi / Sekolah'] || 'SEKOLAH MENENGAH SAYYIDINA HUSAIN').toUpperCase());
+  setTxt('bfrd-print-tahun-institusi', String(p['Tahun Tamat'] || '2021'));
+  setTxt('bfrd-print-kelulusan', (p['Kelulusan Tertinggi'] || 'GCE \'O\' LEVEL (4 KREDIT)').toUpperCase());
+  setTxt('bfrd-print-tarikh-pemohon', todayStr);
+  setTxt('bfrd-print-kod-s1', p['Kod Pemeriksa S1'] || 'P-001');
+  setTxt('bfrd-print-tarikh-s1', todayStr);
+
+  // 3. Sukatan Tinggi dan Timbangan (Body Mass Index)
+  const beratNum = parseFloat(p['Berat (kg)'] || 65.0);
+  const tinggiNum = parseFloat(p['Tinggi (cm)'] || 168.0);
+  const dadaNum = parseFloat(p['Ukuran Dada (cm)'] || (p['Ukuran Dada (inci)'] ? p['Ukuran Dada (inci)'] * 2.54 : 84.0));
+  const bmiNum = parseFloat(p['Nilai BMI'] || (beratNum / Math.pow(tinggiNum/100, 2)).toFixed(2));
+
+  setTxt('bfrd-print-berat', beratNum.toFixed(1));
+  setTxt('bfrd-print-tinggi', tinggiNum.toFixed(1));
+  setTxt('bfrd-print-dada', dadaNum.toFixed(1));
+  setTxt('bfrd-print-bmi', bmiNum.toFixed(2));
+
+  // Lelaki: BMI tidak melebihi 23 | Wanita: BMI tidak melebihi 24
+  if (isMale) {
+    setTxt('bfrd-print-lelaki-check', bmiNum <= 23.0 ? '[ ✓ MEMATUHI ]' : '[ X MELEBIHI ]');
+    setTxt('bfrd-print-wanita-check', '-');
+  } else {
+    setTxt('bfrd-print-lelaki-check', '-');
+    setTxt('bfrd-print-wanita-check', bmiNum <= 24.0 ? '[ ✓ MEMATUHI ]' : '[ X MELEBIHI ]');
   }
 
+  // Categories: Under Weight, Normal, Overweight, Obesity
+  setTxt('bfrd-print-bmi-under', bmiNum < 18.5 ? '[ ✓ ]' : '[   ]');
+  const isNormal = (bmiNum >= 18.5 && ((isMale && bmiNum <= 23.0) || (!isMale && bmiNum <= 24.0)));
+  setTxt('bfrd-print-bmi-normal', isNormal ? '[ ✓ ]' : '[   ]');
+  const isOver = ((isMale && bmiNum > 23.0 && bmiNum < 27.5) || (!isMale && bmiNum > 24.0 && bmiNum < 27.5));
+  setTxt('bfrd-print-bmi-over', isOver ? '[ ✓ ]' : '[   ]');
+  setTxt('bfrd-print-bmi-obese', bmiNum >= 27.5 ? '[ ✓ ]' : '[   ]');
+
+  setTxt('bfrd-print-kod-s2', p['Kod Pemeriksa S2'] || 'P-002');
+  setTxt('bfrd-print-tarikh-s2', todayStr);
+
+  // 4. Disahkan Oleh Pegawai
+  const kep = (p['Keputusan Akhir'] || 'Cukup Syarat').toLowerCase();
+  const isCukup = (kep.includes('cukup') && !kep.includes('tidak')) || kep.includes('layak') || kep.includes('lulus');
+  setTick('bfrd-print-box-cukup', isCukup);
+  setTick('bfrd-print-box-tidak-cukup', !isCukup);
+
+  const ulasan = p['Ulasan Pegawai'] || p['Catatan Pegawai'] || 'CALON MEMENUHI KESELURUHAN SYARAT FIZIKAL DAN DOKUMEN ASAL.';
+  setTxt('bfrd-print-ulasan', ulasan.toUpperCase());
+  setTxt('bfrd-print-kod-s4', p['Kod Pemeriksa S4'] || 'KP-4088');
+  setTxt('bfrd-print-tarikh-s4', todayStr);
+
+  // Paparkan modal
   modal.style.display = 'flex';
 }
 
@@ -4068,6 +4105,8 @@ async function submitStation3Record() {
     showToast('Amaran: Hanya ' + count + ' daripada 6 dokumen disahkan lengkap.', 'warn');
   }
 
+  const kodS3 = document.getElementById('s3-inp-kod-pemeriksa')?.value.trim().toUpperCase() || 'P-003';
+  activeStation3Candidate['Kod Pemeriksa S3'] = kodS3;
   activeStation3Candidate['Semakan Surat Panggilan'] = s3DocStatus[0] ? 'Ya' : 'Tidak';
   activeStation3Candidate['Semakan Kad Pengenalan'] = s3DocStatus[1] ? 'Ya' : 'Tidak';
   activeStation3Candidate['Semakan Sijil Akademik'] = s3DocStatus[2] ? 'Ya' : 'Tidak';
@@ -4390,11 +4429,14 @@ async function submitStation4DecisionFromPage(shouldPrint = false) {
   }
 
   const radio = document.querySelector('input[name="s4-page-decision-choice"]:checked');
-  const decision = radio ? radio.value : 'Lulus';
-  const catatan = document.getElementById('s4-page-catatan-inp')?.value || 'Disahkan melepasi saringan 4 stesen BFRD.';
+  const decision = radio ? radio.value : 'Cukup Syarat';
+  const catatan = document.getElementById('s4-page-catatan-inp')?.value || 'CALON MEMENUHI KESELURUHAN SYARAT FIZIKAL DAN DOKUMEN ASAL.';
+  const kodS4 = document.getElementById('s4-inp-kod-pemeriksa')?.value.trim().toUpperCase() || 'KP-4088';
 
   activeStation4Candidate['Keputusan Akhir'] = decision;
   activeStation4Candidate['Catatan Pegawai'] = catatan;
+  activeStation4Candidate['Ulasan Pegawai'] = catatan;
+  activeStation4Candidate['Kod Pemeriksa S4'] = kodS4;
 
   // Kemas kini paparan status
   const elStatusTag = document.getElementById('s4-main-status-tag');
