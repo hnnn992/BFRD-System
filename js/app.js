@@ -184,10 +184,13 @@ async function apiPost(action, data = {}) {
   }
 
   try {
+    // Sediakan data pada aras utama dan juga bersarang di dalam .data untuk keserasian sempurna dengan GAS
+    const payload = Object.assign({ action, token }, data, { data: data });
+
     const res = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Non-negotiable CORS rule
-      body: JSON.stringify({ action, token, data })
+      body: JSON.stringify(payload)
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -223,28 +226,25 @@ function mockGet(action, params) {
 function mockPost(action, data, token) {
   if (action === 'login') {
     const id = (data.idPegawai || '').toLowerCase().trim();
-    const pin = data.pin || '';
-    if ((id === 'p001' && pin === 'P001@bomba') || (id === 'admin01' && pin === 'Admin@2026!')) {
-      const role = id === 'admin01' ? 'superadmin' : 'pegawai';
-      const nama = id === 'admin01' ? 'Pentadbir Kanan BFRD' : 'Hj. Razali bin Mahmud';
+    const pin = (data.pin || '').trim();
+
+    // Terima akaun admin
+    if (id === 'admin01' || id === 'admin' || id.startsWith('admin')) {
       return {
         success: true,
-        message: 'Log masuk berjaya',
+        message: 'Log masuk sebagai Pentadbir Kanan berjaya',
         token: 'demo-hmac-token-' + Date.now(),
-        user: { idPegawai: id, role, nama }
+        user: { idPegawai: id || 'admin01', role: 'superadmin', nama: 'Pentadbir Kanan BFRD' }
       };
     }
-    // Benarkan sebarang input bermula p atau admin jika mod demo
-    if (id.length >= 3 && pin.length >= 4) {
-      const role = id.startsWith('admin') ? 'superadmin' : 'pegawai';
-      return {
-        success: true,
-        message: 'Log masuk mod demo diterima',
-        token: 'demo-hmac-token-' + Date.now(),
-        user: { idPegawai: id, role, nama: 'Pegawai Pemeriksa (' + id + ')' }
-      };
-    }
-    return { success: false, message: 'ID Pegawai atau PIN tidak sah (Demo: gunakan p001 / P001@bomba)' };
+
+    // Terima akaun pegawai atau sebarang ID
+    return {
+      success: true,
+      message: 'Log masuk sebagai Pegawai Pemeriksa berjaya',
+      token: 'demo-hmac-token-' + Date.now(),
+      user: { idPegawai: id || 'p001', role: 'pegawai', nama: 'Hj. Razali bin Mahmud' }
+    };
   }
 
   if (action === 'simpanPemohon') {
@@ -437,6 +437,22 @@ function togglePassVisibility(id) {
     if (icon) icon.setAttribute('data-lucide', 'eye');
   }
   refreshIcons();
+}
+
+function quickFill(id, pin) {
+  const elId = document.getElementById('login-id');
+  const elPin = document.getElementById('login-pin');
+  if (elId) elId.value = id;
+  if (elPin) elPin.value = pin;
+  const form = document.getElementById('form-login');
+  if (form) {
+    if (form.requestSubmit) {
+      form.requestSubmit();
+    } else {
+      const btn = document.getElementById('btn-login-submit');
+      if (btn) btn.click();
+    }
+  }
 }
 
 function toggleSidebar(open) {
