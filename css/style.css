@@ -4046,6 +4046,443 @@ select.field-input { cursor: pointer; }
 .spin {
   animation: spinIcon 1s linear infinite;
 }
+
+/* ============================================================
+   14. SISTEM OPERASI 4 STESEN (STATION WORKFLOW & QR SCANNER)
+   ============================================================ */
+
+/* Topbar Station Selector */
+.station-topbar-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.station-pill-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #BFDBFE;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.station-dropdown {
+  background: var(--navy-dark);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+}
+
+.station-dropdown:focus {
+  border-color: #60A5FA;
+}
+
+.btn-scan-qr {
+  background: var(--red);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);
+}
+
+.btn-scan-qr:hover {
+  background: var(--red-hover);
+  transform: translateY(-1px);
+}
+
+/* Station Active Banner */
+.station-banner-card {
+  background: linear-gradient(135deg, #1E3A8A 0%, #172554 100%);
+  color: var(--white);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+  flex-wrap: wrap;
+}
+
+.station-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.station-candidate-active-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--navy);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.station-candidate-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.station-avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  border: 2px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy);
+  flex-shrink: 0;
+}
+
+.station-candidate-details h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--slate-dark);
+  margin-bottom: 3px;
+}
+
+.station-candidate-details p {
+  font-size: 12px;
+  color: var(--slate-muted);
+  margin: 0;
+}
+
+.station-candidate-tag {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.station-candidate-tag.pass {
+  background: var(--green-bg);
+  color: var(--green-text);
+}
+
+/* Empty State for Stations */
+.station-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--white);
+  border: 2px dashed #CBD5E1;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.station-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate-muted);
+}
+
+/* QR Scanner Modal Viewfinder */
+#qr-reader {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #CBD5E1;
+  background: #000;
+}
+
+#qr-reader__scan_region {
+  background: transparent !important;
+}
+
+.qr-scanner-controls {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qr-manual-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.qr-manual-input {
+  flex: 1;
+  height: 42px;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.qr-manual-input:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+
+/* Candidate QR Pass Slip Card */
+.candidate-qr-pass-wrap {
+  background: var(--white);
+  border: 2px solid var(--navy);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 420px;
+  margin: 0 auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  position: relative;
+}
+
+.candidate-qr-pass-header {
+  border-bottom: 2px dashed #CBD5E1;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.candidate-qr-pass-header img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.candidate-qr-pass-header h3 {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 2px;
+  letter-spacing: 0.02em;
+}
+
+.candidate-qr-pass-header p {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--slate-muted);
+  text-transform: uppercase;
+}
+
+.candidate-qr-img-box {
+  background: #FFFFFF;
+  padding: 12px;
+  border-radius: 8px;
+  display: inline-block;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 12px;
+}
+
+.candidate-qr-img-box img {
+  width: 190px;
+  height: 190px;
+  display: block;
+}
+
+.candidate-qr-id-badge {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--navy);
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  padding: 4px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.candidate-qr-meta-table {
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+  margin-bottom: 14px;
+  border-collapse: collapse;
+}
+
+.candidate-qr-meta-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.candidate-qr-meta-table td.label {
+  font-weight: 700;
+  color: var(--slate-muted);
+  width: 40%;
+}
+
+.candidate-qr-meta-table td.val {
+  font-weight: 800;
+  color: var(--slate-dark);
+}
+
+.candidate-qr-pass-stations {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #CBD5E1;
+}
+
+.qr-station-step {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 4px 2px;
+  border-radius: 4px;
+  background: #F1F5F9;
+  color: var(--slate-muted);
+}
+
+.qr-station-step.done {
+  background: var(--green-bg);
+  color: var(--green-text);
+}
+
+.qr-station-step.current {
+  background: #DBEAFE;
+  color: var(--navy);
+  border: 1px solid #93C5FD;
+}
+
+/* Station 4 Master Scorecard Modal */
+.station4-scorecard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.station4-score-box {
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.station4-score-header {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 6px;
+}
+
+.station4-score-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.station4-score-row span.k {
+  color: var(--slate-muted);
+  font-weight: 600;
+}
+
+.station4-score-row span.v {
+  color: var(--slate-dark);
+  font-weight: 800;
+}
+
+.station4-decision-panel {
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.station4-radio-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.station4-radio-card {
+  border: 2px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  transition: all 0.15s;
+}
+
+.station4-radio-card input {
+  cursor: pointer;
+}
+
+.station4-radio-card.pass {
+  border-color: var(--green);
+  background: #F0FDF4;
+  color: var(--green-text);
+}
+
+.station4-radio-card.warn {
+  border-color: #F59E0B;
+  background: #FFFBEB;
+  color: #92400E;
+}
+
+.station4-radio-card.fail {
+  border-color: var(--red);
+  background: #FEF2F2;
+  color: var(--red-text);
+}
 @keyframes spinIcon {
   100% { transform: rotate(360deg); }
 }

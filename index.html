@@ -14,6 +14,8 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <!-- Tesseract.js: Client-Side Real OCR Engine for Form Photos -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- Html5Qrcode: Pengimbas Kod QR Kamera Berbilang Peranti (Stesen 2, 3 & 4) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 
@@ -100,6 +102,24 @@
           <span class="nav-badge" id="nav-count-pemohon">0</span>
         </button>
 
+        <div class="nav-section-label">Stesen Bertugas (Aliran 4 Stesen)</div>
+        <button type="button" class="nav-item nav-station" data-page="kaunter" onclick="switchStation(1)">
+          <span class="nav-icon"><i data-lucide="user-check"></i></span>
+          <span>1. Pendaftaran (QR)</span>
+        </button>
+        <button type="button" class="nav-item nav-station" data-page="stesen-2" onclick="switchStation(2)">
+          <span class="nav-icon"><i data-lucide="scale"></i></span>
+          <span>2. Timbangan (QR)</span>
+        </button>
+        <button type="button" class="nav-item nav-station" data-page="stesen-3" onclick="switchStation(3)">
+          <span class="nav-icon"><i data-lucide="file-check"></i></span>
+          <span>3. Dokumen (QR)</span>
+        </button>
+        <button type="button" class="nav-item nav-station" data-page="dashboard" onclick="switchStation(4)">
+          <span class="nav-icon"><i data-lucide="laptop"></i></span>
+          <span>4. Final Check (Laptop)</span>
+        </button>
+
         <div class="nav-section-label">Pengurusan</div>
         <button type="button" class="nav-item" data-page="syarat" onclick="navigateTo('syarat')">
           <span class="nav-icon"><i data-lucide="sliders"></i></span>
@@ -134,14 +154,28 @@
           <i data-lucide="menu"></i>
         </button>
         <h1 class="topbar-title" id="page-title">Papan Pemuka Kaunter</h1>
+
+        <!-- Stesen Selector Dropdown -->
+        <div class="station-topbar-pill">
+          <span class="station-pill-label"><i data-lucide="layers" style="width:13px;height:13px;"></i> Stesen:</span>
+          <select id="topbar-station-select" onchange="switchStation(this.value)" class="station-dropdown">
+            <option value="4">💻 Stesen 4: Final Check (Laptop)</option>
+            <option value="1">🏢 Stesen 1: Pendaftaran (QR)</option>
+            <option value="2">⚖️ Stesen 2: Timbangan (QR)</option>
+            <option value="3">📋 Stesen 3: Dokumen (QR)</option>
+          </select>
+        </div>
+
+        <!-- Scan QR Button -->
+        <button type="button" class="btn-scan-qr" onclick="openQrScannerModal()" title="Imbas Kod QR Calon">
+          <i data-lucide="qr-code" style="width:15px;height:15px;"></i>
+          <span>Imbas QR Calon</span>
+        </button>
+
         <div class="session-badge" id="session-date-badge">
           <i data-lucide="calendar" style="width:14px;height:14px;"></i>
           <span id="txt-session-date">09 Nov 2026</span>
         </div>
-        <button type="button" class="btn-daftar" onclick="navigateTo('kaunter')">
-          <i data-lucide="plus" style="width:16px;height:16px;"></i>
-          <span>+ Saringan Baharu</span>
-        </button>
       </header>
 
       <!-- PAGE CONTENT WRAPPER -->
@@ -1069,6 +1103,286 @@
           </div>
         </section>
 
+        <!-- ============================================================
+             STESEN 2: TIMBANGAN & UKURAN FIZIKAL (KOD QR KAMERA)
+             ============================================================ -->
+        <section id="page-stesen-2" class="page">
+          <!-- Banner Stesen 2 -->
+          <div class="station-banner-card">
+            <div>
+              <div class="station-badge-tag"><i data-lucide="scale"></i> STESEN 2</div>
+              <h2 style="font-size:20px;font-weight:900;margin-top:4px;">Stesen Timbangan & Ukuran Fizikal</h2>
+              <p style="font-size:12px;color:#BFDBFE;margin-top:2px;">Imbas kod QR pada slip calon dari Stesen 1 untuk memasukkan ukuran ketinggian, berat badan dan dada.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button type="button" class="btn btn-red" onclick="startStationQrScanner(2)">
+                <i data-lucide="qr-code"></i>
+                <span>Imbas QR Calon</span>
+              </button>
+              <div class="qr-manual-row" style="background:rgba(255,255,255,0.1);padding:4px;border-radius:6px;">
+                <input type="text" id="s2-manual-id" placeholder="No. ID / IC..." class="qr-manual-input" style="width:140px;height:36px;font-size:12px;background:#FFFFFF;color:#000;" onkeydown="if(event.key==='Enter') searchCandidateForStation(2, this.value)">
+                <button type="button" class="btn btn-sm btn-navy" onclick="searchCandidateForStation(2, document.getElementById('s2-manual-id').value)">Cari</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kad Calon Aktif Stesen 2 -->
+          <div id="s2-candidate-container">
+            <div class="station-empty-state" id="s2-empty-state">
+              <div class="station-empty-icon"><i data-lucide="qr-code" style="width:32px;height:32px;"></i></div>
+              <h3 style="font-size:16px;font-weight:800;color:var(--slate-dark);margin-bottom:6px;">Menunggu Imbasan Calon</h3>
+              <p style="font-size:13px;color:var(--slate-muted);max-width:440px;margin:0 auto 16px;">
+                Sila klik butang <strong>"Imbas QR Calon"</strong> untuk menghalakan kamera iPad/telefon ke slip calon atau masukkan No. IC calon di atas.
+              </p>
+              <button type="button" class="btn btn-red" onclick="startStationQrScanner(2)">
+                <i data-lucide="camera"></i>
+                <span>Buka Kamera Pengimbas QR</span>
+              </button>
+            </div>
+
+            <div id="s2-active-content" style="display:none;">
+              <!-- Candidate Meta Header -->
+              <div class="station-candidate-active-card">
+                <div class="station-candidate-meta">
+                  <div class="station-avatar-circle" id="s2-avatar">C</div>
+                  <div class="station-candidate-details">
+                    <h3 id="s2-nama">NAMA CALON</h3>
+                    <p><span id="s2-id" style="font-weight:800;color:var(--navy);">BFRD-XXXX</span> &bull; IC: <span id="s2-ic">01-XXXXXX</span> &bull; <span id="s2-jawatan">Ahli Bomba</span> &bull; <span id="s2-umur">22 Tahun</span> (<span id="s2-jantina">Lelaki</span>)</p>
+                  </div>
+                </div>
+                <div>
+                  <span class="station-candidate-tag" id="s2-stage-badge">Sedang Ditimbang</span>
+                </div>
+              </div>
+
+              <!-- Measurement Panels (Height, Weight, Chest) -->
+              <div class="tactile-measure-grid">
+                <!-- Tinggi -->
+                <div class="tactile-measure-card">
+                  <div class="tactile-card-header">
+                    <div class="tactile-card-title">
+                      <div class="tactile-card-icon"><i data-lucide="ruler"></i></div>
+                      <div><strong>Ketinggian Fizikal</strong><span class="sub" id="s2-syarat-tinggi">Min: 161.0 cm</span></div>
+                    </div>
+                    <span class="tactile-status-chip pass" id="s2-height-badge">Mematuhi</span>
+                  </div>
+                  <div class="led-display-box">
+                    <div class="led-digits-wrap">
+                      <input type="number" inputmode="decimal" step="0.1" id="s2-inp-tinggi" class="led-digit-input" value="168.0" oninput="onStation2MeasureChange('height', this.value)" onfocus="this.select()">
+                      <span class="led-unit">CM</span>
+                    </div>
+                  </div>
+                  <div class="stepper-touch-grid">
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('height', -0.5)"><strong>-0.5</strong><span>cm</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('height', -0.1)"><strong>-0.1</strong><span>cm</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('height', 0.1)"><strong>+0.1</strong><span>cm</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('height', 0.5)"><strong>+0.5</strong><span>cm</span></button>
+                  </div>
+                </div>
+
+                <!-- Berat -->
+                <div class="tactile-measure-card">
+                  <div class="tactile-card-header">
+                    <div class="tactile-card-title">
+                      <div class="tactile-card-icon"><i data-lucide="scale"></i></div>
+                      <div><strong>Berat Badan Fizikal</strong><span class="sub">Tare: 0.00 kg</span></div>
+                    </div>
+                    <span class="tactile-status-chip pass">Disahkan</span>
+                  </div>
+                  <div class="led-display-box">
+                    <div class="led-digits-wrap">
+                      <input type="number" inputmode="decimal" step="0.1" id="s2-inp-berat" class="led-digit-input" value="65.0" oninput="onStation2MeasureChange('weight', this.value)" onfocus="this.select()">
+                      <span class="led-unit">KG</span>
+                    </div>
+                  </div>
+                  <div class="stepper-touch-grid">
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('weight', -0.5)"><strong>-0.5</strong><span>kg</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('weight', -0.1)"><strong>-0.1</strong><span>kg</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('weight', 0.1)"><strong>+0.1</strong><span>kg</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('weight', 0.5)"><strong>+0.5</strong><span>kg</span></button>
+                  </div>
+                </div>
+
+                <!-- Dada -->
+                <div class="tactile-measure-card" id="s2-group-dada">
+                  <div class="tactile-card-header">
+                    <div class="tactile-card-title">
+                      <div class="tactile-card-icon"><i data-lucide="activity"></i></div>
+                      <div><strong>Ukuran Dada Biasa</strong><span class="sub">&lt; 34" Syarat BFRD</span></div>
+                    </div>
+                    <span class="tactile-status-chip pass" id="s2-chest-badge">&lt; 34" Mematuhi</span>
+                  </div>
+                  <div class="led-display-box compact">
+                    <div class="led-digits-wrap">
+                      <input type="number" inputmode="decimal" step="0.1" id="s2-inp-dada" class="led-digit-input" value="33.0" oninput="onStation2MeasureChange('chest', this.value)" onfocus="this.select()">
+                      <span class="led-unit">INCI</span>
+                    </div>
+                  </div>
+                  <div class="stepper-touch-grid">
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('chest', -0.5)"><strong>-0.5</strong><span>"</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('chest', -0.1)"><strong>-0.1</strong><span>"</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('chest', 0.1)"><strong>+0.1</strong><span>"</span></button>
+                    <button type="button" class="tactile-step-btn" onclick="stepStation2Val('chest', 0.5)"><strong>+0.5</strong><span>"</span></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BMI Status Banner -->
+              <div class="tactile-bmi-banner" style="margin-top:16px;">
+                <div class="bmi-top-row">
+                  <div>
+                    <span class="bmi-calc-label">INDEKS JISIM BADAN (BMI) MASA NYATA:</span>
+                    <div class="bmi-display-row">
+                      <span class="bmi-number" id="s2-bmi-num">23.03</span>
+                      <span class="bmi-unit">kg/m&sup2;</span>
+                    </div>
+                  </div>
+                  <div class="bmi-badge-wrap">
+                    <div class="tactile-status-chip pass" id="s2-bmi-status-badge" style="font-size:13px;padding:6px 14px;">
+                      <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
+                      <span id="s2-bmi-status-txt">BMI NORMAL & LULUS KELAYAKAN</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Station 2 Action Buttons -->
+              <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-green btn-lg" style="flex:2;height:52px;font-size:15px;font-weight:800;" onclick="submitStation2Record()">
+                  <i data-lucide="check-circle-2"></i>
+                  <span>SAHKAN TIMBANGAN & HANTAR KE STESEN 3</span>
+                </button>
+                <button type="button" class="btn btn-outlined" style="flex:1;height:52px;" onclick="resetStation2()">
+                  <i data-lucide="rotate-ccw"></i>
+                  <span>Calon Seterusnya</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             STESEN 3: PENGESAHAN DOKUMEN FIZIKAL (KOD QR KAMERA)
+             ============================================================ -->
+        <section id="page-stesen-3" class="page">
+          <!-- Banner Stesen 3 -->
+          <div class="station-banner-card">
+            <div>
+              <div class="station-badge-tag"><i data-lucide="file-check"></i> STESEN 3</div>
+              <h2 style="font-size:20px;font-weight:900;margin-top:4px;">Stesen Pengesahan Dokumen Fizikal</h2>
+              <p style="font-size:12px;color:#BFDBFE;margin-top:2px;">Imbas kod QR pada slip calon untuk menyemak dan mengesahkan 6 dokumen wajib sebelum ke Meja Ketua Penguji.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button type="button" class="btn btn-red" onclick="startStationQrScanner(3)">
+                <i data-lucide="qr-code"></i>
+                <span>Imbas QR Calon</span>
+              </button>
+              <div class="qr-manual-row" style="background:rgba(255,255,255,0.1);padding:4px;border-radius:6px;">
+                <input type="text" id="s3-manual-id" placeholder="No. ID / IC..." class="qr-manual-input" style="width:140px;height:36px;font-size:12px;background:#FFFFFF;color:#000;" onkeydown="if(event.key==='Enter') searchCandidateForStation(3, this.value)">
+                <button type="button" class="btn btn-sm btn-navy" onclick="searchCandidateForStation(3, document.getElementById('s3-manual-id').value)">Cari</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kad Calon Aktif Stesen 3 -->
+          <div id="s3-candidate-container">
+            <div class="station-empty-state" id="s3-empty-state">
+              <div class="station-empty-icon"><i data-lucide="file-text" style="width:32px;height:32px;"></i></div>
+              <h3 style="font-size:16px;font-weight:800;color:var(--slate-dark);margin-bottom:6px;">Menunggu Imbasan Calon</h3>
+              <p style="font-size:13px;color:var(--slate-muted);max-width:440px;margin:0 auto 16px;">
+                Sila klik butang <strong>"Imbas QR Calon"</strong> untuk menghalakan kamera iPad/telefon ke slip calon atau masukkan No. IC calon di atas.
+              </p>
+              <button type="button" class="btn btn-red" onclick="startStationQrScanner(3)">
+                <i data-lucide="camera"></i>
+                <span>Buka Kamera Pengimbas QR</span>
+              </button>
+            </div>
+
+            <div id="s3-active-content" style="display:none;">
+              <!-- Candidate Meta Header -->
+              <div class="station-candidate-active-card">
+                <div class="station-candidate-meta">
+                  <div class="station-avatar-circle" id="s3-avatar">C</div>
+                  <div class="station-candidate-details">
+                    <h3 id="s3-nama">NAMA CALON</h3>
+                    <p><span id="s3-id" style="font-weight:800;color:var(--navy);">BFRD-XXXX</span> &bull; IC: <span id="s3-ic">01-XXXXXX</span> &bull; <span id="s3-jawatan">Ahli Bomba</span> &bull; Fizikal: <strong id="s3-fizikal-summary" style="color:var(--green-text);">Tinggi 170.0cm | BMI 22.5</strong></p>
+                  </div>
+                </div>
+                <div>
+                  <button type="button" class="btn btn-sm btn-navy" onclick="markAllStation3Docs(true)">
+                    <i data-lucide="check-check"></i>
+                    <span>Tanda Semua Sah (6/6)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 6 Document Verification Checkboxes -->
+              <div class="tactile-doc-grid">
+                <div class="tactile-doc-card checked" id="s3-doc-0" onclick="toggleStation3Doc(0)">
+                  <div class="tactile-doc-check"><i data-lucide="check"></i></div>
+                  <div class="tactile-doc-info">
+                    <strong>1. Surat Panggilan / Slip Saringan</strong>
+                    <span>Slip rasmi panggilan temuduga BFRD</span>
+                  </div>
+                </div>
+                <div class="tactile-doc-card checked" id="s3-doc-1" onclick="toggleStation3Doc(1)">
+                  <div class="tactile-doc-check"><i data-lucide="check"></i></div>
+                  <div class="tactile-doc-info">
+                    <strong>2. Kad Pengenalan Pintar Brunei Asal</strong>
+                    <span>Kad Pengenalan Kuning asal yang sah</span>
+                  </div>
+                </div>
+                <div class="tactile-doc-card checked" id="s3-doc-2" onclick="toggleStation3Doc(2)">
+                  <div class="tactile-doc-check"><i data-lucide="check"></i></div>
+                  <div class="tactile-doc-info">
+                    <strong>3. Sijil Akademik PMB / GCE O-Level</strong>
+                    <span>Kelayakan minimum 4 Kredit asal</span>
+                  </div>
+                </div>
+                <div class="tactile-doc-card checked" id="s3-doc-3" onclick="toggleStation3Doc(3)">
+                  <div class="tactile-doc-check"><i data-lucide="check"></i></div>
+                  <div class="tactile-doc-info">
+                    <strong>4. CV & Borang Permohonan Lengkap</strong>
+                    <span>Borang rasmi JPA / BFRD bertandatangan</span>
+                  </div>
+                </div>
+                <div class="tactile-doc-card checked" id="s3-doc-4" onclick="toggleStation3Doc(4)">
+                  <div class="tactile-doc-check"><i data-lucide="check"></i></div>
+                  <div class="tactile-doc-info">
+                    <strong>5. Sijil Khas / Lesen Memandu Kelas 3</strong>
+                    <span>Lesen memandu yang masih sah</span>
+                  </div>
+                </div>
+                <div class="tactile-doc-card checked" id="s3-doc-5" onclick="toggleStation3Doc(5)">
+                  <div class="tactile-doc-check"><i data-lucide="check"></i></div>
+                  <div class="tactile-doc-info">
+                    <strong>6. 4 Keping Pasfoto Rasmi Terkini</strong>
+                    <span>Ukuran pasport berlatar belakang biru</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Counter Badge -->
+              <div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;">
+                <span class="tactile-status-chip pass" id="s3-doc-counter">6 / 6 Dokumen Disahkan</span>
+                <span style="font-size:12px;color:var(--slate-muted);">Semua dokumen asal wajib disahkan sebelum ke Stesen 4.</span>
+              </div>
+
+              <!-- Station 3 Action Buttons -->
+              <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-green btn-lg" style="flex:2;height:52px;font-size:15px;font-weight:800;" onclick="submitStation3Record()">
+                  <i data-lucide="check-circle-2"></i>
+                  <span>SAHKAN 6 DOKUMEN & HANTAR KE FINAL CHECK</span>
+                </button>
+                <button type="button" class="btn btn-outlined" style="flex:1;height:52px;" onclick="resetStation3()">
+                  <i data-lucide="rotate-ccw"></i>
+                  <span>Calon Seterusnya</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   </div>
@@ -1952,6 +2266,212 @@
           <i data-lucide="check-circle" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;color:var(--green);"></i>
           <span>Sambungan Kekal Aktif — <strong>TIDAK PERLU</strong> imbas QR Code lagi bagi setiap calon.</span>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: PENGIMBAS KOD QR KAMERA (KAMERA IPAD / TELEFON / WEBCAM)
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-qr-scanner" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-qr-scanner')">
+    <div class="modal" style="max-width:480px;text-align:center;">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:8px;background:var(--red);color:#FFF;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="qr-code" style="width:20px;height:20px;"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" id="qr-scanner-title">Pengimbas Kod QR Calon</h3>
+            <span style="font-size:11px;color:var(--slate-muted);">Kamera Peranti Pintar Lapangan</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close" onclick="closeQrScannerModal()"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding:16px;">
+        <!-- Live Camera Viewfinder -->
+        <div id="qr-reader" style="width:100%;min-height:280px;background:#000;border-radius:10px;"></div>
+
+        <div style="margin-top:12px;font-size:12px;color:var(--slate-muted);">
+          Halakan kamera ke Kod QR pada slip atau telefon calon.
+        </div>
+
+        <div style="margin-top:14px;padding-top:14px;border-top:1px dashed #CBD5E1;">
+          <span style="font-size:11px;font-weight:700;color:var(--slate-muted);display:block;margin-bottom:6px;">ATAU CARI MANUAL (NO. IC / ID CALON):</span>
+          <div class="qr-manual-row">
+            <input type="text" id="qr-scanner-manual-inp" placeholder="cth: BFRD-2026-0001 atau 01-123456" class="qr-manual-input" onkeydown="if(event.key==='Enter') submitManualQrLookup()">
+            <button type="button" class="btn btn-navy" onclick="submitManualQrLookup()">Muat Calon</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content:space-between;">
+        <button type="button" class="btn btn-outlined btn-sm" onclick="toggleCameraFacing()"><i data-lucide="switch-camera"></i> Tukar Kamera</button>
+        <button type="button" class="btn btn-outlined btn-sm" onclick="closeQrScannerModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: KAD QR CALON (SLIP PENDAFTARAN STESEN 1)
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-candidate-qr-pass" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-candidate-qr-pass')">
+    <div class="modal" style="max-width:440px;padding:0;">
+      <div class="modal-header">
+        <h3 class="modal-title">Kad Pengenalan QR Calon</h3>
+        <button type="button" class="modal-close" onclick="closeCandidateQrPass()"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding:20px;">
+        <div class="candidate-qr-pass-wrap" id="printable-qr-slip">
+          <div class="candidate-qr-pass-header">
+            <img src="img/logo-bomba.png" alt="BFRD">
+            <h3>JABATAN BOMBA DAN PENYELAMAT</h3>
+            <p>Slip Pengenalan Calon &bull; Saringan 4 Stesen</p>
+          </div>
+
+          <div class="candidate-qr-id-badge" id="pass-cand-id">BFRD-2026-0001</div>
+
+          <div class="candidate-qr-img-box">
+            <img id="pass-cand-qr-img" src="" alt="Kod QR Calon">
+          </div>
+
+          <table class="candidate-qr-meta-table">
+            <tr>
+              <td class="label">Nama Penuh:</td>
+              <td class="val" id="pass-cand-nama">AWANG MUHAMMAD</td>
+            </tr>
+            <tr>
+              <td class="label">No. Kad Pengenalan:</td>
+              <td class="val" id="pass-cand-ic">01-123456</td>
+            </tr>
+            <tr>
+              <td class="label">Jawatan Dipohon:</td>
+              <td class="val" id="pass-cand-jawatan">Ahli Bomba dan Penyelamat</td>
+            </tr>
+            <tr>
+              <td class="label">Masa Pendaftaran:</td>
+              <td class="val" id="pass-cand-time">09 Nov 2026, 09:15 AM</td>
+            </tr>
+          </table>
+
+          <div class="candidate-qr-pass-stations">
+            <div class="qr-station-step done">1. DAFTAR</div>
+            <div class="qr-station-step current">2. TIMBANG</div>
+            <div class="qr-station-step">3. DOKUMEN</div>
+            <div class="qr-station-step">4. FINAL</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display:flex;gap:10px;">
+        <button type="button" class="btn btn-red" style="flex:1;" onclick="printCandidateQrSlip()">
+          <i data-lucide="printer"></i>
+          <span>Cetak Slip QR</span>
+        </button>
+        <button type="button" class="btn btn-navy" style="flex:1;" onclick="closeCandidateQrPass()">
+          <i data-lucide="check"></i>
+          <span>Selesai & Seterusnya</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: KEPUTUSAN AKHIR MEJA KETUA PENGUJI (STESEN 4 FINAL CHECK)
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-station4-review" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-station4-review')">
+    <div class="modal" style="max-width:760px;">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--navy);color:#FFF;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="shield-check" style="width:20px;height:20px;"></i>
+          </div>
+          <div>
+            <h3 class="modal-title">Stesen 4: Pemeriksaan Akhir & Pengesahan Slip</h3>
+            <span style="font-size:12px;color:var(--slate-muted);">Meja Ketua Penguji / Pentadbir Saringan BFRD</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close" onclick="closeStation4Review()"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding:20px;">
+        <!-- Header Profil Calon -->
+        <div class="station-candidate-active-card" style="margin-bottom:16px;">
+          <div class="station-candidate-meta">
+            <div class="station-avatar-circle" id="s4-avatar">C</div>
+            <div class="station-candidate-details">
+              <h3 id="s4-nama">AWANG MUHAMMAD</h3>
+              <p><span id="s4-id" style="font-weight:800;color:var(--navy);">BFRD-2026-0001</span> &bull; IC: <span id="s4-ic">01-123456</span> &bull; <span id="s4-jawatan">Ahli Bomba</span> &bull; <span id="s4-umur">22 Tahun</span> (<span id="s4-jantina">Lelaki</span>)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3-Station Scorecard Grid -->
+        <div class="station4-scorecard-grid">
+          <!-- Box 1: Stesen 1 -->
+          <div class="station4-score-box">
+            <div class="station4-score-header"><i data-lucide="user-check"></i> STESEN 1: DATA PERIBADI</div>
+            <div class="station4-score-row"><span class="k">Kerakyatan:</span><span class="v" id="s4-val-kerakyatan">Rakyat Brunei</span></div>
+            <div class="station4-score-row"><span class="k">Perkahwinan:</span><span class="v" id="s4-val-kahwin">Bujang</span></div>
+            <div class="station4-score-row"><span class="k">Telefon:</span><span class="v" id="s4-val-tel">+673 8123456</span></div>
+            <div class="station4-score-row"><span class="k">Kelayakan:</span><span class="v pass" style="color:var(--green-text);">Mematuhi Syarat Am</span></div>
+          </div>
+
+          <!-- Box 2: Stesen 2 -->
+          <div class="station4-score-box">
+            <div class="station4-score-header"><i data-lucide="scale"></i> STESEN 2: UKURAN FIZIKAL</div>
+            <div class="station4-score-row"><span class="k">Ketinggian:</span><span class="v" id="s4-val-tinggi">172.0 cm (Min 161)</span></div>
+            <div class="station4-score-row"><span class="k">Berat Badan:</span><span class="v" id="s4-val-berat">68.5 kg</span></div>
+            <div class="station4-score-row"><span class="k">Ukuran Dada:</span><span class="v" id="s4-val-dada">33.0" (&lt; 34")</span></div>
+            <div class="station4-score-row"><span class="k">Indeks BMI:</span><span class="v" id="s4-val-bmi" style="font-weight:900;color:var(--green-text);">23.15 (OPTIMAL)</span></div>
+          </div>
+
+          <!-- Box 3: Stesen 3 -->
+          <div class="station4-score-box">
+            <div class="station4-score-header"><i data-lucide="file-check"></i> STESEN 3: DOKUMEN ASAL</div>
+            <div class="station4-score-row"><span class="k">Surat & IC:</span><span class="v pass" style="color:var(--green-text);">Lengkap Asal</span></div>
+            <div class="station4-score-row"><span class="k">Sijil Akademik:</span><span class="v pass" style="color:var(--green-text);">4 Kredit (Sah)</span></div>
+            <div class="station4-score-row"><span class="k">Borang & Foto:</span><span class="v pass" style="color:var(--green-text);">4 Keping Biru</span></div>
+            <div class="station4-score-row"><span class="k">Status Dokumen:</span><span class="v" id="s4-val-docs" style="font-weight:900;color:var(--green-text);">6 / 6 DISAHKAN</span></div>
+          </div>
+        </div>
+
+        <!-- Panel Keputusan Akhir Ketua Penguji -->
+        <div class="station4-decision-panel">
+          <label style="font-size:13px;font-weight:800;color:var(--slate-dark);display:flex;align-items:center;gap:6px;">
+            <i data-lucide="gavel" style="width:16px;height:16px;color:var(--navy);"></i>
+            <span>KEPUTUSAN AKHIR KETUA PENGUJI (FINAL DISPOSITION):</span>
+          </label>
+
+          <div class="station4-radio-group">
+            <label class="station4-radio-card pass">
+              <input type="radio" name="s4-decision-choice" value="Lulus" checked>
+              <span>🟢 LULUS KE UJIAN PADANG (PAFT)</span>
+            </label>
+            <label class="station4-radio-card warn">
+              <input type="radio" name="s4-decision-choice" value="Perlu Semakan">
+              <span>🟡 PERLU SEMAKAN PERUBATAN</span>
+            </label>
+            <label class="station4-radio-card fail">
+              <input type="radio" name="s4-decision-choice" value="Tidak Layak">
+              <span>🔴 TIDAK LAYAK / GAGAL</span>
+            </label>
+          </div>
+
+          <div style="margin-top:12px;">
+            <label style="font-size:11px;font-weight:700;color:var(--slate-muted);display:block;margin-bottom:4px;">CATATAN RASMI KETUA PENGUJI:</label>
+            <input type="text" id="s4-catatan-inp" class="field-input" placeholder="cth: Calon memenuhi kesemua syarat fizikal dan dokumen. Sedia ke ujian kecergasan padang." value="Calon disahkan melepasi saringan 4 stesen. Layak ke fasa ujian fizikal padang.">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display:flex;gap:12px;">
+        <button type="button" class="btn btn-red btn-lg" style="flex:2;height:52px;font-size:15px;font-weight:800;" onclick="submitStation4FinalDecision()">
+          <i data-lucide="printer"></i>
+          <span>SAHKAN & CETAK SLIP A4 RASMI KERAJAAN</span>
+        </button>
+        <button type="button" class="btn btn-outlined" style="flex:1;height:52px;" onclick="closeStation4Review()">Batal</button>
       </div>
     </div>
   </div>

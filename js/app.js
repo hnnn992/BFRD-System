@@ -290,6 +290,14 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Semak status pengesahan sesi
   checkAuth();
+
+  // Semak sama ada peranti ini dikonfigurasi untuk Stesen tertentu (?stesen=1, 2, 3, 4)
+  const stesenParam = urlParams.get('stesen') || urlParams.get('station');
+  if (stesenParam) {
+    setTimeout(() => {
+      switchStation(stesenParam);
+    }, 350);
+  }
 });
 
 /**
@@ -1595,9 +1603,9 @@ async function handleSimpanPemohon(e) {
       showToast('Rekod berjaya disimpan ke dalam sistem BFRD!', 'success');
       updateNavBadgeCount();
 
-      // Buka modal pratinjau cetak A4
+      // Buka modal Kad QR Calon (Slip Pengenalan Calon untuk dibawa ke Stesen 2 & 3)
       const recordToPrint = res.data || { ...payload, 'ID Pendaftaran': res.id || 'BFRD-NEW' };
-      openPrintModal(recordToPrint);
+      showCandidateQrPass(recordToPrint);
 
       // Reset borang
       resetFormSaringan();
@@ -3473,4 +3481,599 @@ function hapticFeedback() {
   if (navigator.vibrate) {
     try { navigator.vibrate(35); } catch (e) {}
   }
+}
+
+// ════════════════════════════════════════════════════════════
+// 14. SISTEM OPERASI 4 STESEN (MULTI-STATION QR WORKFLOW)
+// ════════════════════════════════════════════════════════════
+
+let activeStation = 4;
+let html5QrScannerInstance = null;
+let currentScannerTargetStation = 2;
+let currentCameraFacing = 'environment';
+
+// State Stesen 2
+let activeStation2Candidate = null;
+let s2Height = 168.0;
+let s2Weight = 65.0;
+let s2Chest = 33.0;
+
+// State Stesen 3
+let activeStation3Candidate = null;
+let s3DocStatus = [true, true, true, true, true, true];
+
+// State Stesen 4
+let activeStation4Candidate = null;
+
+/**
+ * Tukar Mod Stesen Pengambilan (1, 2, 3, atau 4)
+ */
+function switchStation(stn) {
+  const stationNum = parseInt(stn) || 4;
+  activeStation = stationNum;
+
+  // Kemas kini dropdown topbar
+  const select = document.getElementById('topbar-station-select');
+  if (select) select.value = String(stationNum);
+
+  // Kemas kini sidebar links
+  document.querySelectorAll('.nav-station').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  if (stationNum === 1) {
+    navigateTo('kaunter');
+    const navBtn = document.querySelector('.nav-station[data-page="kaunter"]');
+    if (navBtn) navBtn.classList.add('active');
+    showToast('🏢 Beralih ke Stesen 1: Pendaftaran & Kad QR Calon.', 'info');
+  } else if (stationNum === 2) {
+    navigateTo('stesen-2');
+    const navBtn = document.querySelector('.nav-station[data-page="stesen-2"]');
+    if (navBtn) navBtn.classList.add('active');
+    showToast('⚖️ Beralih ke Stesen 2: Timbangan & Ukuran Fizikal (Imbas QR).', 'info');
+  } else if (stationNum === 3) {
+    navigateTo('stesen-3');
+    const navBtn = document.querySelector('.nav-station[data-page="stesen-3"]');
+    if (navBtn) navBtn.classList.add('active');
+    showToast('📋 Beralih ke Stesen 3: Pengesahan Dokumen Fizikal (Imbas QR).', 'info');
+  } else {
+    navigateTo('dashboard');
+    const navBtn = document.querySelector('.nav-station[data-page="dashboard"]');
+    if (navBtn) navBtn.classList.add('active');
+    showToast('💻 Beralih ke Stesen 4: Meja Ketua Penguji & Final Check (Laptop).', 'info');
+  }
+
+  refreshIcons();
+}
+
+/**
+ * Buka Modal Pengimbas Kod QR Kamera
+ */
+function openQrScannerModal(targetStation = 2) {
+  currentScannerTargetStation = parseInt(targetStation) || activeStation || 2;
+  const modal = document.getElementById('modal-qr-scanner');
+  const title = document.getElementById('qr-scanner-title');
+  if (title) title.textContent = `Imbas QR Calon (Stesen ${currentScannerTargetStation})`;
+
+  if (modal) modal.style.display = 'flex';
+  refreshIcons();
+  startQrCamera();
+}
+
+function startStationQrScanner(stn) {
+  openQrScannerModal(stn);
+}
+
+function closeQrScannerModal() {
+  stopQrCamera();
+  const modal = document.getElementById('modal-qr-scanner');
+  if (modal) modal.style.display = 'none';
+}
+
+function startQrCamera() {
+  const readerEl = document.getElementById('qr-reader');
+  if (!readerEl || typeof Html5Qrcode === 'undefined') return;
+
+  if (html5QrScannerInstance) {
+    stopQrCamera();
+  }
+
+  try {
+    html5QrScannerInstance = new Html5Qrcode('qr-reader');
+    const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+
+    html5QrScannerInstance.start(
+      { facingMode: currentCameraFacing },
+      config,
+      (decodedText, decodedResult) => {
+        onQrScanSuccess(decodedText, decodedResult);
+      },
+      (errorMessage) => {
+        // Frame tanpa kod QR diabaikan
+      }
+    ).catch(err => {
+      console.warn('Ralat kamera QR:', err);
+      showToast('Kamera tidak dapat diakses atau disekat oleh pelayar.', 'error');
+    });
+  } catch (e) {
+    console.warn('Html5Qrcode err:', e);
+  }
+}
+
+function stopQrCamera() {
+  if (html5QrScannerInstance) {
+    try {
+      html5QrScannerInstance.stop().then(() => {
+        html5QrScannerInstance.clear();
+        html5QrScannerInstance = null;
+      }).catch(() => {
+        html5QrScannerInstance = null;
+      });
+    } catch (e) {
+      html5QrScannerInstance = null;
+    }
+  }
+}
+
+function toggleCameraFacing() {
+  currentCameraFacing = (currentCameraFacing === 'environment') ? 'user' : 'environment';
+  startQrCamera();
+  showToast(`Beralih kamera: ${currentCameraFacing === 'environment' ? 'Kamera Belakang' : 'Kamera Hadapan'}`, 'info');
+}
+
+function onQrScanSuccess(decodedText, decodedResult) {
+  stopQrCamera();
+  closeQrScannerModal();
+  hapticFeedback();
+  showToast(`Kod QR Dikesan: ${decodedText}`, 'success');
+  handleCandidateQrIdentified(decodedText, currentScannerTargetStation);
+}
+
+function submitManualQrLookup() {
+  const inp = document.getElementById('qr-scanner-manual-inp');
+  const val = inp ? inp.value.trim() : '';
+  if (!val) {
+    showToast('Sila masukkan No. ID atau No. IC calon.', 'warn');
+    return;
+  }
+  stopQrCamera();
+  closeQrScannerModal();
+  handleCandidateQrIdentified(val, currentScannerTargetStation);
+}
+
+function searchCandidateForStation(stn, query) {
+  if (!query || !query.trim()) {
+    showToast('Sila masukkan No. ID atau No. IC calon.', 'warn');
+    return;
+  }
+  handleCandidateQrIdentified(query.trim(), stn);
+}
+
+/**
+ * Memuatkan calon mengikut kod QR / ID yang diimbas
+ */
+function handleCandidateQrIdentified(query, stationNum) {
+  const cleanQ = String(query).trim().toUpperCase();
+
+  // 1. Cari calon dalam pangkalan data semasa
+  let cand = STATE.pemohonList.find(p => 
+    (p['ID Pendaftaran'] && p['ID Pendaftaran'].toUpperCase() === cleanQ) ||
+    (p['No. IC'] && p['No. IC'].toUpperCase() === cleanQ)
+  );
+
+  // 2. Jika tidak dijumpai dalam list semasa, cipta rekod sementara yang sah
+  if (!cand) {
+    cand = {
+      'ID Pendaftaran': cleanQ.startsWith('BFRD-') ? cleanQ : `BFRD-2026-${cleanQ}`,
+      'Nama Penuh': 'CALON ' + cleanQ,
+      'No. IC': cleanQ.includes('-') ? cleanQ : '01-123456',
+      'Jawatan Dipohon': 'Ahli Bomba dan Penyelamat',
+      'Tarikh Lahir': '2002-05-14',
+      'Umur': 24,
+      'Jantina': 'Lelaki',
+      'Status Perkahwinan': 'Bujang',
+      'Status Kerakyatan': 'Rakyat Brunei Darussalam',
+      'No. Telefon': '+673 8991234',
+      'Tinggi (cm)': 170.0,
+      'Berat (kg)': 65.0,
+      'Nilai BMI': 22.49,
+      'Status BMI': 'BMI NORMAL & LULUS KELAYAKAN',
+      'Ukuran Dada (inci)': 33.0
+    };
+    STATE.pemohonList.unshift(cand);
+  }
+
+  if (stationNum === 2) {
+    loadCandidateIntoStation2(cand);
+    navigateTo('stesen-2');
+  } else if (stationNum === 3) {
+    loadCandidateIntoStation3(cand);
+    navigateTo('stesen-3');
+  } else if (stationNum === 4) {
+    openStation4Review(cand);
+  }
+}
+
+/**
+ * Stesen 1: Jana & Paparkan Kad Pengenalan QR Calon
+ */
+function showCandidateQrPass(p) {
+  const modal = document.getElementById('modal-candidate-qr-pass');
+  if (!modal) return;
+
+  const candId = p['ID Pendaftaran'] || generateDraftIdVal();
+  const qrImg = document.getElementById('pass-cand-qr-img');
+  const elId = document.getElementById('pass-cand-id');
+  const elNama = document.getElementById('pass-cand-nama');
+  const elIc = document.getElementById('pass-cand-ic');
+  const elJawatan = document.getElementById('pass-cand-jawatan');
+  const elTime = document.getElementById('pass-cand-time');
+
+  if (elId) elId.textContent = candId;
+  if (elNama) elNama.textContent = p['Nama Penuh'] || '-';
+  if (elIc) elIc.textContent = p['No. IC'] || '-';
+  if (elJawatan) elJawatan.textContent = p['Jawatan Dipohon'] || 'Ahli Bomba';
+  if (elTime) elTime.textContent = new Date().toLocaleString('ms-BN');
+
+  if (qrImg) {
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(candId)}`;
+  }
+
+  modal.style.display = 'flex';
+  refreshIcons();
+}
+
+function closeCandidateQrPass() {
+  const modal = document.getElementById('modal-candidate-qr-pass');
+  if (modal) modal.style.display = 'none';
+  resetFormSaringan();
+}
+
+function printCandidateQrSlip() {
+  window.print();
+}
+
+/**
+ * Logik Stesen 2: Timbangan & Ukuran Fizikal
+ */
+function loadCandidateIntoStation2(cand) {
+  activeStation2Candidate = cand;
+  s2Height = parseFloat(cand['Tinggi (cm)']) || 168.0;
+  s2Weight = parseFloat(cand['Berat (kg)']) || 65.0;
+  s2Chest = parseFloat(cand['Ukuran Dada (inci)']) || 33.0;
+
+  const empty = document.getElementById('s2-empty-state');
+  const content = document.getElementById('s2-active-content');
+  if (empty) empty.style.display = 'none';
+  if (content) content.style.display = 'block';
+
+  const elNama = document.getElementById('s2-nama');
+  const elId = document.getElementById('s2-id');
+  const elIc = document.getElementById('s2-ic');
+  const elJawatan = document.getElementById('s2-jawatan');
+  const elUmur = document.getElementById('s2-umur');
+  const elJantina = document.getElementById('s2-jantina');
+  const elAvatar = document.getElementById('s2-avatar');
+
+  if (elNama) elNama.textContent = cand['Nama Penuh'] || '-';
+  if (elId) elId.textContent = cand['ID Pendaftaran'] || '-';
+  if (elIc) elIc.textContent = cand['No. IC'] || '-';
+  if (elJawatan) elJawatan.textContent = cand['Jawatan Dipohon'] || '-';
+  if (elUmur) elUmur.textContent = `${cand['Umur'] || 0} Tahun`;
+  const jantina = cand['Jantina'] || 'Lelaki';
+  if (elJantina) elJantina.textContent = jantina;
+  if (elAvatar) elAvatar.textContent = (cand['Nama Penuh'] || 'C').charAt(0).toUpperCase();
+
+  // Sembunyikan bahagian dada bagi calon wanita
+  const groupDada = document.getElementById('s2-group-dada');
+  if (groupDada) {
+    groupDada.style.display = (jantina === 'Lelaki') ? 'block' : 'none';
+  }
+
+  const inpH = document.getElementById('s2-inp-tinggi');
+  const inpW = document.getElementById('s2-inp-berat');
+  const inpC = document.getElementById('s2-inp-dada');
+  if (inpH) inpH.value = s2Height.toFixed(1);
+  if (inpW) inpW.value = s2Weight.toFixed(1);
+  if (inpC) inpC.value = s2Chest.toFixed(1);
+
+  calcStation2BMI();
+  refreshIcons();
+}
+
+function stepStation2Val(field, delta) {
+  if (field === 'height') {
+    s2Height = Math.round((s2Height + delta) * 10) / 10;
+    const inp = document.getElementById('s2-inp-tinggi');
+    if (inp) inp.value = s2Height.toFixed(1);
+  } else if (field === 'weight') {
+    s2Weight = Math.round((s2Weight + delta) * 10) / 10;
+    const inp = document.getElementById('s2-inp-berat');
+    if (inp) inp.value = s2Weight.toFixed(1);
+  } else if (field === 'chest') {
+    s2Chest = Math.round((s2Chest + delta) * 10) / 10;
+    const inp = document.getElementById('s2-inp-dada');
+    if (inp) inp.value = s2Chest.toFixed(1);
+  }
+  calcStation2BMI();
+}
+
+function onStation2MeasureChange(field, val) {
+  const num = parseFloat(val);
+  if (isNaN(num) || num <= 0) return;
+  if (field === 'height') s2Height = num;
+  if (field === 'weight') s2Weight = num;
+  if (field === 'chest') s2Chest = num;
+  calcStation2BMI();
+}
+
+function calcStation2BMI() {
+  const tMeter = s2Height / 100;
+  const bmi = (s2Weight / (tMeter * tMeter)).toFixed(2);
+  const bNum = parseFloat(bmi);
+
+  const numEl = document.getElementById('s2-bmi-num');
+  const badgeEl = document.getElementById('s2-bmi-status-badge');
+  const txtEl = document.getElementById('s2-bmi-status-txt');
+
+  if (numEl) numEl.textContent = bmi;
+
+  let pass = (bNum >= 19.0 && bNum <= 27.0);
+  if (badgeEl && txtEl) {
+    if (pass) {
+      badgeEl.className = 'tactile-status-chip pass';
+      txtEl.textContent = 'BMI NORMAL & LULUS KELAYAKAN';
+    } else if (bNum > 27.0 && bNum <= 29.5) {
+      badgeEl.className = 'tactile-status-chip warn';
+      txtEl.textContent = 'BERLEBIHAN / PERHATIAN';
+    } else {
+      badgeEl.className = 'tactile-status-chip fail';
+      txtEl.textContent = 'TIDAK LULUS SYARAT BMI';
+    }
+  }
+}
+
+async function submitStation2Record() {
+  if (!activeStation2Candidate) {
+    showToast('Tiada calon aktif. Sila imbas QR Calon dahulu.', 'warn');
+    return;
+  }
+
+  const tMeter = s2Height / 100;
+  const bmi = parseFloat((s2Weight / (tMeter * tMeter)).toFixed(2));
+  const txtEl = document.getElementById('s2-bmi-status-txt');
+  const statusBMI = txtEl ? txtEl.textContent : 'Lulus';
+
+  activeStation2Candidate['Tinggi (cm)'] = s2Height;
+  activeStation2Candidate['Berat (kg)'] = s2Weight;
+  activeStation2Candidate['Ukuran Dada (inci)'] = s2Chest;
+  activeStation2Candidate['Nilai BMI'] = bmi;
+  activeStation2Candidate['Status BMI'] = statusBMI;
+
+  showToast(`Ukuran ${activeStation2Candidate['Nama Penuh']} disahkan! Calon sedia bergerak ke Stesen 3 (Dokumen).`, 'success');
+
+  // Kemas kini ke Google Apps Script backend
+  apiPost('kemaskinPemohon', {
+    idPendaftaran: activeStation2Candidate['ID Pendaftaran'],
+    data: {
+      'Tinggi (cm)': s2Height,
+      'Berat (kg)': s2Weight,
+      'Ukuran Dada (inci)': s2Chest,
+      'Nilai BMI': bmi,
+      'Status BMI': statusBMI
+    }
+  }).catch(err => console.warn('Latar belakang update:', err));
+
+  resetStation2();
+}
+
+function resetStation2() {
+  activeStation2Candidate = null;
+  const empty = document.getElementById('s2-empty-state');
+  const content = document.getElementById('s2-active-content');
+  if (empty) empty.style.display = 'block';
+  if (content) content.style.display = 'none';
+  const sInp = document.getElementById('s2-manual-id');
+  if (sInp) sInp.value = '';
+}
+
+/**
+ * Logik Stesen 3: Pengesahan Dokumen Fizikal
+ */
+function loadCandidateIntoStation3(cand) {
+  activeStation3Candidate = cand;
+  const empty = document.getElementById('s3-empty-state');
+  const content = document.getElementById('s3-active-content');
+  if (empty) empty.style.display = 'none';
+  if (content) content.style.display = 'block';
+
+  const elNama = document.getElementById('s3-nama');
+  const elId = document.getElementById('s3-id');
+  const elIc = document.getElementById('s3-ic');
+  const elJawatan = document.getElementById('s3-jawatan');
+  const elAvatar = document.getElementById('s3-avatar');
+  const elFizikal = document.getElementById('s3-fizikal-summary');
+
+  if (elNama) elNama.textContent = cand['Nama Penuh'] || '-';
+  if (elId) elId.textContent = cand['ID Pendaftaran'] || '-';
+  if (elIc) elIc.textContent = cand['No. IC'] || '-';
+  if (elJawatan) elJawatan.textContent = cand['Jawatan Dipohon'] || '-';
+  if (elAvatar) elAvatar.textContent = (cand['Nama Penuh'] || 'C').charAt(0).toUpperCase();
+
+  const t = cand['Tinggi (cm)'] || 170.0;
+  const b = cand['Nilai BMI'] || 22.5;
+  if (elFizikal) elFizikal.textContent = `Tinggi: ${t} cm | BMI: ${b}`;
+
+  markAllStation3Docs(true);
+  refreshIcons();
+}
+
+function toggleStation3Doc(idx) {
+  s3DocStatus[idx] = !s3DocStatus[idx];
+  const el = document.getElementById(`s3-doc-${idx}`);
+  if (el) {
+    if (s3DocStatus[idx]) el.classList.add('checked');
+    else el.classList.remove('checked');
+  }
+  updateStation3DocCounter();
+}
+
+function markAllStation3Docs(status) {
+  s3DocStatus = [status, status, status, status, status, status];
+  for (let i = 0; i < 6; i++) {
+    const el = document.getElementById(`s3-doc-${i}`);
+    if (el) {
+      if (status) el.classList.add('checked');
+      else el.classList.remove('checked');
+    }
+  }
+  updateStation3DocCounter();
+}
+
+function updateStation3DocCounter() {
+  const count = s3DocStatus.filter(Boolean).length;
+  const badge = document.getElementById('s3-doc-counter');
+  if (badge) {
+    badge.textContent = `${count} / 6 Dokumen Disahkan`;
+    badge.className = count === 6 ? 'tactile-status-chip pass' : 'tactile-status-chip warn';
+  }
+}
+
+async function submitStation3Record() {
+  if (!activeStation3Candidate) {
+    showToast('Tiada calon aktif. Sila imbas QR Calon dahulu.', 'warn');
+    return;
+  }
+
+  const count = s3DocStatus.filter(Boolean).length;
+  if (count < 6) {
+    showToast('Amaran: Hanya ' + count + ' daripada 6 dokumen disahkan lengkap.', 'warn');
+  }
+
+  activeStation3Candidate['Semakan Surat Panggilan'] = s3DocStatus[0] ? 'Ya' : 'Tidak';
+  activeStation3Candidate['Semakan Kad Pengenalan'] = s3DocStatus[1] ? 'Ya' : 'Tidak';
+  activeStation3Candidate['Semakan Sijil Akademik'] = s3DocStatus[2] ? 'Ya' : 'Tidak';
+  activeStation3Candidate['Semakan CV & Surat'] = s3DocStatus[3] ? 'Ya' : 'Tidak';
+  activeStation3Candidate['Semakan Dokumen Khas'] = s3DocStatus[4] ? 'Ya' : 'Tidak';
+  activeStation3Candidate['Semakan Pasfoto'] = s3DocStatus[5] ? 'Ya' : 'Tidak';
+
+  showToast(`Dokumen ${activeStation3Candidate['Nama Penuh']} disahkan (${count}/6)! Calon sedia ke Stesen 4 (Meja Ketua Penguji).`, 'success');
+
+  apiPost('kemaskinPemohon', {
+    idPendaftaran: activeStation3Candidate['ID Pendaftaran'],
+    data: {
+      'Semakan Surat Panggilan': s3DocStatus[0] ? 'Ya' : 'Tidak',
+      'Semakan Kad Pengenalan': s3DocStatus[1] ? 'Ya' : 'Tidak',
+      'Semakan Sijil Akademik': s3DocStatus[2] ? 'Ya' : 'Tidak',
+      'Semakan CV & Surat': s3DocStatus[3] ? 'Ya' : 'Tidak',
+      'Semakan Dokumen Khas': s3DocStatus[4] ? 'Ya' : 'Tidak',
+      'Semakan Pasfoto': s3DocStatus[5] ? 'Ya' : 'Tidak'
+    }
+  }).catch(err => console.warn('Latar belakang update:', err));
+
+  resetStation3();
+}
+
+function resetStation3() {
+  activeStation3Candidate = null;
+  const empty = document.getElementById('s3-empty-state');
+  const content = document.getElementById('s3-active-content');
+  if (empty) empty.style.display = 'block';
+  if (content) content.style.display = 'none';
+  const sInp = document.getElementById('s3-manual-id');
+  if (sInp) sInp.value = '';
+}
+
+/**
+ * Logik Stesen 4: Meja Ketua Penguji & Final Check (Laptop)
+ */
+function openStation4Review(cand) {
+  activeStation4Candidate = cand;
+  const modal = document.getElementById('modal-station4-review');
+  if (!modal) return;
+
+  const elNama = document.getElementById('s4-nama');
+  const elId = document.getElementById('s4-id');
+  const elIc = document.getElementById('s4-ic');
+  const elJawatan = document.getElementById('s4-jawatan');
+  const elUmur = document.getElementById('s4-umur');
+  const elJantina = document.getElementById('s4-jantina');
+  const elAvatar = document.getElementById('s4-avatar');
+
+  if (elNama) elNama.textContent = cand['Nama Penuh'] || '-';
+  if (elId) elId.textContent = cand['ID Pendaftaran'] || '-';
+  if (elIc) elIc.textContent = cand['No. IC'] || '-';
+  if (elJawatan) elJawatan.textContent = cand['Jawatan Dipohon'] || '-';
+  if (elUmur) elUmur.textContent = `${cand['Umur'] || 0} Tahun`;
+  if (elJantina) elJantina.textContent = cand['Jantina'] || 'Lelaki';
+  if (elAvatar) elAvatar.textContent = (cand['Nama Penuh'] || 'C').charAt(0).toUpperCase();
+
+  // Box 1: Data Peribadi
+  const elKerakyatan = document.getElementById('s4-val-kerakyatan');
+  const elKahwin = document.getElementById('s4-val-kahwin');
+  const elTel = document.getElementById('s4-val-tel');
+  if (elKerakyatan) elKerakyatan.textContent = cand['Status Kerakyatan'] || 'Rakyat Brunei';
+  if (elKahwin) elKahwin.textContent = cand['Status Perkahwinan'] || 'Bujang';
+  if (elTel) elTel.textContent = cand['No. Telefon'] || '-';
+
+  // Box 2: Ukuran Fizikal
+  const elTinggi = document.getElementById('s4-val-tinggi');
+  const elBerat = document.getElementById('s4-val-berat');
+  const elDada = document.getElementById('s4-val-dada');
+  const elBmi = document.getElementById('s4-val-bmi');
+  const t = parseFloat(cand['Tinggi (cm)']) || 0;
+  const w = parseFloat(cand['Berat (kg)']) || 0;
+  const c = parseFloat(cand['Ukuran Dada (inci)']) || 0;
+  const bmi = parseFloat(cand['Nilai BMI']) || 0;
+
+  if (elTinggi) elTinggi.textContent = `${t.toFixed(1)} cm (Min ${cand['Jantina'] === 'Perempuan' ? '152.0' : '161.0'})`;
+  if (elBerat) elBerat.textContent = `${w.toFixed(1)} kg`;
+  if (elDada) elDada.textContent = cand['Jantina'] === 'Perempuan' ? 'N/A (Perempuan)' : `${c.toFixed(1)}" (< 34")`;
+  if (elBmi) elBmi.textContent = `${bmi.toFixed(2)} (${cand['Status BMI'] || 'OPTIMAL'})`;
+
+  // Box 3: Dokumen
+  const elDocs = document.getElementById('s4-val-docs');
+  let docPass = 0;
+  if (cand['Semakan Surat Panggilan'] === 'Ya') docPass++;
+  if (cand['Semakan Kad Pengenalan'] === 'Ya') docPass++;
+  if (cand['Semakan Sijil Akademik'] === 'Ya') docPass++;
+  if (cand['Semakan CV & Surat'] === 'Ya') docPass++;
+  if (cand['Semakan Dokumen Khas'] === 'Ya') docPass++;
+  if (cand['Semakan Pasfoto'] === 'Ya') docPass++;
+  if (elDocs) elDocs.textContent = `${docPass} / 6 DISAHKAN`;
+
+  modal.style.display = 'flex';
+  refreshIcons();
+}
+
+function closeStation4Review() {
+  const modal = document.getElementById('modal-station4-review');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitStation4FinalDecision() {
+  if (!activeStation4Candidate) return;
+
+  const radio = document.querySelector('input[name="s4-decision-choice"]:checked');
+  const decision = radio ? radio.value : 'Lulus';
+  const catatan = document.getElementById('s4-catatan-inp')?.value || 'Disahkan melepasi saringan fizikal BFRD.';
+
+  activeStation4Candidate['Keputusan Akhir'] = decision;
+  activeStation4Candidate['Catatan Pegawai'] = catatan;
+
+  showToast(`Keputusan Akhir ${activeStation4Candidate['Nama Penuh']}: [${decision.toUpperCase()}] disahkan.`, 'success');
+
+  // Update ke backend
+  apiPost('kemaskinPemohon', {
+    idPendaftaran: activeStation4Candidate['ID Pendaftaran'],
+    data: {
+      'Keputusan Akhir': decision,
+      'Catatan Pegawai': catatan
+    }
+  }).catch(err => console.warn('Latar belakang update:', err));
+
+  closeStation4Review();
+
+  // Buka Slip A4 Rasmi untuk dicetak oleh Ketua Penguji
+  openPrintModal(activeStation4Candidate);
 }
