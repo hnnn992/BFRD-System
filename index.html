@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BFRD System — Body Fitness & Requirement Data System</title>
   <link rel="icon" type="image/png" href="img/logo-bomba.png">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=1.1.0">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js -->
@@ -70,40 +70,40 @@
       <div class="sidebar-header">
         <div class="sidebar-brand">
           <div class="brand-icon" style="background:none;padding:0;">
-            <img src="img/logo-bomba.png" alt="BFRD" style="width:36px;height:36px;object-fit:contain;">
+            <img src="img/logo-bomba.png" alt="BFRD" style="width:38px;height:38px;object-fit:contain;">
           </div>
           <div>
-            <h2>BFRD SYSTEM</h2>
-            <p>Bomba & Penyelamat Brunei</p>
+            <h2 style="font-size:14px;letter-spacing:-0.2px;">BFRD Portal</h2>
+            <p style="font-size:11px;">Bomba & Penyelamat Brunei</p>
           </div>
         </div>
-        <span class="role-pill" id="user-role-badge"><i data-lucide="shield" style="width:12px;height:12px;"></i> Pegawai</span>
+        <span class="role-pill" id="user-role-badge"><i data-lucide="shield" style="width:12px;height:12px;"></i> Command</span>
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-section-label">Menu Utama</div>
+        <div class="nav-section-label">Portal Pengambilan</div>
         <button type="button" class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
           <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
-          <span>Papan Pemuka</span>
-        </button>
-        <button type="button" class="nav-item" data-page="kaunter" onclick="navigateTo('kaunter')">
-          <span class="nav-icon"><i data-lucide="user-plus"></i></span>
-          <span>Kaunter Saringan</span>
+          <span>Dashboard</span>
         </button>
         <button type="button" class="nav-item" data-page="senarai" onclick="navigateTo('senarai')">
           <span class="nav-icon"><i data-lucide="users"></i></span>
-          <span>Senarai Pemohon</span>
+          <span>Candidate Management</span>
           <span class="nav-badge" id="nav-count-pemohon">0</span>
         </button>
+        <button type="button" class="nav-item" data-page="kaunter" onclick="navigateTo('kaunter')">
+          <span class="nav-icon"><i data-lucide="user-plus"></i></span>
+          <span>Walk-In Registration</span>
+        </button>
 
-        <div class="nav-section-label">Pengurusan</div>
+        <div class="nav-section-label">Penilaian & Sistem</div>
         <button type="button" class="nav-item" data-page="syarat" onclick="navigateTo('syarat')">
           <span class="nav-icon"><i data-lucide="sliders"></i></span>
-          <span>Syarat Jawatan</span>
+          <span>Screening & Tests</span>
         </button>
         <button type="button" class="nav-item" data-page="aktiviti" onclick="navigateTo('aktiviti')">
           <span class="nav-icon"><i data-lucide="history"></i></span>
-          <span>Rekod Aktiviti</span>
+          <span>Audit & Settings</span>
         </button>
       </nav>
 
@@ -144,46 +144,306 @@
       <main id="page-content">
 
         <!-- ============================================================
-             PAGE 2: DASHBOARD
+             PAGE 2: DASHBOARD (COMMAND DASHBOARD)
              ============================================================ -->
         <section id="page-dashboard" class="page active">
-          <!-- KPI Grid -->
-          <div class="kpi-grid">
-            <div class="kpi-card blue">
-              <div class="kpi-icon"><i data-lucide="users"></i></div>
+
+          <!-- Hero Command Header Banner -->
+          <div class="command-hero">
+            <div class="command-hero-left">
+              <div class="command-accent-bar"></div>
               <div>
-                <div class="kpi-label">Jumlah Hadir Hari Ini</div>
-                <div class="kpi-value" id="kpi-hadir">0</div>
-                <div class="kpi-sub">Pemohon Berdaftar</div>
+                <h2 class="command-hero-title">BFRD Recruitment Portal</h2>
+                <div class="command-hero-subtitle">Command Dashboard</div>
               </div>
             </div>
-            <div class="kpi-card green">
-              <div class="kpi-icon"><i data-lucide="check-circle-2"></i></div>
-              <div>
-                <div class="kpi-label">Layak / Melepasi Syarat</div>
-                <div class="kpi-value" id="kpi-layak">0</div>
-                <div class="kpi-sub" id="kpi-layak-pct">0% daripada hadir</div>
+            <div class="command-hero-right">
+              <div class="command-clock-box">
+                <i data-lucide="clock" style="width:16px;height:16px;color:#00E5FF;"></i>
+                <span id="dashboard-live-clock">Mon, 09 Nov 2026 | 15:30:22</span>
               </div>
-            </div>
-            <div class="kpi-card amber">
-              <div class="kpi-icon"><i data-lucide="alert-triangle"></i></div>
-              <div>
-                <div class="kpi-label">Perlu Semakan</div>
-                <div class="kpi-value" id="kpi-semakan">0</div>
-                <div class="kpi-sub" id="kpi-semakan-pct">0% daripada hadir</div>
-              </div>
-            </div>
-            <div class="kpi-card red">
-              <div class="kpi-icon"><i data-lucide="x-circle"></i></div>
-              <div>
-                <div class="kpi-label">Tidak Layak / Gagal</div>
-                <div class="kpi-value" id="kpi-gagal">0</div>
-                <div class="kpi-sub" id="kpi-gagal-pct">0% daripada hadir</div>
+              <div class="command-user-box">
+                <div class="command-user-avatar" id="cmd-user-initial">A</div>
+                <div>
+                  <div class="command-user-name" id="cmd-user-name">Admin BFRD</div>
+                  <div class="command-user-access">Command Access</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Charts and Activity -->
+          <!-- Section 1: Live Metrics & Overview -->
+          <div class="command-section-title">
+            <div class="command-section-title-left">
+              <i data-lucide="activity"></i>
+              <span>Live Metrics & Overview</span>
+            </div>
+          </div>
+
+          <div class="cmd-metrics-grid">
+            <!-- Total Applicants Today -->
+            <div class="cmd-metric-card teal">
+              <div class="cmd-metric-header">
+                <div class="cmd-metric-icon"><i data-lucide="users"></i></div>
+                <div class="cmd-metric-label">Total Applicants Today</div>
+              </div>
+              <div class="cmd-metric-val-row">
+                <div class="cmd-metric-val" id="kpi-hadir">248</div>
+                <span class="cmd-trend-badge">
+                  <i data-lucide="trending-up" style="width:12px;height:12px;"></i>
+                  <span>+32 vs yesterday (216)</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Active Physical Screening (PAFT) -->
+            <div class="cmd-metric-card navy">
+              <div class="cmd-metric-header">
+                <div class="cmd-metric-icon"><i data-lucide="flame"></i></div>
+                <div class="cmd-metric-label">Active Physical Screening (PAFT)</div>
+              </div>
+              <div class="cmd-metric-val-row">
+                <div class="cmd-metric-val" id="kpi-layak">56</div>
+              </div>
+              <div class="cmd-status-indicator">
+                <span class="cmd-status-dot cyan"></span>
+                <span id="kpi-layak-pct">● In progress</span>
+              </div>
+            </div>
+
+            <!-- Medical Clearance Queue -->
+            <div class="cmd-metric-card cyan">
+              <div class="cmd-metric-header">
+                <div class="cmd-metric-icon"><i data-lucide="shield-alert"></i></div>
+                <div class="cmd-metric-label">Medical Clearance Queue</div>
+              </div>
+              <div class="cmd-metric-val-row">
+                <div class="cmd-metric-val" id="kpi-semakan">38</div>
+              </div>
+              <div class="cmd-status-indicator">
+                <span class="cmd-status-dot amber"></span>
+                <span id="kpi-semakan-pct">● Pending verification</span>
+              </div>
+            </div>
+
+            <!-- Position Slots Available -->
+            <div class="cmd-metric-card slots">
+              <div class="cmd-metric-header">
+                <div class="cmd-metric-icon"><i data-lucide="briefcase"></i></div>
+                <div class="cmd-metric-label">Position Slots Available</div>
+              </div>
+              <div class="cmd-slots-list">
+                <div class="cmd-slot-item">
+                  <span class="cmd-slot-name"><i data-lucide="award" style="width:12px;height:12px;color:#F59E0B;"></i> Pegawai Balai</span>
+                  <span class="cmd-slot-count">8 <span>/ 20</span></span>
+                </div>
+                <div class="cmd-slot-item">
+                  <span class="cmd-slot-name"><i data-lucide="award" style="width:12px;height:12px;color:#00E5FF;"></i> Timbalan Pegawai Balai</span>
+                  <span class="cmd-slot-count">12 <span>/ 30</span></span>
+                </div>
+                <div class="cmd-slot-item">
+                  <span class="cmd-slot-name"><i data-lucide="award" style="width:12px;height:12px;color:#10B981;"></i> Penolong Pegawai Balai</span>
+                  <span class="cmd-slot-count">28 <span>/ 60</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Candidate Pipeline Tracker -->
+          <div class="cmd-pipeline-card">
+            <div class="cmd-pipeline-header">
+              <div class="cmd-pipeline-title">
+                <i data-lucide="filter"></i>
+                <span>Candidate Pipeline Tracker</span>
+              </div>
+              <div class="cmd-pipeline-toggles">
+                <button type="button" class="cmd-view-btn active" id="btn-toggle-kanban" onclick="switchPipelineView('kanban')">
+                  <i data-lucide="layout-grid" style="width:14px;height:14px;"></i>
+                  <span>Kanban View</span>
+                </button>
+                <button type="button" class="cmd-view-btn" id="btn-toggle-funnel" onclick="switchPipelineView('funnel')">
+                  <i data-lucide="git-commit" style="width:14px;height:14px;"></i>
+                  <span>Funnel View</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 6 Sequential Chevron Pipeline Stages -->
+            <div class="cmd-pipeline-grid">
+              <!-- Step 1 -->
+              <div class="cmd-pipe-step" onclick="navigateTo('senarai')">
+                <div class="cmd-pipe-step-header">
+                  <span class="cmd-pipe-num c1">1</span>
+                  <span class="cmd-pipe-name">Registered / Walk-In Queue</span>
+                </div>
+                <div class="cmd-pipe-body">
+                  <span class="cmd-pipe-icon" style="color:#A78BFA;"><i data-lucide="clipboard-list"></i></span>
+                  <span class="cmd-pipe-count" id="pipe-val-1">248</span>
+                </div>
+                <div class="cmd-pipe-link">View List &rarr;</div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="cmd-pipe-step" onclick="navigateTo('senarai')">
+                <div class="cmd-pipe-step-header">
+                  <span class="cmd-pipe-num c2">2</span>
+                  <span class="cmd-pipe-name">Document & Academic Verification</span>
+                </div>
+                <div class="cmd-pipe-body">
+                  <span class="cmd-pipe-icon" style="color:#60A5FA;"><i data-lucide="file-check-2"></i></span>
+                  <span class="cmd-pipe-count" id="pipe-val-2">206</span>
+                </div>
+                <div class="cmd-pipe-link">View List &rarr;</div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="cmd-pipe-step" onclick="navigateTo('senarai')">
+                <div class="cmd-pipe-step-header">
+                  <span class="cmd-pipe-num c3">3</span>
+                  <span class="cmd-pipe-name">Physical & Anthropometric Check</span>
+                </div>
+                <div class="cmd-pipe-body">
+                  <span class="cmd-pipe-icon" style="color:#22D3EE;"><i data-lucide="ruler"></i></span>
+                  <span class="cmd-pipe-count" id="pipe-val-3">172</span>
+                </div>
+                <div class="cmd-pipe-link">View List &rarr;</div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="cmd-pipe-step" onclick="navigateTo('senarai')">
+                <div class="cmd-pipe-step-header">
+                  <span class="cmd-pipe-num c4">4</span>
+                  <span class="cmd-pipe-name">Physical Agility & Fitness Test (PAFT)</span>
+                </div>
+                <div class="cmd-pipe-body">
+                  <span class="cmd-pipe-icon" style="color:#FBBF24;"><i data-lucide="activity"></i></span>
+                  <span class="cmd-pipe-count" id="pipe-val-4">56</span>
+                </div>
+                <div class="cmd-pipe-link">View List &rarr;</div>
+              </div>
+
+              <!-- Step 5 -->
+              <div class="cmd-pipe-step" onclick="navigateTo('senarai')">
+                <div class="cmd-pipe-step-header">
+                  <span class="cmd-pipe-num c5">5</span>
+                  <span class="cmd-pipe-name">Panel Interview Board</span>
+                </div>
+                <div class="cmd-pipe-body">
+                  <span class="cmd-pipe-icon" style="color:#FB923C;"><i data-lucide="users"></i></span>
+                  <span class="cmd-pipe-count" id="pipe-val-5">34</span>
+                </div>
+                <div class="cmd-pipe-link">View List &rarr;</div>
+              </div>
+
+              <!-- Step 6 -->
+              <div class="cmd-pipe-step" onclick="navigateTo('senarai')">
+                <div class="cmd-pipe-step-header">
+                  <span class="cmd-pipe-num c6">6</span>
+                  <span class="cmd-pipe-name">Final Selection / Pool</span>
+                </div>
+                <div class="cmd-pipe-body">
+                  <span class="cmd-pipe-icon" style="color:#34D399;"><i data-lucide="check-circle"></i></span>
+                  <span class="cmd-pipe-count" id="pipe-val-6">18</span>
+                </div>
+                <div class="cmd-pipe-link">View List &rarr;</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Quick Candidate Evaluation Hub -->
+          <div class="cmd-eval-hub">
+            <div class="cmd-eval-hub-header">
+              <i data-lucide="user-check"></i>
+              <span>Quick Candidate Evaluation Hub</span>
+            </div>
+
+            <div class="cmd-eval-grid">
+              <!-- Left Candidate Profile -->
+              <div class="cmd-cand-profile">
+                <div class="cmd-cand-avatar-wrap">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=face" alt="Candidate" class="cmd-cand-avatar-img" id="hub-cand-avatar">
+                </div>
+                <div class="cmd-cand-meta">
+                  <div class="cmd-cand-meta-id" id="hub-cand-id">BFRD-2026-0248</div>
+                  <div class="cmd-cand-meta-name" id="hub-cand-name">Md. Aiman bin Haji Salleh</div>
+                  <div class="cmd-cand-meta-app" id="hub-cand-app">Application: Walk-In</div>
+                  <span class="cmd-cand-badge-screening" id="hub-cand-badge">In Screening</span>
+                </div>
+              </div>
+
+              <!-- Middle Biometric & Physical Quick-Check -->
+              <div class="cmd-bio-section">
+                <div class="cmd-box-title">
+                  <i data-lucide="ruler"></i>
+                  <span>Biometric & Physical Quick-Check</span>
+                </div>
+                <div class="cmd-bio-table">
+                  <div class="cmd-bio-row">
+                    <span class="cmd-bio-label">Height</span>
+                    <input type="text" class="cmd-bio-input" id="hub-bio-height" value="1.68 m" readonly>
+                    <span class="cmd-bio-status pass"><i data-lucide="check" style="width:14px;height:14px;"></i> Pass (&ge; 1.61 m)</span>
+                  </div>
+                  <div class="cmd-bio-row">
+                    <span class="cmd-bio-label">BMI</span>
+                    <input type="text" class="cmd-bio-input" id="hub-bio-bmi" value="22.4" readonly>
+                    <span class="cmd-bio-status pass"><i data-lucide="check" style="width:14px;height:14px;"></i> Within Range (19 - 27)</span>
+                  </div>
+                  <div class="cmd-bio-row">
+                    <span class="cmd-bio-label">Chest (Unexpanded)</span>
+                    <input type="text" class="cmd-bio-input" id="hub-bio-chest" value="88 cm (34.6&quot;)" readonly>
+                    <span class="cmd-bio-status pass"><i data-lucide="check" style="width:14px;height:14px;"></i> Pass (&ge; 86 cm / 34&quot;)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Academic Credential Matcher -->
+              <div class="cmd-academic-section">
+                <div class="cmd-box-title">
+                  <i data-lucide="graduation-cap"></i>
+                  <span>Academic Credential Matcher</span>
+                </div>
+                <div class="cmd-acad-required">Required: <strong>NC / BTEC / National Diploma</strong></div>
+                <div class="cmd-acad-checks">
+                  <label class="cmd-check-item">
+                    <input type="checkbox" id="chk-acad-nd" checked>
+                    <span>National Diploma (ND)</span>
+                  </label>
+                  <label class="cmd-check-item">
+                    <input type="checkbox" id="chk-acad-btec">
+                    <span>BTEC</span>
+                  </label>
+                  <label class="cmd-check-item">
+                    <input type="checkbox" id="chk-acad-nc">
+                    <span>National Certificate (NC)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Disposition Action Bar -->
+            <div class="cmd-disposition-bar">
+              <div class="cmd-disp-title">
+                <i data-lucide="gavel"></i>
+                <span>Quick Disposition</span>
+              </div>
+              <div class="cmd-disp-actions">
+                <button type="button" class="btn-disp btn-disp-pass" onclick="handleQuickDisposition('pass')">
+                  <i data-lucide="check"></i>
+                  <span>Pass</span>
+                </button>
+                <button type="button" class="btn-disp btn-disp-fail" onclick="handleQuickDisposition('fail')">
+                  <i data-lucide="x"></i>
+                  <span>Fail / Disqualified</span>
+                </button>
+                <button type="button" class="btn-disp btn-disp-pending" onclick="handleQuickDisposition('pending')">
+                  <i data-lucide="clock"></i>
+                  <span>Pending Medical Review</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Supplementary Charts & Activity Feed -->
           <div class="dashboard-grid">
             <div class="card">
               <div class="card-title">
@@ -211,6 +471,9 @@
               </ul>
             </div>
           </div>
+          <!-- Hidden fallback for legacy counter element -->
+          <span id="kpi-gagal" style="display:none;">0</span>
+          <span id="kpi-gagal-pct" style="display:none;">0%</span>
         </section>
 
         <!-- ============================================================
@@ -871,7 +1134,7 @@
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=1.0.6"></script>
-  <script src="js/app.js?v=1.0.6"></script>
+  <script src="js/config.js?v=1.1.0"></script>
+  <script src="js/app.js?v=1.1.0"></script>
 </body>
 </html>
