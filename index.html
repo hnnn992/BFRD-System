@@ -338,23 +338,57 @@
         </section>
 
         <!-- ============================================================
-             PAGE 3: KAUNTER (Screening Form)
+             PAGE 3: KAUNTER (Screening Form & Stesen Timbang Lapangan)
              ============================================================ -->
         <section id="page-kaunter" class="page">
-          <div class="breadcrumb">
-            <span>Kaunter Saringan</span>
-            <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-            <span>Borang Penilaian Fizikal</span>
-          </div>
-
-          <div class="page-header">
-            <div class="page-header-left">
-              <h2>Borang Pemeriksaan Fizikal & Dokumen Pemohon</h2>
-              <p>Masukkan data peribadi, ukuran fizikal secara reaktif, dan semak 6 dokumen rasmi BFRD.</p>
+          <!-- Station Breadcrumb & Ref ID -->
+          <div class="station-top-meta">
+            <div class="breadcrumb" style="margin-bottom:0;">
+              <span>Pusat Saringan</span>
+              <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+              <span style="color:var(--navy);font-weight:700;">Stesen Timbang Zon 1 (Saringan Fizikal)</span>
             </div>
             <div class="ref-badge" id="form-ref-badge">
               <i data-lucide="file-text" style="width:14px;height:14px;"></i>
               <span id="txt-form-ref-id">BFRD-20261109-0001</span>
+            </div>
+          </div>
+
+          <!-- Stesen Timbang Status & Bluetooth Connection Bar -->
+          <div class="station-status-bar">
+            <div class="station-status-info">
+              <div class="station-pulse-badge">
+                <span class="pulse-dot-amber"></span>
+                <span class="station-status-title">Mod Input Manual (Luar Talian)</span>
+              </div>
+              <div class="station-status-sub">
+                <i data-lucide="bluetooth-off" style="width:13px;height:13px;"></i>
+                <span>SECA 704s Tidak Terhubung • Penimbang Mekanikal Zon 1 Aktif</span>
+              </div>
+            </div>
+            <div class="station-status-actions">
+              <button type="button" class="btn-reconnect-device" onclick="reconnectDevice()">
+                <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i>
+                <span>Sambung Semula</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Alert Perhatian Operasi (Prosedur Luar Talian) -->
+          <div class="alert-station-manual">
+            <div class="alert-station-icon">
+              <i data-lucide="alert-circle" style="width:20px;height:20px;"></i>
+            </div>
+            <div class="alert-station-content">
+              <div class="alert-station-tag">
+                <span class="badge-tag">PERHATIAN OPERASI</span>
+                <strong>Prosedur Saringan Fizikal Luar Talian (SOP BFRD)</strong>
+              </div>
+              <p>Pegawai dikehendaki memasukkan bacaan fizikal daripada penimbang mekanikal/digital secara manual dan mengesahkan penentukuran sifar (tare) sebelum mengunci bacaan.</p>
+            </div>
+            <div class="alert-station-badge">
+              <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+              <span>SOP BFRD Sah</span>
             </div>
           </div>
 
@@ -363,7 +397,7 @@
             <div class="card form-section">
               <div class="form-section-title">
                 <span class="step-num">1</span>
-                <span>Maklumat Peribadi Pemohon</span>
+                <span>Maklumat Peribadi Calon</span>
               </div>
 
               <div class="grid-3">
@@ -372,7 +406,7 @@
                   <input type="text" class="field-input" id="inp-ic" placeholder="01-123456" required autocomplete="off">
                 </div>
                 <div class="field-group">
-                  <label class="field-label" for="inp-nama">Nama Penuh (Huruf Besar) <span class="req">*</span></label>
+                  <label class="field-label" for="inp-nama">Nama Penuh Calon (Huruf Besar) <span class="req">*</span></label>
                   <input type="text" class="field-input" id="inp-nama" placeholder="AWANG / DAYANG NAMA PENUH" required style="text-transform:uppercase;">
                 </div>
                 <div class="field-group">
@@ -428,145 +462,422 @@
               </div>
             </div>
 
-            <!-- Bahagian 2: Ukuran Fizikal & BMI -->
-            <div class="card form-section" style="border: 1.5px solid var(--gold);">
+            <!-- Bahagian 2: Pengukuran Fizikal Giant Touch Steppers & Hero BMI Gauge -->
+            <div class="card form-section tactile-physical-card">
               <div class="form-section-title">
-                <span class="step-num" style="background:var(--gold-dark);">2</span>
-                <span>Ukuran Fizikal & Kalkulator BMI Reaktif (Masa Nyata)</span>
+                <span class="step-num" style="background:var(--navy);">2</span>
+                <span>Pengukuran Fizikal Taktikal & Kalkulator BMI Reaktif (Masa Nyata)</span>
               </div>
 
-              <div class="grid-2">
-                <div>
-                  <div class="field-group">
-                    <label class="field-label">Tinggi Badan (cm) <span class="req">*</span></label>
-                    <div class="stepper-wrapper">
-                      <button type="button" class="stepper-btn" onclick="stepVal('inp-tinggi', -0.5)">−</button>
-                      <input type="number" step="0.1" min="120" max="220" class="stepper-input" id="inp-tinggi" value="168.0" required oninput="calcBMI()">
-                      <button type="button" class="stepper-btn" onclick="stepVal('inp-tinggi', 0.5)">+</button>
+              <div class="tactile-screen-grid">
+                <!-- Kolum Kiri: Kad Ketinggian, Berat Badan & Dada -->
+                <div class="tactile-measure-col">
+                  <!-- KAD KETINGGIAN (CM) -->
+                  <div class="tactile-measure-card">
+                    <div class="tactile-card-header">
+                      <div class="tactile-card-title">
+                        <div class="tactile-card-icon"><i data-lucide="ruler"></i></div>
+                        <div>
+                          <strong>Ketinggian Fizikal</strong>
+                          <span class="sub" id="syarat-tinggi-info">Stadiometer Manual • Min: 161.0 cm (Lelaki)</span>
+                        </div>
+                      </div>
+                      <span class="tactile-status-chip pass" id="height-eval-badge">
+                        <i data-lucide="check" style="width:12px;height:12px;"></i>
+                        <span>Mematuhi Syarat</span>
+                      </span>
                     </div>
-                    <small id="syarat-tinggi-info" style="color:var(--slate-muted);font-size:11.5px;margin-top:4px;display:block;">Syarat rasmi: Lelaki ≥ 1.61 m (161 cm) | Wanita ≥ 1.52 m (152 cm)</small>
+
+                    <!-- LED Display Box -->
+                    <div class="led-display-box">
+                      <span class="led-indicator"><i data-lucide="edit-3" style="width:11px;height:11px;"></i> Input Manual Ketinggian</span>
+                      <div class="led-digits-wrap">
+                        <span class="led-digit" id="height-val">168.0</span>
+                        <span class="led-unit">CM</span>
+                      </div>
+                      <div class="led-sub-badge" id="height-sub-msg">Memenuhi Syarat Fizikal BFRD</div>
+                      <!-- Hidden Form Input -->
+                      <input type="hidden" id="inp-tinggi" value="168.0">
+                    </div>
+
+                    <!-- Tactile Step Calibration -->
+                    <div class="stepper-touch-grid">
+                      <button type="button" class="tactile-step-btn" onclick="adjustHeight(-0.5)">
+                        <strong>-0.5</strong><span>cm</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustHeight(-0.1)">
+                        <strong>-0.1</strong><span>cm</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustHeight(0.1)">
+                        <strong>+0.1</strong><span>cm</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustHeight(0.5)">
+                        <strong>+0.5</strong><span>cm</span>
+                      </button>
+                    </div>
+
+                    <!-- Pratetap & Butang Numpad -->
+                    <div class="tactile-card-footer">
+                      <div class="preset-label-row">
+                        <span>Pratetap Piawai:</span>
+                        <button type="button" class="tactile-link-btn" onclick="openNumpad('height')">
+                          <i data-lucide="calculator" style="width:13px;height:13px;"></i>
+                          <span>Pad Angka Manual</span>
+                        </button>
+                      </div>
+                      <div class="preset-pills-row" id="height-presets-row">
+                        <button type="button" class="preset-pill" onclick="setHeight(161.0)">161.0 cm (Min)</button>
+                        <button type="button" class="preset-pill" onclick="setHeight(165.0)">165.0 cm</button>
+                        <button type="button" class="preset-pill active" onclick="setHeight(168.0)">168.0 cm</button>
+                        <button type="button" class="preset-pill" onclick="setHeight(170.0)">170.0 cm</button>
+                        <button type="button" class="preset-pill" onclick="setHeight(172.0)">172.0 cm</button>
+                        <button type="button" class="preset-pill" onclick="setHeight(175.0)">175.0 cm</button>
+                      </div>
+                    </div>
                   </div>
 
-                  <div class="field-group">
-                    <label class="field-label">Berat Badan (kg) <span class="req">*</span></label>
-                    <div class="stepper-wrapper">
-                      <button type="button" class="stepper-btn" onclick="stepVal('inp-berat', -0.5)">−</button>
-                      <input type="number" step="0.1" min="30" max="180" class="stepper-input" id="inp-berat" value="65.0" required oninput="calcBMI()">
-                      <button type="button" class="stepper-btn" onclick="stepVal('inp-berat', 0.5)">+</button>
+                  <!-- KAD BERAT BADAN (KG) -->
+                  <div class="tactile-measure-card">
+                    <div class="tactile-card-header">
+                      <div class="tactile-card-title">
+                        <div class="tactile-card-icon"><i data-lucide="scale"></i></div>
+                        <div>
+                          <strong>Berat Badan Fizikal</strong>
+                          <span class="sub">Input Manual Pegawai Pemeriksa</span>
+                        </div>
+                      </div>
+                      <span class="tactile-status-chip pass">
+                        <i data-lucide="shield-check" style="width:12px;height:12px;"></i>
+                        <span>Disahkan Pegawai</span>
+                      </span>
+                    </div>
+
+                    <!-- LED Display Box -->
+                    <div class="led-display-box">
+                      <span class="led-indicator"><i data-lucide="edit-3" style="width:11px;height:11px;"></i> Input Manual Penimbang Mekanikal</span>
+                      <div class="led-digits-wrap">
+                        <span class="led-digit" id="weight-val">65.0</span>
+                        <span class="led-unit">KG</span>
+                      </div>
+                      <div class="led-sub-badge tare" id="weight-tare-note">Penentukuran Manual Disahkan oleh Pegawai (Tare 0.0 kg)</div>
+                      <!-- Hidden Form Input -->
+                      <input type="hidden" id="inp-berat" value="65.0">
+                    </div>
+
+                    <!-- Tactile Step Calibration -->
+                    <div class="stepper-touch-grid">
+                      <button type="button" class="tactile-step-btn" onclick="adjustWeight(-0.5)">
+                        <strong>-0.5</strong><span>kg</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustWeight(-0.1)">
+                        <strong>-0.1</strong><span>kg</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustWeight(0.1)">
+                        <strong>+0.1</strong><span>kg</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustWeight(0.5)">
+                        <strong>+0.5</strong><span>kg</span>
+                      </button>
+                    </div>
+
+                    <!-- Tare & Hold Controls -->
+                    <div class="tactile-actions-row">
+                      <button type="button" class="tactile-action-btn" id="tare-btn" onclick="toggleTare()">
+                        <i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i>
+                        <span>Sahkan Tare (0.00)</span>
+                      </button>
+                      <button type="button" class="tactile-action-btn" id="hold-btn" onclick="toggleHold()">
+                        <i data-lucide="lock" style="width:15px;height:15px;"></i>
+                        <span id="hold-btn-text">Kunci Bacaan Manual</span>
+                      </button>
+                      <button type="button" class="tactile-link-btn" onclick="openNumpad('weight')" style="margin-left:auto;">
+                        <i data-lucide="calculator" style="width:13px;height:13px;"></i>
+                        <span>Pad Angka</span>
+                      </button>
                     </div>
                   </div>
 
-                  <div class="field-group" id="group-ukuran-dada">
-                    <label class="field-label">Ukuran Dada Biasa (Lelaki) <span class="req">*</span></label>
-                    <div class="stepper-wrapper">
-                      <button type="button" class="stepper-btn" onclick="stepVal('inp-dada', -0.5)">−</button>
-                      <input type="number" step="0.5" min="20" max="50" class="stepper-input" id="inp-dada" value="33.0" oninput="calcBMI()">
-                      <button type="button" class="stepper-btn" onclick="stepVal('inp-dada', 0.5)">+</button>
+                  <!-- KAD UKURAN DADA (LELAKI) -->
+                  <div class="tactile-measure-card" id="group-ukuran-dada">
+                    <div class="tactile-card-header">
+                      <div class="tactile-card-title">
+                        <div class="tactile-card-icon"><i data-lucide="activity"></i></div>
+                        <div>
+                          <strong>Ukuran Dada Biasa (Lelaki)</strong>
+                          <span class="sub" id="syarat-dada-info">Syarat BFRD: &lt; 34" (86 cm) semasa hembus nafas biasa</span>
+                        </div>
+                      </div>
+                      <span class="tactile-status-chip pass" id="chest-eval-badge">
+                        <i data-lucide="check" style="width:12px;height:12px;"></i>
+                        <span>&lt; 34" Mematuhi</span>
+                      </span>
                     </div>
-                    <small id="syarat-dada-info" style="color:var(--slate-muted);font-size:11.5px;margin-top:4px;display:block;">Syarat BFRD: &lt; 34" (86 cm) apabila tidak ditarik nafas (biasa)</small>
+
+                    <!-- LED Display Box -->
+                    <div class="led-display-box compact">
+                      <div class="led-digits-wrap">
+                        <span class="led-digit" id="chest-val">33.0</span>
+                        <span class="led-unit">INCI</span>
+                      </div>
+                      <!-- Hidden Form Input -->
+                      <input type="hidden" id="inp-dada" value="33.0">
+                    </div>
+
+                    <!-- Stepper Grid -->
+                    <div class="stepper-touch-grid">
+                      <button type="button" class="tactile-step-btn" onclick="adjustChest(-0.5)">
+                        <strong>-0.5</strong><span>"</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustChest(-0.1)">
+                        <strong>-0.1</strong><span>"</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustChest(0.1)">
+                        <strong>+0.1</strong><span>"</span>
+                      </button>
+                      <button type="button" class="tactile-step-btn" onclick="adjustChest(0.5)">
+                        <strong>+0.5</strong><span>"</span>
+                      </button>
+                    </div>
+
+                    <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+                      <button type="button" class="tactile-link-btn" onclick="openNumpad('chest')">
+                        <i data-lucide="calculator" style="width:13px;height:13px;"></i>
+                        <span>Pad Angka Ukuran Dada</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Right Live BMI Panel -->
-                <div class="bmi-panel">
-                  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                    <div>
-                      <div class="bmi-value-big" id="bmi-display-val">23.03</div>
-                      <div class="bmi-unit">kg/m² (Indeks Jisim Badan)</div>
+                <!-- Kolum Kanan: Hero BMI Gauge Card & Spectrum Bar -->
+                <div class="tactile-bmi-col">
+                  <div class="bmi-hero-card">
+                    <!-- Top Mega Metric & Status -->
+                    <div class="bmi-hero-header">
+                      <div>
+                        <span class="bmi-mega-label">INDEKS JISIM BADAN (BMI)</span>
+                        <div class="bmi-mega-row">
+                          <span class="bmi-mega-val" id="bmi-display-val">23.03</span>
+                          <span class="bmi-mega-unit">kg/m²</span>
+                        </div>
+                      </div>
+                      <div class="bmi-hero-badge-wrap">
+                        <div class="badge-status-lg" id="bmi-status-badge">
+                          <i data-lucide="check-circle" id="bmi-badge-icon" style="width:20px;height:20px;"></i>
+                          <div class="badge-text-group">
+                            <span class="sub">STATUS KELAYAKAN FIZIKAL</span>
+                            <strong id="bmi-status-text">BMI NORMAL & LULUS KELAYAKAN</strong>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div class="badge" id="bmi-status-badge" style="background:var(--green-bg);color:var(--green-text);font-size:13px;padding:6px 14px;">
-                      <i data-lucide="check" style="width:14px;height:14px;"></i>
-                      <span id="bmi-status-text">LULUS</span>
+
+                    <!-- Target Matrix -->
+                    <div class="bmi-target-matrix">
+                      <div class="bmi-target-box">
+                        <span class="lbl">Min. Ketinggian Bomba</span>
+                        <strong class="val" id="disp-min-tinggi">161.0 cm</strong>
+                        <span class="status-sub" id="disp-tinggi-status">Status: LULUS (168.0 cm)</span>
+                      </div>
+                      <div class="bmi-target-box">
+                        <span class="lbl">Julat Sasaran BMI</span>
+                        <strong class="val" id="syarat-julat-bmi">19.0 – 27.0</strong>
+                        <span class="status-sub" id="disp-bmi-status">Status: OPTIMAL (23.03)</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div class="bmi-gauge">
-                    <div class="bmi-gauge-fill" id="bmi-gauge-fill" style="width:50%;background:var(--green);"></div>
-                  </div>
-                  <div class="bmi-gauge-labels">
-                    <span>Kurang (&lt;19.0)</span>
-                    <span>Ideal (19.0 - 27.0)</span>
-                    <span>Perhatian (27.1 - 29.5)</span>
-                    <span>Obes (&gt;29.5)</span>
-                  </div>
+                    <!-- Visual BMI Range Spectrum Bar -->
+                    <div class="bmi-spectrum-bar-wrap">
+                      <div class="spectrum-header-row">
+                        <span class="seg-lbl">Kurang (&lt; 19.0)</span>
+                        <span class="seg-lbl ideal">Normal / Ideal (19.0 - 27.0)</span>
+                        <span class="seg-lbl">Perhatian (27.1 - 29.5)</span>
+                        <span class="seg-lbl danger">Obes (&gt; 29.5)</span>
+                      </div>
 
-                  <div style="margin-top:14px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;font-size:12px;color:var(--slate-dark);">
-                    <strong>Syarat Jawatan Terpilih:</strong> <span id="syarat-julat-bmi">BMI 19.0 - 27.0</span>
+                      <div class="bmi-spectrum-bar">
+                        <!-- Segment 1: Kurang (<19) ~20% -->
+                        <div class="spectrum-seg seg-under" title="Kurang Berat (<19.0)"></div>
+                        <!-- Segment 2: Ideal (19-27) ~40% -->
+                        <div class="spectrum-seg seg-ideal" title="Ideal / Normal (19.0 - 27.0)"></div>
+                        <!-- Segment 3: Perhatian (27.1-29.5) ~20% -->
+                        <div class="spectrum-seg seg-warn" title="Perhatian (27.1 - 29.5)"></div>
+                        <!-- Segment 4: Obes (>29.5) ~20% -->
+                        <div class="spectrum-seg seg-danger" title="Obesiti (>29.5)"></div>
+
+                        <!-- Needle / Cursor Indicator pinned dynamically -->
+                        <div class="bmi-needle" id="bmi-needle" style="left: 40.15%;">
+                          <div class="needle-pin"></div>
+                          <div class="needle-line"></div>
+                        </div>
+                      </div>
+
+                      <div class="spectrum-legend">
+                        <span>15.0</span>
+                        <span>19.0</span>
+                        <strong class="legend-calon" id="bmi-needle-val">23.03 (Calon)</strong>
+                        <span>27.0</span>
+                        <span>29.5</span>
+                        <span>35.0+</span>
+                      </div>
+                    </div>
+
+                    <div class="bmi-helper-info">
+                      <i data-lucide="info" style="width:14px;height:14px;flex-shrink:0;"></i>
+                      <span>Garis panduan rasmi BFRD: Calon dalam julat BMI 19.0 - 27.0 diluluskan serta-merta ke fasa Ujian Ketangkasan Jasmani (PAFT/IPPT).</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Bahagian 3: Senarai Semak 6 Dokumen Rasmi -->
+            <!-- Bahagian 3: Senarai Semak 6 Dokumen Rasmi BFRD (Big Touch Tiles) -->
             <div class="card form-section">
-              <div class="form-section-title">
-                <span class="step-num">3</span>
-                <span>Senarai Semak 6 Dokumen Rasmi BFRD</span>
+              <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span class="step-num" style="background:var(--navy);">3</span>
+                  <span>Pemeriksaan Dokumen Fizikal Kaunter (6 Dokumen Wajib)</span>
+                </div>
+                <span class="tactile-status-chip pass" id="doc-counter-badge" style="font-size:12px;padding:4px 10px;">
+                  6 / 6 Disahkan Lengkap
+                </span>
               </div>
               <p style="font-size:12.5px;color:var(--slate-muted);margin-bottom:14px;">
-                Tandakan dokumen fizikal yang telah diperiksa dan disahkan di hadapan kaunter:
+                Sila sahkan ketulenan 6 dokumen rasmi calon di hadapan kaunter sebelum pengesahan dan cetakan slip rasmi:
               </p>
 
-              <div class="doc-grid" id="doc-checklist-container">
-                <div class="doc-card checked" data-idx="0" onclick="toggleDoc(0)">
-                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">1. Surat Panggilan Pemeriksaan / Bukti Pendaftaran Rasmi <span class="req">*</span></div>
+              <div class="tactile-doc-grid" id="doc-checklist-container">
+                <!-- Dokumen 1 -->
+                <div class="tactile-doc-card checked" data-idx="0" onclick="toggleDoc(0)">
+                  <div class="doc-left">
+                    <div class="doc-icon"><i data-lucide="file-check-2"></i></div>
+                    <div class="doc-texts">
+                      <div class="doc-name">Surat Panggilan / Slip Saringan</div>
+                      <div class="doc-sub">Slip Pendaftaran Rasmi BFRD</div>
+                    </div>
+                  </div>
+                  <div class="doc-status-bubble"><i data-lucide="check"></i></div>
                 </div>
-                <div class="doc-card checked" data-idx="1" onclick="toggleDoc(1)">
-                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">2. Kad Pengenalan Pintar Brunei Asal (Pengesahan Kerakyatan) <span class="req">*</span></div>
+
+                <!-- Dokumen 2 -->
+                <div class="tactile-doc-card checked" data-idx="1" onclick="toggleDoc(1)">
+                  <div class="doc-left">
+                    <div class="doc-icon"><i data-lucide="id-card"></i></div>
+                    <div class="doc-texts">
+                      <div class="doc-name">Kad Pengenalan Pintar Brunei Asal</div>
+                      <div class="doc-sub">IC Kuning Warganegara Sah</div>
+                    </div>
+                  </div>
+                  <div class="doc-status-bubble"><i data-lucide="check"></i></div>
                 </div>
-                <div class="doc-card checked" data-idx="2" onclick="toggleDoc(2)">
-                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">3. Salinan Diakui Sah Sijil Akademik & Transkrip Asal <span class="req">*</span></div>
+
+                <!-- Dokumen 3 -->
+                <div class="tactile-doc-card checked" data-idx="2" onclick="toggleDoc(2)">
+                  <div class="doc-left">
+                    <div class="doc-icon"><i data-lucide="graduation-cap"></i></div>
+                    <div class="doc-texts">
+                      <div class="doc-name">Sijil Akademik & Transkrip Asal</div>
+                      <div class="doc-sub">Kelayakan Minimum Mengikut Jawatan</div>
+                    </div>
+                  </div>
+                  <div class="doc-status-bubble"><i data-lucide="check"></i></div>
                 </div>
-                <div class="doc-card checked" data-idx="3" onclick="toggleDoc(3)">
-                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">4. Curriculum Vitae (CV) & Surat Permohonan Terkini</div>
+
+                <!-- Dokumen 4 -->
+                <div class="tactile-doc-card checked" data-idx="3" onclick="toggleDoc(3)">
+                  <div class="doc-left">
+                    <div class="doc-icon"><i data-lucide="clipboard-list"></i></div>
+                    <div class="doc-texts">
+                      <div class="doc-name">CV & Borang Permohonan Lengkap</div>
+                      <div class="doc-sub">Borang Rasmi JPA Ditandatangani</div>
+                    </div>
+                  </div>
+                  <div class="doc-status-bubble"><i data-lucide="check"></i></div>
                 </div>
-                <div class="doc-card checked" data-idx="4" onclick="toggleDoc(4)">
-                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">5. Deria & Penglihatan: Tiada masalah pendengaran & Tidak buta warna (Colour Blind) <span class="req">*</span></div>
+
+                <!-- Dokumen 5 -->
+                <div class="tactile-doc-card checked" data-idx="4" onclick="toggleDoc(4)">
+                  <div class="doc-left">
+                    <div class="doc-icon"><i data-lucide="eye"></i></div>
+                    <div class="doc-texts">
+                      <div class="doc-name">Deria & Penglihatan (Bebas Buta Warna)</div>
+                      <div class="doc-sub">Tiada masalah pendengaran / buta warna</div>
+                    </div>
+                  </div>
+                  <div class="doc-status-bubble"><i data-lucide="check"></i></div>
                 </div>
-                <div class="doc-card checked" data-idx="5" onclick="toggleDoc(5)">
-                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">6. Status Kesihatan: Lulus Pemeriksaan Kesihatan Pegawai Perubatan Kerajaan <span class="req">*</span></div>
+
+                <!-- Dokumen 6 -->
+                <div class="tactile-doc-card checked" data-idx="5" onclick="toggleDoc(5)">
+                  <div class="doc-left">
+                    <div class="doc-icon"><i data-lucide="stethoscope"></i></div>
+                    <div class="doc-texts">
+                      <div class="doc-name">Pemeriksaan Kesihatan Pegawai Perubatan</div>
+                      <div class="doc-sub">Lulus Garis Panduan Perubatan Bomba</div>
+                    </div>
+                  </div>
+                  <div class="doc-status-bubble"><i data-lucide="check"></i></div>
                 </div>
               </div>
             </div>
 
-            <!-- Bahagian 4: Keputusan Kelayakan & Catatan -->
+            <!-- Bahagian 4: Keputusan Kelayakan, Perakuan Pegawai & Catatan -->
             <div class="card form-section">
               <div class="form-section-title">
-                <span class="step-num">4</span>
-                <span>Keputusan Kelayakan Sistem & Catatan Pegawai</span>
+                <span class="step-num" style="background:var(--navy);">4</span>
+                <span>Keputusan Kelayakan Sistem & Perakuan Pegawai Pemeriksa</span>
               </div>
 
               <div class="keputusan-banner layak" id="keputusan-banner">
                 <i data-lucide="check-circle" id="keputusan-icon" style="width:24px;height:24px;"></i>
                 <div>
-                  <div style="font-size:16px;" id="keputusan-text">KEPUTUSAN: LAYAK KE PERINGKAT SETERUSNYA</div>
+                  <div style="font-size:16px;font-weight:700;" id="keputusan-text">KEPUTUSAN: LAYAK KE PERINGKAT SETERUSNYA</div>
                   <div style="font-size:12px;font-weight:400;opacity:0.9;" id="keputusan-subtext">Memenuhi kriteria ketinggian, BMI, serta 6 dokumen lengkap disahkan.</div>
                 </div>
               </div>
 
-              <div class="field-group">
+              <!-- Officer Verification Statement Box -->
+              <div class="officer-statement-box">
+                <div class="officer-statement-header">
+                  <div class="officer-badge-avatar"><i data-lucide="user-check"></i></div>
+                  <div class="officer-badge-meta">
+                    <span class="lbl">Pegawai Pemeriksa Bertugas:</span>
+                    <strong class="name" id="inspector-name">Hj. Razali bin Mahmud (No. 4088)</strong>
+                  </div>
+                  <div class="officer-badge-time">
+                    <i data-lucide="clock" style="width:13px;height:13px;"></i>
+                    <span id="inspector-timestamp">Masa Nyata BFRD</span>
+                  </div>
+                </div>
+                <p class="officer-statement-quote">
+                  "Ukuran manual disahkan melepasi piawaian fizikal BFRD melalui timbangan mekanikal lapangan. Prosedur tare dan kalibrasi sifar telah dipatuhi. Calon bersedia bagi fasa ujian kecergasan jasmani."
+                </p>
+              </div>
+
+              <div class="field-group" style="margin-top:14px;">
                 <label class="field-label" for="inp-catatan">Catatan / Ulasan Khas Pegawai Pemeriksa</label>
-                <textarea class="field-input" id="inp-catatan" rows="3" placeholder="Contoh: Keadaan fizikal cergas dan memenuhi syarat asas bomba. Tiada sebarang kecacatan ketara."></textarea>
+                <textarea class="field-input" id="inp-catatan" rows="3" placeholder="Contoh: Keadaan fizikal cergas dan memenuhi syarat asas bomba. Prosedur tare dan kalibrasi dipatuhi."></textarea>
               </div>
             </div>
 
             <!-- Sticky Bottom Action Bar -->
             <div class="sticky-bar">
-              <div class="progress-label" id="txt-form-progress">Kemajuan: 100% Lengkap</div>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar-fill" id="form-progress-bar" style="width:100%;"></div>
+              <div class="sticky-bar-left">
+                <div class="sticky-status-indicator">
+                  <span class="pulse-dot-green"></span>
+                  <span class="sticky-status-label" id="sticky-status-title">KEPUTUSAN KESELURUHAN: LAYAK KE UJIAN KECERGASAN PADANG</span>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-fill" id="form-progress-bar" style="width:100%;"></div>
+                </div>
               </div>
               <div class="sticky-actions">
-                <button type="button" class="btn btn-outlined" onclick="resetFormSaringan()">Kosongkan</button>
-                <button type="submit" id="btn-simpan-saringan" class="btn btn-red">
-                  <i data-lucide="printer"></i>
-                  <span>Simpan & Cetak Laporan Rasmi</span>
+                <button type="button" class="btn btn-outlined btn-reset-candidate" onclick="nextCandidate()">
+                  <i data-lucide="refresh-cw" style="width:15px;height:15px;"></i>
+                  <span>Set Semula / Calon Seterusnya</span>
+                </button>
+                <button type="submit" id="btn-simpan-saringan" class="btn btn-red btn-save-print">
+                  <i data-lucide="printer" style="width:16px;height:16px;"></i>
+                  <span>SIMPAN REKOD & CETAK SLIP A4</span>
                 </button>
               </div>
             </div>
@@ -991,11 +1302,157 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       MODAL: TACTILE NUMPAD MANUAL ENTRY (PAD ANGKA TAKTIKAL)
+       ============================================================ -->
+  <div class="numpad-modal-overlay" id="modal-numpad" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-numpad')">
+    <div class="numpad-modal">
+      <div class="numpad-header">
+        <div class="numpad-header-title">
+          <div class="numpad-pin-icon"><i data-lucide="calculator"></i></div>
+          <div>
+            <h3 class="title" id="numpad-title">Input Pantas Ketinggian Calon (cm)</h3>
+            <span class="sub" id="numpad-sub">Stesen Timbang Zon 1 • Syarat Min: 161.0 cm</span>
+          </div>
+        </div>
+        <button type="button" class="numpad-close-btn" onclick="closeNumpad()"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="numpad-body">
+        <!-- Display Box -->
+        <div class="numpad-display-box">
+          <div class="numpad-display-digits">
+            <span id="numpad-display">168.0</span>
+            <span class="unit" id="numpad-unit">CM</span>
+          </div>
+          <div class="numpad-eval-chip" id="numpad-eval-chip">
+            <i data-lucide="check" style="width:12px;height:12px;"></i>
+            <span id="numpad-eval-text">Melepasi Syarat Minimum</span>
+          </div>
+        </div>
+
+        <!-- Presets Row -->
+        <div class="numpad-presets-section">
+          <span class="preset-label">Pratetap Pantas:</span>
+          <div class="numpad-preset-pills" id="numpad-presets-container">
+            <!-- Diisi secara dinamik -->
+          </div>
+        </div>
+
+        <!-- 3x4 Touch Keypad -->
+        <div class="numpad-grid">
+          <button type="button" class="numpad-key" onclick="numpadPress('1')">1</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('2')">2</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('3')">3</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('4')">4</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('5')">5</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('6')">6</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('7')">7</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('8')">8</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('9')">9</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('.')">.</button>
+          <button type="button" class="numpad-key" onclick="numpadPress('0')">0</button>
+          <button type="button" class="numpad-key numpad-backspace" onclick="numpadBackspace()"><i data-lucide="delete"></i></button>
+        </div>
+
+        <!-- Actions Row -->
+        <div class="numpad-actions-row">
+          <button type="button" class="btn btn-outlined btn-numpad-cancel" onclick="closeNumpad()">Batal / Tutup</button>
+          <button type="button" class="btn btn-navy btn-numpad-apply" onclick="applyNumpad()">
+            <i data-lucide="check-circle-2" style="width:16px;height:16px;"></i>
+            <span id="btn-numpad-confirm-txt">Sahkan & Kunci Nilai</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: DIAGNOSTIK PERANTI SECA 704s & STESEN TIMBANG
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-peranti" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-peranti')">
+    <div class="modal" style="max-width:540px;">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--amber-bg);color:var(--amber-text);display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="cpu" style="width:20px;height:20px;"></i>
+          </div>
+          <div>
+            <h3 class="modal-title">Status Peranti & Diagnostik Stesen</h3>
+            <span style="font-size:12px;color:var(--slate-muted);">Stesen Timbang Zon 1 • BFRD Brunei</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close" onclick="closeDeviceModal()"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="station-device-card">
+          <div class="device-row">
+            <div>
+              <strong style="font-size:14px;color:var(--slate-dark);">SECA 704s Digital Stadiometer & Scale</strong>
+              <div style="font-size:11.5px;color:var(--slate-muted);margin-top:2px;">Protokol: Bluetooth Low Energy (BLE) / Manual Fallback</div>
+            </div>
+            <span class="hub-badge-warn">MOD MANUAL</span>
+          </div>
+          <div class="device-detail-grid">
+            <div class="detail-box">
+              <span class="detail-lbl">Status Sambungan:</span>
+              <strong style="color:var(--gold-dark);">Luar Talian (Standby)</strong>
+            </div>
+            <div class="detail-box">
+              <span class="detail-lbl">Kalibrasi Sifar (Tare):</span>
+              <strong style="color:var(--green-text);">Tepat (0.00 kg)</strong>
+            </div>
+            <div class="detail-box">
+              <span class="detail-lbl">Bateri / Kuasa:</span>
+              <strong style="color:var(--slate-dark);">AC Mains 240V (98%)</strong>
+            </div>
+            <div class="detail-box">
+              <span class="detail-lbl">Jadual Servis:</span>
+              <strong style="color:var(--slate-dark);">15 Disember 2026</strong>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding:12px;background:#F8FAFC;border-radius:8px;font-size:12px;color:var(--slate-dark);line-height:1.5;">
+            <strong>Garis Panduan Luar Talian BFRD:</strong> Sekiranya sambungan nirkabel Bluetooth tergendala, pegawai dikehendaki menyemak bacaan mekanikal pada tiang stadiometer dan dial penimbang, kemudian menginput nilai secara taktikal melalui butang pelarasan pantas.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outlined" onclick="closeDeviceModal()">Tutup</button>
+        <button type="button" class="btn btn-navy" onclick="reconnectDevice()">
+          <i data-lucide="refresh-cw"></i>
+          <span>Uji Isyarat Bluetooth</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MOBILE & TABLET BOTTOM TAB BAR (NAVIGASI PANTAS LAPANGAN)
+       ============================================================ -->
+  <nav class="mobile-bottom-nav" id="mobile-tab-bar">
+    <button type="button" class="mobile-nav-btn" id="mob-nav-senarai" onclick="navigateTo('senarai')">
+      <i data-lucide="clipboard-list"></i>
+      <span>Antrian</span>
+    </button>
+    <button type="button" class="mobile-nav-btn active" id="mob-nav-kaunter" onclick="navigateTo('kaunter')">
+      <i data-lucide="scale"></i>
+      <span>Timbang</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" id="mob-nav-dashboard" onclick="navigateTo('dashboard')">
+      <i data-lucide="bar-chart-3"></i>
+      <span>Statistik</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" id="mob-nav-peranti" onclick="openDeviceModal()">
+      <i data-lucide="settings-2"></i>
+      <span>Peranti</span>
+    </button>
+  </nav>
+
   <!-- Toast Container -->
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=1.0.8"></script>
-  <script src="js/app.js?v=1.0.8"></script>
+  <script src="js/config.js?v=1.0.9"></script>
+  <script src="js/app.js?v=1.0.9"></script>
 </body>
 </html>

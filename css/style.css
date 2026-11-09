@@ -2150,3 +2150,1209 @@ select.field-input { cursor: pointer; }
   .command-clock-box, .command-user-box { width: 100%; text-align: left; }
   .command-clock-label { justify-content: flex-start; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   STESEN TIMBANG & MODUL SARINGAN FIZIKAL TAKTIKAL (TACTILE STATION)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Station Top Meta & Status Bar */
+.station-top-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.station-status-bar {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.station-status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.station-pulse-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pulse-dot-amber {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  animation: pulseAmber 2s infinite;
+}
+
+@keyframes pulseAmber {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.pulse-dot-green {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
+  animation: pulseGreen 2s infinite;
+}
+
+@keyframes pulseGreen {
+  0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(5, 150, 105, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+}
+
+.station-status-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--slate-dark);
+}
+
+.station-status-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--slate-muted);
+}
+
+.btn-reconnect-device {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-reconnect-device:hover { background: var(--navy-dark); }
+.btn-reconnect-device:active { transform: scale(0.97); }
+
+/* Alert Perhatian Operasi */
+.alert-station-manual {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-left: 4px solid var(--gold-dark);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.alert-station-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #FEF3C7;
+  color: #92400E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alert-station-content {
+  flex: 1;
+  min-width: 240px;
+}
+
+.alert-station-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+  flex-wrap: wrap;
+}
+
+.badge-tag {
+  background: #FEF3C7;
+  color: #92400E;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.alert-station-content strong {
+  font-size: 13px;
+  color: #78350F;
+}
+
+.alert-station-content p {
+  font-size: 12px;
+  color: #92400E;
+  line-height: 1.45;
+}
+
+.alert-station-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+  color: #92400E;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Grid Pengukuran Fizikal Taktikal */
+.tactile-physical-card {
+  border: 1.5px solid var(--navy) !important;
+  background: var(--white);
+}
+
+.tactile-screen-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .tactile-screen-grid { grid-template-columns: 1fr; }
+}
+
+.tactile-measure-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tactile-measure-card {
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.tactile-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+
+.tactile-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tactile-card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #E0E7FF;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tactile-card-title strong {
+  display: block;
+  font-size: 13.5px;
+  color: var(--slate-dark);
+}
+
+.tactile-card-title .sub {
+  font-size: 11.5px;
+  color: var(--slate-muted);
+}
+
+.tactile-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tactile-status-chip.pass {
+  background: var(--green-bg);
+  color: var(--green-text);
+  border: 1px solid #A7F3D0;
+}
+
+.tactile-status-chip.warn {
+  background: var(--amber-bg);
+  color: var(--amber-text);
+  border: 1px solid #FDE68A;
+}
+
+.tactile-status-chip.fail {
+  background: var(--red-bg);
+  color: var(--red-text);
+  border: 1px solid #FECACA;
+}
+
+/* LED Digital Display Boxes */
+.led-display-box {
+  background: var(--white);
+  border: 1.5px solid #CBD5E1;
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 12px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.led-display-box.compact {
+  padding: 10px 14px;
+}
+
+.led-indicator {
+  position: absolute;
+  top: 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.led-digits-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.led-digit {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--slate-dark);
+}
+
+.led-unit {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--slate-muted);
+}
+
+.led-sub-badge {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #E0E7FF;
+  color: var(--navy);
+}
+
+.led-sub-badge.tare {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+/* Tactile 4-button Stepper Grid */
+.stepper-touch-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tactile-step-btn {
+  height: 48px;
+  border-radius: 8px;
+  background: var(--white);
+  border: 1px solid #CBD5E1;
+  color: var(--slate-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tactile-step-btn:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+}
+
+.tactile-step-btn:active {
+  background: #E2E8F0;
+  transform: scale(0.96);
+}
+
+.tactile-step-btn strong {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tactile-step-btn span {
+  font-size: 10.5px;
+  color: var(--slate-muted);
+  font-weight: 500;
+}
+
+/* Preset Pills & Direct Numpad Link */
+.tactile-card-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.preset-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 11.5px;
+  color: var(--slate-muted);
+}
+
+.tactile-link-btn {
+  background: none;
+  border: none;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+}
+.tactile-link-btn:hover { text-decoration: underline; color: var(--navy-dark); }
+
+.preset-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.preset-pill {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  color: var(--slate-dark);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.preset-pill:hover { background: #F1F5F9; }
+.preset-pill.active {
+  background: var(--navy);
+  color: var(--white);
+  border-color: var(--navy);
+}
+
+/* Direct Action & Tare Controls */
+.tactile-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  flex-wrap: wrap;
+}
+
+.tactile-action-btn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 6px;
+  background: var(--white);
+  border: 1px solid #CBD5E1;
+  color: var(--slate-dark);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.tactile-action-btn:hover { background: #F1F5F9; }
+.tactile-action-btn:active { transform: scale(0.97); }
+
+.tactile-action-btn.flash {
+  background: #FEF3C7;
+  border-color: var(--gold);
+  color: #92400E;
+}
+
+.tactile-action-btn.hold-active {
+  background: var(--navy);
+  color: var(--white);
+  border-color: var(--navy);
+}
+
+/* Kolum Kanan: Hero BMI Gauge Card */
+.bmi-hero-card {
+  background: #F8FAFC;
+  border: 1.5px solid #CBD5E1;
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bmi-hero-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.bmi-mega-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--slate-muted);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.bmi-mega-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.bmi-mega-val {
+  font-size: 46px;
+  font-weight: 900;
+  color: var(--slate-dark);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.bmi-mega-unit {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--slate-muted);
+}
+
+.badge-status-lg {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--green-bg);
+  border: 1px solid #A7F3D0;
+  color: var(--green-text);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+}
+
+.badge-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-text-group .sub {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+.badge-text-group strong {
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+/* Quick Target Matrix */
+.bmi-target-matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.bmi-target-box {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bmi-target-box .lbl {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--slate-muted);
+  text-transform: uppercase;
+}
+
+.bmi-target-box .val {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--slate-dark);
+  margin-top: 2px;
+}
+
+.bmi-target-box .status-sub {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* Visual Spectrum Bar with Slider Needle */
+.bmi-spectrum-bar-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.spectrum-header-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--slate-muted);
+  margin-bottom: 8px;
+}
+
+.spectrum-header-row .ideal {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.spectrum-header-row .danger {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.bmi-spectrum-bar {
+  position: relative;
+  width: 100%;
+  height: 16px;
+  border-radius: 20px;
+  display: flex;
+  overflow: visible;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.spectrum-seg {
+  height: 100%;
+}
+
+.seg-under {
+  width: 20%;
+  background: #93C5FD;
+  border-radius: 20px 0 0 20px;
+}
+
+.seg-ideal {
+  width: 40%;
+  background: #10B981;
+}
+
+.seg-warn {
+  width: 15%;
+  background: #F59E0B;
+}
+
+.seg-danger {
+  width: 25%;
+  background: #EF4444;
+  border-radius: 0 20px 20px 0;
+}
+
+.bmi-needle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 5;
+}
+
+.needle-pin {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3.5px solid var(--navy);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.needle-line {
+  width: 2px;
+  height: 22px;
+  background: var(--navy);
+  margin-top: -2px;
+}
+
+.spectrum-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--slate-muted);
+  margin-top: 10px;
+}
+
+.legend-calon {
+  color: var(--navy);
+  font-size: 11px;
+}
+
+.bmi-helper-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  color: #1E40AF;
+  line-height: 1.45;
+}
+
+/* Bahagian 3: Big Touch Tiles (6 Dokumen Wajib) */
+.tactile-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.tactile-doc-card {
+  background: #F8FAFC;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tactile-doc-card:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.tactile-doc-card:active {
+  transform: scale(0.985);
+}
+
+.tactile-doc-card.checked {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+}
+
+.doc-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.doc-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.doc-texts {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.doc-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--slate-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-sub {
+  font-size: 11px;
+  color: var(--slate-muted);
+}
+
+.doc-status-bubble {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #E2E8F0;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.tactile-doc-card.checked .doc-status-bubble {
+  background: var(--navy);
+  color: var(--white);
+}
+
+/* Officer Statement Box */
+.officer-statement-box {
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+
+.officer-statement-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.officer-badge-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.officer-badge-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.officer-badge-meta .lbl {
+  font-size: 10.5px;
+  color: var(--slate-muted);
+}
+
+.officer-badge-meta .name {
+  font-size: 13px;
+  color: var(--navy);
+}
+
+.officer-badge-time {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--slate-muted);
+}
+
+.officer-statement-quote {
+  font-size: 12px;
+  font-style: italic;
+  color: #475569;
+  line-height: 1.5;
+}
+
+/* Sticky Action Bar Adjustments */
+.sticky-bar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.sticky-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sticky-status-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+}
+
+.btn-reset-candidate {
+  font-size: 12.5px;
+  height: 44px;
+  padding: 0 16px;
+}
+
+.btn-save-print {
+  font-size: 13px;
+  height: 44px;
+  padding: 0 20px;
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TACTILE NUMPAD MODAL (POP-UP TAKTIKAL)
+   ═══════════════════════════════════════════════════════════ */
+.numpad-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.numpad-modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 360px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  animation: numpadPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes numpadPop {
+  0% { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.numpad-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.numpad-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.numpad-pin-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #E0E7FF;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.numpad-header-title .title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--slate-dark);
+}
+
+.numpad-header-title .sub {
+  font-size: 11px;
+  color: var(--slate-muted);
+  display: block;
+}
+
+.numpad-close-btn {
+  background: none;
+  border: none;
+  color: var(--slate-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+.numpad-close-btn:hover { background: #F1F5F9; color: var(--slate-dark); }
+
+.numpad-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.numpad-display-box {
+  background: #F8FAFC;
+  border: 1.5px solid #CBD5E1;
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.numpad-display-digits {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.numpad-display-digits span:first-child {
+  font-size: 46px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--slate-dark);
+}
+
+.numpad-display-digits .unit {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.numpad-eval-chip {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #E0E7FF;
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.numpad-presets-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.numpad-presets-section .preset-label {
+  font-size: 11px;
+  color: var(--slate-muted);
+}
+
+.numpad-preset-pills {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.numpad-key {
+  height: 52px;
+  border-radius: 10px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: var(--slate-dark);
+  font-size: 22px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: all 0.12s ease;
+}
+
+.numpad-key:hover {
+  background: #E2E8F0;
+}
+
+.numpad-key:active {
+  background: #CBD5E1;
+  transform: scale(0.94);
+}
+
+.numpad-backspace {
+  color: var(--red);
+}
+
+.numpad-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-numpad-cancel {
+  flex: 1;
+  height: 48px;
+}
+
+.btn-numpad-apply {
+  flex: 1.8;
+  height: 48px;
+  font-weight: 800;
+  font-size: 13.5px;
+}
+
+/* Device Detail Modal Box */
+.station-device-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.device-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.device-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.detail-box {
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-lbl {
+  font-size: 11px;
+  color: var(--slate-muted);
+}
+
+.detail-box strong {
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE & TABLET BOTTOM TAB BAR
+   ═══════════════════════════════════════════════════════════ */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: center;
+  justify-content: space-around;
+}
+
+.mobile-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  background: none;
+  border: none;
+  color: var(--slate-muted);
+  cursor: pointer;
+  padding: 6px 0;
+  transition: all 0.15s ease;
+}
+
+.mobile-nav-btn i {
+  width: 22px;
+  height: 22px;
+}
+
+.mobile-nav-btn span {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.mobile-nav-btn.active {
+  color: var(--navy);
+}
+
+.mobile-nav-btn.active i {
+  stroke-width: 2.5px;
+}
+
+.mobile-nav-btn.active span {
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .mobile-bottom-nav { display: flex; }
+  #page-content { padding-bottom: 90px; }
+  .sticky-bar { bottom: 64px; }
+}
+

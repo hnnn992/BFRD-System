@@ -299,6 +299,9 @@ function startLiveClock() {
     const elDate = document.getElementById('cmd-clock-date');
     if (elTime) elTime.textContent = timeStr;
     if (elDate) elDate.textContent = dateStr;
+
+    const elInsp = document.getElementById('inspector-timestamp');
+    if (elInsp) elInsp.textContent = `${timeStr} • ${dateStr}`;
   }
 
   tick();
@@ -495,6 +498,18 @@ function navigateTo(pageId) {
       item.classList.remove('active');
     }
   });
+
+  // Kemas kini mobile bottom nav aktif
+  const mobTabMap = {
+    'senarai': 'mob-nav-senarai',
+    'kaunter': 'mob-nav-kaunter',
+    'dashboard': 'mob-nav-dashboard'
+  };
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
+  if (mobTabMap[pageId]) {
+    const mobBtn = document.getElementById(mobTabMap[pageId]);
+    if (mobBtn) mobBtn.classList.add('active');
+  }
 
   // Kemas kini tajuk topbar
   const titles = {
@@ -815,13 +830,292 @@ function setJantina(val) {
   handleJawatanChange();
 }
 
-function stepVal(id, delta) {
-  const input = document.getElementById(id);
-  if (!input) return;
-  let val = parseFloat(input.value) || 0;
-  val = Math.max(parseFloat(input.min) || 0, Math.min(parseFloat(input.max) || 300, val + delta));
-  input.value = val.toFixed(1);
+// ════════════════════════════════════════════════════════════
+// STESEN TIMBANG & PENGUKURAN FIZIKAL TAKTIKAL (TACTILE STATE)
+// ════════════════════════════════════════════════════════════
+let currentHeight = 168.0;
+let currentWeight = 65.0;
+let currentChest = 33.0;
+let isHold = false;
+let activeNumpadField = 'height';
+let numpadBuffer = '168.0';
+
+function adjustHeight(delta) {
+  currentHeight = Math.round((currentHeight + delta) * 10) / 10;
+  if (currentHeight < 100) currentHeight = 100;
+  if (currentHeight > 250) currentHeight = 250;
+  updateHeightDisplay();
   calcBMI();
+}
+
+function setHeight(val) {
+  currentHeight = parseFloat(val) || 168.0;
+  updateHeightDisplay();
+  calcBMI();
+}
+
+function updateHeightDisplay() {
+  const el = document.getElementById('height-val');
+  if (el) el.textContent = currentHeight.toFixed(1);
+  const inp = document.getElementById('inp-tinggi');
+  if (inp) inp.value = currentHeight.toFixed(1);
+
+  // Kemas kini butang preset aktif
+  document.querySelectorAll('#height-presets-row .preset-pill').forEach(btn => {
+    const txt = btn.textContent;
+    if (txt.includes(currentHeight.toFixed(1))) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+function adjustWeight(delta) {
+  currentWeight = Math.round((currentWeight + delta) * 10) / 10;
+  if (currentWeight < 30) currentWeight = 30;
+  if (currentWeight > 200) currentWeight = 200;
+  updateWeightDisplay();
+  calcBMI();
+}
+
+function setWeight(val) {
+  currentWeight = parseFloat(val) || 65.0;
+  updateWeightDisplay();
+  calcBMI();
+}
+
+function updateWeightDisplay() {
+  const el = document.getElementById('weight-val');
+  if (el) el.textContent = currentWeight.toFixed(1);
+  const inp = document.getElementById('inp-berat');
+  if (inp) inp.value = currentWeight.toFixed(1);
+}
+
+function adjustChest(delta) {
+  currentChest = Math.round((currentChest + delta) * 10) / 10;
+  if (currentChest < 20) currentChest = 20;
+  if (currentChest > 60) currentChest = 60;
+  updateChestDisplay();
+  calcBMI();
+}
+
+function setChest(val) {
+  currentChest = parseFloat(val) || 33.0;
+  updateChestDisplay();
+  calcBMI();
+}
+
+function updateChestDisplay() {
+  const el = document.getElementById('chest-val');
+  if (el) el.textContent = currentChest.toFixed(1);
+  const inp = document.getElementById('inp-dada');
+  if (inp) inp.value = currentChest.toFixed(1);
+}
+
+function toggleTare() {
+  const tareBtn = document.getElementById('tare-btn');
+  const tareNote = document.getElementById('weight-tare-note');
+  if (tareBtn) {
+    tareBtn.classList.add('flash');
+    setTimeout(() => tareBtn.classList.remove('flash'), 300);
+  }
+  if (tareNote) {
+    tareNote.textContent = 'Penentukuran Sifar (Tare 0.00 kg) Disahkan Pegawai';
+  }
+  showToast('Penentukuran sifar (Tare 0.00 kg) disahkan!', 'info');
+}
+
+function toggleHold() {
+  isHold = !isHold;
+  const holdBtn = document.getElementById('hold-btn');
+  const holdTxt = document.getElementById('hold-btn-text');
+  if (holdBtn && holdTxt) {
+    if (isHold) {
+      holdBtn.classList.add('hold-active');
+      holdTxt.textContent = 'Kunci Bacaan Aktif (Hold)';
+      showToast('Bacaan berat badan berjaya dikunci (Hold)', 'info');
+    } else {
+      holdBtn.classList.remove('hold-active');
+      holdTxt.textContent = 'Kunci Bacaan Manual';
+      showToast('Kunci bacaan dilepaskan', 'info');
+    }
+  }
+}
+
+// ── Numpad Modal Tactile ──
+function openNumpad(type) {
+  activeNumpadField = type;
+  const modal = document.getElementById('modal-numpad');
+  const title = document.getElementById('numpad-title');
+  const sub = document.getElementById('numpad-sub');
+  const unit = document.getElementById('numpad-unit');
+  const presetsContainer = document.getElementById('numpad-presets-container');
+
+  if (type === 'height') {
+    numpadBuffer = currentHeight.toFixed(1);
+    if (title) title.textContent = 'Input Pantas Ketinggian Calon (cm)';
+    const minT = STATE.jantina === 'Lelaki' ? 161.0 : 152.0;
+    if (sub) sub.textContent = `Stesen Timbang Zon 1 • Syarat Min: ${minT.toFixed(1)} cm (${STATE.jantina})`;
+    if (unit) unit.textContent = 'CM';
+    if (presetsContainer) {
+      presetsContainer.innerHTML = `
+        <button type="button" class="preset-pill" onclick="setNumpadValue('${minT.toFixed(1)}')">${minT.toFixed(1)} Min</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('165.0')">165.0</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('168.0')">168.0</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('170.0')">170.0</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('172.0')">172.0</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('175.0')">175.0</button>
+      `;
+    }
+  } else if (type === 'weight') {
+    numpadBuffer = currentWeight.toFixed(1);
+    if (title) title.textContent = 'Input Pantas Berat Badan Calon (kg)';
+    if (sub) sub.textContent = 'Stesen Timbang Zon 1 • Penimbang Mekanikal Disahkan';
+    if (unit) unit.textContent = 'KG';
+    if (presetsContainer) {
+      presetsContainer.innerHTML = `
+        <button type="button" class="preset-pill" onclick="setNumpadValue('55.0')">55.0</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('60.0')">60.0</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('65.0')">65.0</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('68.5')">68.5</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('72.0')">72.0</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('75.0')">75.0</button>
+      `;
+    }
+  } else if (type === 'chest') {
+    numpadBuffer = currentChest.toFixed(1);
+    if (title) title.textContent = 'Input Pantas Ukuran Dada Biasa (Inci)';
+    if (sub) sub.textContent = 'Syarat BFRD: < 34" (86 cm) semasa hembus nafas biasa';
+    if (unit) unit.textContent = 'INCI';
+    if (presetsContainer) {
+      presetsContainer.innerHTML = `
+        <button type="button" class="preset-pill" onclick="setNumpadValue('31.0')">31.0"</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('32.0')">32.0"</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('33.0')">33.0"</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('33.5')">33.5"</button>
+        <button type="button" class="preset-pill" onclick="setNumpadValue('34.0')">34.0" (Had)</button>
+      `;
+    }
+  }
+
+  updateNumpadDisplay();
+  if (modal) modal.style.display = 'flex';
+  refreshIcons();
+}
+
+function closeNumpad() {
+  const modal = document.getElementById('modal-numpad');
+  if (modal) modal.style.display = 'none';
+}
+
+function setNumpadValue(val) {
+  numpadBuffer = String(val);
+  updateNumpadDisplay();
+}
+
+function numpadPress(char) {
+  if (char === '.' && numpadBuffer.includes('.')) return;
+  if (numpadBuffer === '0' && char !== '.') {
+    numpadBuffer = char;
+  } else {
+    if (numpadBuffer.length >= 6) return;
+    numpadBuffer += char;
+  }
+  updateNumpadDisplay();
+}
+
+function numpadBackspace() {
+  if (numpadBuffer.length <= 1) {
+    numpadBuffer = '0';
+  } else {
+    numpadBuffer = numpadBuffer.slice(0, -1);
+  }
+  updateNumpadDisplay();
+}
+
+function updateNumpadDisplay() {
+  const display = document.getElementById('numpad-display');
+  if (display) display.textContent = numpadBuffer || '0';
+
+  const confirmBtnTxt = document.getElementById('btn-numpad-confirm-txt');
+  if (confirmBtnTxt) {
+    confirmBtnTxt.textContent = `Sahkan & Kunci Nilai (${numpadBuffer})`;
+  }
+
+  // Evaluasi cepat dalam chip
+  const val = parseFloat(numpadBuffer) || 0;
+  const chipTxt = document.getElementById('numpad-eval-text');
+  if (chipTxt) {
+    if (activeNumpadField === 'height') {
+      const minT = STATE.jantina === 'Lelaki' ? 161.0 : 152.0;
+      if (val >= minT) {
+        const diff = (val - minT).toFixed(1);
+        chipTxt.textContent = `Melepasi Syarat Minimum (+${diff} cm)`;
+      } else {
+        const diff = (minT - val).toFixed(1);
+        chipTxt.textContent = `Di Bawah Syarat Minimum (-${diff} cm)`;
+      }
+    } else if (activeNumpadField === 'weight') {
+      chipTxt.textContent = 'Nilai Timbangan Mekanikal Disahkan Pegawai';
+    } else if (activeNumpadField === 'chest') {
+      if (val < 34.0) {
+        chipTxt.textContent = 'Mematuhi Had Biasa (< 34")';
+      } else {
+        chipTxt.textContent = 'Melebihi Had Biasa (≥ 34")';
+      }
+    }
+  }
+}
+
+function applyNumpad() {
+  const val = parseFloat(numpadBuffer) || 0;
+  if (activeNumpadField === 'height') {
+    setHeight(val);
+  } else if (activeNumpadField === 'weight') {
+    setWeight(val);
+  } else if (activeNumpadField === 'chest') {
+    setChest(val);
+  }
+  closeNumpad();
+  showToast(`Nilai ${activeNumpadField.toUpperCase()} dikemaskini: ${val}`, 'success');
+}
+
+function nextCandidate() {
+  resetFormSaringan();
+  showToast('Borang saringan dikosongkan untuk giliran calon seterusnya.', 'info');
+}
+
+function reconnectDevice() {
+  showToast('Mencari isyarat Bluetooth peranti SECA 704s Stesen Timbang Zon 1...', 'info');
+  setTimeout(() => {
+    showToast('Mod Penimbang Mekanikal Zon 1 Aktif. Prosedur penentukuran manual SOP BFRD sah.', 'success');
+  }, 900);
+}
+
+function openDeviceModal() {
+  const modal = document.getElementById('modal-peranti');
+  if (modal) modal.style.display = 'flex';
+  refreshIcons();
+}
+
+function closeDeviceModal() {
+  const modal = document.getElementById('modal-peranti');
+  if (modal) modal.style.display = 'none';
+}
+
+function stepVal(id, delta) {
+  if (id === 'inp-tinggi') adjustHeight(delta);
+  else if (id === 'inp-berat') adjustWeight(delta);
+  else if (id === 'inp-dada') adjustChest(delta);
+  else {
+    const input = document.getElementById(id);
+    if (!input) return;
+    let val = parseFloat(input.value) || 0;
+    val = Math.max(parseFloat(input.min) || 0, Math.min(parseFloat(input.max) || 300, val + delta));
+    input.value = val.toFixed(1);
+    calcBMI();
+  }
 }
 
 function handleTarikhLahirChange() {
@@ -856,7 +1150,7 @@ function handleJawatanChange() {
   const minT = jawatan ? (STATE.jantina === 'Lelaki' ? (parseFloat(jawatan['Min. Tinggi Lelaki (cm)']) || defaultMinT) : (parseFloat(jawatan['Min. Tinggi Wanita (cm)']) || defaultMinT)) : defaultMinT;
 
   if (elInfo) {
-    elInfo.textContent = `Syarat rasmi BFRD: Ketinggian minimum ≥ ${minT} cm (${STATE.jantina})`;
+    elInfo.textContent = `Stadiometer Manual • Min: ${minT.toFixed(1)} cm (${STATE.jantina})`;
   }
   if (elJulat) {
     elJulat.textContent = `BMI ${jawatan ? (jawatan['Min. BMI'] || '19.0') : '19.0'} - ${jawatan ? (jawatan['Maks. BMI'] || '27.0') : '27.0'} (Julat Rasmi BFRD)`;
@@ -867,18 +1161,40 @@ function handleJawatanChange() {
 
 function toggleDoc(idx) {
   STATE.docStatus[idx] = !STATE.docStatus[idx];
-  const card = document.querySelector(`.doc-card[data-idx="${idx}"]`);
-  if (!card) return;
+  
+  // Kemas kini tactile cards
+  const tactileCards = document.querySelectorAll('.tactile-doc-card');
+  if (tactileCards[idx]) {
+    if (STATE.docStatus[idx]) {
+      tactileCards[idx].classList.add('checked');
+    } else {
+      tactileCards[idx].classList.remove('checked');
+    }
+  }
 
-  const checkbox = card.querySelector('.doc-checkbox');
-  const icon = checkbox ? checkbox.querySelector('i') : null;
+  // Kemas kini legacy doc-card if any
+  const oldCard = document.querySelector(`.doc-card[data-idx="${idx}"]`);
+  if (oldCard) {
+    const icon = oldCard.querySelector('.doc-checkbox i');
+    if (STATE.docStatus[idx]) {
+      oldCard.classList.add('checked');
+      if (icon) icon.style.display = 'block';
+    } else {
+      oldCard.classList.remove('checked');
+      if (icon) icon.style.display = 'none';
+    }
+  }
 
-  if (STATE.docStatus[idx]) {
-    card.classList.add('checked');
-    if (icon) icon.style.display = 'block';
-  } else {
-    card.classList.remove('checked');
-    if (icon) icon.style.display = 'none';
+  // Kemas kini badge counter 6 dokumen
+  const countChecked = STATE.docStatus.filter(Boolean).length;
+  const counterBadge = document.getElementById('doc-counter-badge');
+  if (counterBadge) {
+    counterBadge.textContent = `${countChecked} / 6 Disahkan Lengkap`;
+    if (countChecked === 6) {
+      counterBadge.className = 'tactile-status-chip pass';
+    } else {
+      counterBadge.className = 'tactile-status-chip warn';
+    }
   }
 
   calcBMI();
@@ -901,9 +1217,9 @@ function calcBMI() {
   const inpKerakyatan = document.getElementById('inp-kerakyatan');
   const inpUmur = document.getElementById('inp-umur');
 
-  const tinggi = parseFloat(inpTinggi ? inpTinggi.value : 0) || 0;
-  const berat = parseFloat(inpBerat ? inpBerat.value : 0) || 0;
-  const dada = parseFloat(inpDada ? inpDada.value : 0) || 0;
+  const tinggi = parseFloat(inpTinggi ? inpTinggi.value : currentHeight) || currentHeight;
+  const berat = parseFloat(inpBerat ? inpBerat.value : currentWeight) || currentWeight;
+  const dada = parseFloat(inpDada ? inpDada.value : currentChest) || currentChest;
   const umur = parseInt(inpUmur ? inpUmur.value : 0) || 0;
   const perkahwinan = inpPerkahwinan ? inpPerkahwinan.value : 'Bujang';
   const kerakyatan = inpKerakyatan ? inpKerakyatan.value : 'Rakyat Brunei Darussalam';
@@ -942,13 +1258,13 @@ function calcBMI() {
 
   const bNum = parseFloat(bmiFixed);
   if (bNum >= minBMI && bNum <= maxBMI) {
-    statusBMI = 'LULUS';
+    statusBMI = 'BMI NORMAL & LULUS KELAYAKAN';
     badgeColor = 'var(--green-bg)';
     textColor = 'var(--green-text)';
     gaugeColor = 'var(--green)';
     gaugeWidth = '55%';
   } else if (bNum > maxBMI && bNum <= maxBMI + 2.5) {
-    statusBMI = 'PERHATIAN';
+    statusBMI = 'BERLEBIHAN / PERHATIAN';
     badgeColor = 'var(--amber-bg)';
     textColor = 'var(--amber-text)';
     gaugeColor = 'var(--gold)';
@@ -973,6 +1289,72 @@ function calcBMI() {
   if (elGauge) {
     elGauge.style.background = gaugeColor;
     elGauge.style.width = gaugeWidth;
+  }
+
+  // ── Penunjuk Spektrum BMI Dinamik (Spectrum Needle) ──
+  const minVal = 15.0;
+  const maxVal = 35.0;
+  const clampedBMI = Math.max(minVal, Math.min(maxVal, bNum));
+  const percentage = ((clampedBMI - minVal) / (maxVal - minVal)) * 100;
+  const needleEl = document.getElementById('bmi-needle');
+  if (needleEl) needleEl.style.left = `${percentage.toFixed(2)}%`;
+  const needleVal = document.getElementById('bmi-needle-val');
+  if (needleVal) needleVal.textContent = `${bNum.toFixed(2)} (Calon)`;
+
+  // Kemas kini Target Matrix
+  const dispMinT = document.getElementById('disp-min-tinggi');
+  if (dispMinT) dispMinT.textContent = `${minTinggi.toFixed(1)} cm`;
+  const dispTStatus = document.getElementById('disp-tinggi-status');
+  if (dispTStatus) {
+    if (tinggi >= minTinggi) {
+      dispTStatus.textContent = `Status: LULUS (${tinggi.toFixed(1)} cm)`;
+      dispTStatus.style.color = 'var(--green-text)';
+    } else {
+      dispTStatus.textContent = `Status: GAGAL (${tinggi.toFixed(1)} cm)`;
+      dispTStatus.style.color = 'var(--red-text)';
+    }
+  }
+  const dispBStatus = document.getElementById('disp-bmi-status');
+  if (dispBStatus) {
+    if (bNum >= minBMI && bNum <= maxBMI) {
+      dispBStatus.textContent = `Status: OPTIMAL (${bmiFixed})`;
+      dispBStatus.style.color = 'var(--green-text)';
+    } else if (bNum > maxBMI && bNum <= maxBMI + 2.5) {
+      dispBStatus.textContent = `Status: PERHATIAN (${bmiFixed})`;
+      dispBStatus.style.color = 'var(--amber-text)';
+    } else {
+      dispBStatus.textContent = `Status: GAGAL (${bmiFixed})`;
+      dispBStatus.style.color = 'var(--red-text)';
+    }
+  }
+
+  // Kemas kini cip evaluasi ketinggian
+  const hBadge = document.getElementById('height-eval-badge');
+  const hMsg = document.getElementById('height-sub-msg');
+  if (hBadge) {
+    if (tinggi >= minTinggi) {
+      const diff = (tinggi - minTinggi).toFixed(1);
+      hBadge.className = 'tactile-status-chip pass';
+      hBadge.innerHTML = `<i data-lucide="check" style="width:12px;height:12px;"></i><span>+${diff} cm Melepasi</span>`;
+      if (hMsg) hMsg.textContent = 'Memenuhi Syarat Fizikal BFRD';
+    } else {
+      const diff = (minTinggi - tinggi).toFixed(1);
+      hBadge.className = 'tactile-status-chip fail';
+      hBadge.innerHTML = `<i data-lucide="alert-triangle" style="width:12px;height:12px;"></i><span>-${diff} cm Di Bawah Syarat</span>`;
+      if (hMsg) hMsg.textContent = 'Tidak Memenuhi Syarat Ketinggian Minimum';
+    }
+  }
+
+  // Kemas kini cip evaluasi ukuran dada
+  const cBadge = document.getElementById('chest-eval-badge');
+  if (cBadge && STATE.jantina === 'Lelaki') {
+    if (dada < 34.0) {
+      cBadge.className = 'tactile-status-chip pass';
+      cBadge.innerHTML = '<i data-lucide="check" style="width:12px;height:12px;"></i><span>< 34" Mematuhi</span>';
+    } else {
+      cBadge.className = 'tactile-status-chip warn';
+      cBadge.innerHTML = '<i data-lucide="alert-circle" style="width:12px;height:12px;"></i><span>≥ 34" Perhatian</span>';
+    }
   }
 
   // ── Penilaian Syarat Mengikut Garis Panduan Rasmi BFRD ──
@@ -1042,23 +1424,27 @@ function calcBMI() {
   let bannerClass = 'layak';
   let iconName = 'check-circle';
   let descText = 'Memenuhi semua syarat kelayakan fizikal (Ketinggian, BMI 19-27) & syarat am BFRD.';
+  let stickyTitle = 'KEPUTUSAN KESELURUHAN: LAYAK KE UJIAN KECERGASAN PADANG';
 
   if (isuGagal.length > 0) {
     keputusan = 'Tidak Layak';
     bannerClass = 'tidak';
     iconName = 'x-circle';
     descText = isuGagal.join('. ') + '.';
+    stickyTitle = 'KEPUTUSAN: TIDAK LAYAK — TIDAK MEMENUHI SYARAT MINIMUM';
   } else if (isuSemakan.length > 0) {
     keputusan = 'Perlu Semakan';
     bannerClass = 'semakan';
     iconName = 'alert-triangle';
     descText = isuSemakan.join('. ') + '.';
+    stickyTitle = 'KEPUTUSAN: PERLU SEMAKAN LANJUT DOKUMEN / KESIHATAN';
   }
 
   const elBanner = document.getElementById('keputusan-banner');
   const elKepTxt = document.getElementById('keputusan-text');
   const elKepSub = document.getElementById('keputusan-subtext');
   const elIcon = document.getElementById('keputusan-icon');
+  const elSticky = document.getElementById('sticky-status-title');
 
   if (elBanner) {
     elBanner.className = `keputusan-banner ${bannerClass}`;
@@ -1066,6 +1452,7 @@ function calcBMI() {
   if (elKepTxt) elKepTxt.textContent = `KEPUTUSAN: ${keputusan.toUpperCase()}`;
   if (elKepSub) elKepSub.textContent = descText;
   if (elIcon) elIcon.setAttribute('data-lucide', iconName);
+  if (elSticky) elSticky.textContent = stickyTitle;
 
   refreshIcons();
   updateFormProgress();
@@ -1177,19 +1564,28 @@ async function handleSimpanPemohon(e) {
 function resetFormSaringan() {
   document.getElementById('form-saringan').reset();
   setJantina('Lelaki');
-  STATE.docStatus = [true, true, true, true, true, true];
+  currentHeight = 168.0;
+  currentWeight = 65.0;
+  currentChest = 33.0;
+  isHold = false;
+  updateHeightDisplay();
+  updateWeightDisplay();
+  updateChestDisplay();
 
-  const cards = document.querySelectorAll('.doc-card');
-  cards.forEach((card, idx) => {
-    const icon = card.querySelector('.doc-checkbox i');
-    if (STATE.docStatus[idx]) {
-      card.classList.add('checked');
-      if (icon) icon.style.display = 'block';
-    } else {
-      card.classList.remove('checked');
-      if (icon) icon.style.display = 'none';
-    }
-  });
+  const holdBtn = document.getElementById('hold-btn');
+  const holdTxt = document.getElementById('hold-btn-text');
+  if (holdBtn && holdTxt) {
+    holdBtn.classList.remove('hold-active');
+    holdTxt.textContent = 'Kunci Bacaan Manual';
+  }
+
+  STATE.docStatus = [true, true, true, true, true, true];
+  document.querySelectorAll('.tactile-doc-card').forEach(card => card.classList.add('checked'));
+  const counterBadge = document.getElementById('doc-counter-badge');
+  if (counterBadge) {
+    counterBadge.textContent = '6 / 6 Disahkan Lengkap';
+    counterBadge.className = 'tactile-status-chip pass';
+  }
 
   generateDraftId();
   calcBMI();
