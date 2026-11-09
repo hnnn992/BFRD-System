@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BFRD System — Body Fitness & Requirement Data System</title>
   <link rel="icon" type="image/png" href="img/logo-bomba.png">
-  <link rel="stylesheet" href="css/style.css?v=2.2.0">
+  <link rel="stylesheet" href="css/style.css?v=2.3.0">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js -->
@@ -725,7 +725,7 @@
               <div class="grid-3">
                 <div class="field-group">
                   <label class="field-label" for="inp-ic">No. Kad Pengenalan (IC) <span class="req">*</span></label>
-                  <input type="text" class="field-input" id="inp-ic" placeholder="01-123456" required autocomplete="off">
+                  <input type="text" class="field-input" id="inp-ic" placeholder="01-123456" maxlength="9" pattern="^\d{2}-\d{6}$" title="Format: xx-xxxxxx (9 aksara)" required autocomplete="off">
                 </div>
                 <div class="field-group">
                   <label class="field-label" for="inp-nama">Nama Penuh Calon (Huruf Besar) <span class="req">*</span></label>
@@ -1780,7 +1780,7 @@
                   <label for="review-inp-ic">No. Kad Pengenalan (IC) <span class="req">*</span></label>
                   <span class="confidence-badge" id="badge-review-ic">Disahkan</span>
                 </div>
-                <input type="text" class="review-input" id="review-inp-ic" placeholder="01-123456" oninput="markFieldVerified('ic')">
+                <input type="text" class="review-input" id="review-inp-ic" placeholder="01-123456" maxlength="9" oninput="markFieldVerified('ic')">
               </div>
 
               <!-- Nama Penuh -->
@@ -2338,7 +2338,7 @@
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=2.2.0"></script>
-  <script src="js/app.js?v=2.2.0"></script>
+  <script src="js/config.js?v=2.3.0"></script>
+  <script src="js/app.js?v=2.3.0"></script>
 </body>
 </html>

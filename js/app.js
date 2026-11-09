@@ -1543,6 +1543,18 @@ async function handleSimpanPemohon(e) {
   e.preventDefault();
 
   const ic = document.getElementById('inp-ic').value.trim();
+
+  // Validasi format tepat No. Kad Pengenalan Brunei (xx-xxxxxx: 9 aksara)
+  if (ic.length !== 9 || !/^\d{2}-\d{6}$/.test(ic)) {
+    showToast('Sila pastikan No. Kad Pengenalan (IC) lengkap 9 aksara mengikut format: xx-xxxxxx (cth: 01-123456).', 'warn');
+    const inpIc = document.getElementById('inp-ic');
+    if (inpIc) {
+      inpIc.focus();
+      inpIc.classList.add('field-error');
+      setTimeout(() => inpIc.classList.remove('field-error'), 2500);
+    }
+    return;
+  }
   const nama = document.getElementById('inp-nama').value.trim().toUpperCase();
   const jawatan = document.getElementById('inp-jawatan').value;
   const tlahir = document.getElementById('inp-tlahir').value;
@@ -2272,6 +2284,10 @@ function setupEventListeners() {
     }
   });
 
+  // Formatkan input No. Kad Pengenalan Brunei (xx-xxxxxx: 9 aksara, auto tambah tanda sempang)
+  setupICInputFormatter('inp-ic');
+  setupICInputFormatter('review-inp-ic');
+
   // Segerakkan maklumat pemohon ke iPad secara automatik dan kemas kini kad calon di bahagian atas
   ['inp-nama', 'inp-ic', 'inp-jawatan'].forEach(id => {
     const el = document.getElementById(id);
@@ -2291,6 +2307,49 @@ function setupEventListeners() {
 /**
  * Kemas kini paparan Nama Calon dan IC di bahagian paling atas Stesen 1 secara langsung
  */
+/**
+ * Format No. Kad Pengenalan Brunei Rasmi: xx-xxxxxx (9 aksara)
+ * Automatik tambah tanda sempang (-) selepas 2 digit nombor pertama
+ * Maksimum 8 digit nombor (2 nombor awalan + 6 nombor siri = 9 aksara)
+ */
+function setupICInputFormatter(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.setAttribute('maxlength', '9');
+  el.setAttribute('placeholder', '01-123456');
+
+  el.addEventListener('input', (e) => {
+    let val = el.value || '';
+    // Ambil hanya digit angka (hadkan kepada 8 digit nombor)
+    let digits = val.replace(/\D/g, '').slice(0, 8);
+
+    if (digits.length > 2) {
+      el.value = digits.slice(0, 2) + '-' + digits.slice(2);
+    } else if (digits.length === 2 && e.inputType !== 'deleteContentBackward') {
+      // Automatik tambah tanda sempang (-) selepas 2 nombor jika menaip ke hadapan
+      el.value = digits + '-';
+    } else {
+      el.value = digits;
+    }
+
+    if (id === 'inp-ic') {
+      updateStation1TopBanner();
+      updateFormProgress();
+      broadcastCandidateToiPad(false);
+    } else if (id === 'review-inp-ic') {
+      markFieldVerified('ic');
+    }
+  });
+
+  el.addEventListener('blur', () => {
+    let digits = el.value.replace(/\D/g, '').slice(0, 8);
+    if (digits.length === 8) {
+      el.value = digits.slice(0, 2) + '-' + digits.slice(2);
+    }
+  });
+}
+
 function updateStation1TopBanner() {
   const inpNama = document.getElementById('inp-nama');
   const inpIc = document.getElementById('inp-ic');
