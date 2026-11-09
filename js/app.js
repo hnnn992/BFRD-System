@@ -1701,7 +1701,29 @@ function openPrintModal(p) {
   const modal = document.getElementById('modal-print');
   if (!modal || !p) return;
 
-  // Format tarikh hari ini
+  // Format tarikh bersih DD/MM/YYYY (mengelakkan ISO timestamp seperti 07-11-08T16:00:00.00)
+  const formatCleanDate = (raw) => {
+    if (!raw) return '-';
+    try {
+      const str = String(raw).trim();
+      if (str.includes('T')) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+          const pad = n => String(n).padStart(2, '0');
+          return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+        }
+        return str.split('T')[0];
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        const parts = str.split('-');
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return str;
+    } catch (e) {
+      return String(raw);
+    }
+  };
+
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   const todayStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
@@ -1716,7 +1738,7 @@ function openPrintModal(p) {
   // Helper pengisian teks & tanda pangkah/tick (font Arial)
   const setTxt = (id, val) => {
     const el = document.getElementById(id);
-    if (el) el.textContent = val || '-';
+    if (el) el.textContent = (val !== undefined && val !== null && val !== '') ? val : '-';
   };
   const setTick = (id, cond) => {
     const el = document.getElementById(id);
@@ -1735,7 +1757,7 @@ function openPrintModal(p) {
   setTick('bfrd-print-box-m', warna.includes('merah') || warna === 'm');
   setTick('bfrd-print-box-h', warna.includes('hijau') || warna === 'h');
 
-  setTxt('bfrd-print-tlahir', p['Tarikh Lahir'] || '-');
+  setTxt('bfrd-print-tlahir', formatCleanDate(p['Tarikh Lahir']));
   setTxt('bfrd-print-umur', String(p['Umur'] || '22'));
   setTxt('bfrd-print-bangsa', (p['Bangsa'] || 'MELAYU').toUpperCase());
   setTxt('bfrd-print-kerakyatan', (p['Status Kerakyatan'] || 'BRUNEI DARUSSALAM').toUpperCase());
@@ -1788,11 +1810,11 @@ function openPrintModal(p) {
 
   // Lelaki: BMI tidak melebihi 23 | Wanita: BMI tidak melebihi 24
   if (isMale) {
-    setTxt('bfrd-print-lelaki-check', bmiNum <= 23.0 ? '[ ✓ MEMATUHI ]' : '[ X MELEBIHI ]');
+    setTxt('bfrd-print-lelaki-check', bmiNum <= 23.0 ? '[ ✓ MEMATUHI ]' : '[ ✗ MELEBIHI ]');
     setTxt('bfrd-print-wanita-check', '-');
   } else {
     setTxt('bfrd-print-lelaki-check', '-');
-    setTxt('bfrd-print-wanita-check', bmiNum <= 24.0 ? '[ ✓ MEMATUHI ]' : '[ X MELEBIHI ]');
+    setTxt('bfrd-print-wanita-check', bmiNum <= 24.0 ? '[ ✓ MEMATUHI ]' : '[ ✗ MELEBIHI ]');
   }
 
   // Categories: Under Weight, Normal, Overweight, Obesity
