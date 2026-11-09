@@ -1560,7 +1560,7 @@ async function handleSimpanPemohon(e) {
   const tlahir = document.getElementById('inp-tlahir').value;
   const umurTxt = document.getElementById('inp-umur').value;
   const tel = document.getElementById('inp-tel').value.trim();
-  const emel = document.getElementById('inp-emel').value.trim();
+  const emel = document.getElementById('inp-emel')?.value.trim() || '-';
   const rawTinggi = parseFloat(document.getElementById('inp-tinggi')?.value) || 0;
   const rawBerat = parseFloat(document.getElementById('inp-berat')?.value) || 0;
   const rawDada = parseFloat(document.getElementById('inp-dada')?.value) || 0;

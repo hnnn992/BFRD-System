@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BFRD System — Body Fitness & Requirement Data System</title>
   <link rel="icon" type="image/png" href="img/logo-bomba.png">
-  <link rel="stylesheet" href="css/style.css?v=2.4.0">
+  <link rel="stylesheet" href="css/style.css?v=2.5.0">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js -->
@@ -1456,255 +1456,63 @@
     </div>
 
     <div class="print-scroll-area">
-      <div class="a4-sheet" id="a4-printable-content" style="padding:10mm 15mm 8mm 15mm;background:#FFF;color:#000;box-sizing:border-box;position:relative;font-family:'Times New Roman',Times,serif;">
+      <div class="a4-sheet" id="a4-printable-content" style="position:relative;width:210mm;height:297mm;max-width:210mm;max-height:297mm;margin:0 auto;padding:0;background:#FFF;box-sizing:border-box;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.25);">
         
-        <!-- BORANG KETERANGAN PERIBADI PEMOHON (BOMBA DAN PENYELAMAT BRUNEI) -->
-        <div class="bfrd-official-report" style="width:100%;color:#000;font-size:10.5px;line-height:1.32;position:relative;">
-
-          <!-- BIL PENDAFTARAN (Top Right Box) -->
-          <div style="position:absolute;top:0;right:0;text-align:center;">
-            <div style="font-size:10px;font-weight:bold;letter-spacing:0.02em;margin-bottom:2px;font-family:Arial,sans-serif;">BIL PENDAFTARAN</div>
-            <div style="border:1.5px solid #000;width:125px;height:32px;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-weight:bold;font-size:12px;" id="bfrd-print-bil-pendaftaran">
-              BFRD-20261109-0001
-            </div>
-          </div>
-
-          <!-- EMBLEM & HEADER (Top Center) -->
-          <div style="text-align:center;padding-top:2px;margin-bottom:10px;">
-            <img src="img/logo-bomba.png" alt="Lambang BFRD" style="width:50px;height:50px;object-fit:contain;margin-bottom:3px;">
-            <div style="font-size:13px;font-weight:bold;letter-spacing:0.03em;">BORANG KETERANGAN PERIBADI PEMOHON</div>
-            <div style="font-size:11px;font-weight:bold;margin-top:3px;">
-              JAWATAN : <span class="bfrd-typed-val" id="bfrd-print-jawatan" style="font-family:Arial,sans-serif;font-size:11.5px;font-weight:bold;text-decoration:underline;">AHLI BOMBA DAN PENYELAMAT</span>
-            </div>
-            <div style="font-size:9.5px;font-style:italic;margin-top:3px;">
-              Sila isi borang dengan <u>LENGKAP</u>, <u>KEMAS</u> dan menggunakan <u>HURUF BESAR</u>
-            </div>
-          </div>
-
-          <!-- 1. KETERANGAN PEMOHON (APPLICANT INFORMATION) -->
-          <div style="font-size:10.5px;font-weight:bold;text-decoration:underline;margin-bottom:5px;">
-            1. KETERANGAN PEMOHON (APPLICANT INFORMATION)
-          </div>
-
-          <!-- Nama Penuh -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:4px;">
-            <span style="white-space:nowrap;font-size:10.5px;">Nama Penuh :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;padding-left:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="bfrd-print-nama">AWANG MUHAMMAD HAZIQ BIN HJ ISMAIL</span>
-          </div>
-
-          <!-- Alamat Sekarang & Poskod -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:4px;">
-            <span style="white-space:nowrap;font-size:10.5px;">Alamat sekarang :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="bfrd-print-alamat">NO. 12, SIMPANG 45, KAMPONG BERIBI, GADONG</span>
-            <span style="white-space:nowrap;font-size:10.5px;margin-left:8px;">Poskod :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="width:75px;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-align:center;" id="bfrd-print-poskod">BE1118</span>
-          </div>
-
-          <!-- No Kad Pintar, Warna (K M H), Tarikh Lahir, Umur -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:4px;gap:4px;">
-            <span style="white-space:nowrap;font-size:10.5px;">No. Kad Pintar :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="width:105px;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-align:center;" id="bfrd-print-ic">01-123456</span>
-            
-            <span style="white-space:nowrap;font-size:10.5px;margin-left:4px;">Warna:</span>
-            <span style="font-size:10px;">K</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-k" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;">✓</span>
-            <span style="font-size:10px;margin-left:2px;">M</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-m" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-            <span style="font-size:10px;margin-left:2px;">H</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-h" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-
-            <span style="white-space:nowrap;font-size:10.5px;margin-left:6px;">Tarikh Lahir :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-align:center;" id="bfrd-print-tlahir">15/04/2004</span>
-
-            <span style="white-space:nowrap;font-size:10.5px;margin-left:6px;">Umur :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="width:45px;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-align:center;" id="bfrd-print-umur">22</span>
-          </div>
-
-          <!-- Bangsa, Kerakyatan, Agama -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:4px;gap:6px;">
-            <span style="white-space:nowrap;font-size:10.5px;">Bangsa :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;" id="bfrd-print-bangsa">MELAYU</span>
-            
-            <span style="white-space:nowrap;font-size:10.5px;">Kerakyatan :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1.2;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;" id="bfrd-print-kerakyatan">BRUNEI DARUSSALAM</span>
-
-            <span style="white-space:nowrap;font-size:10.5px;">Agama :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;" id="bfrd-print-agama">ISLAM</span>
-          </div>
-
-          <!-- Jantina & Taraf Kelamin -->
-          <div style="display:flex;align-items:center;margin-bottom:4px;gap:6px;font-size:10.5px;">
-            <span>Jantina : Lelaki</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-lelaki" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;">✓</span>
-            <span>/ Wanita</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-wanita" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-
-            <span style="margin-left:14px;">Taraf Kelamin: Bujang</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-bujang" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;">✓</span>
-            <span style="margin-left:4px;">Kahwin</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-kahwin" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-            <span style="margin-left:4px;">Janda</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-janda" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-            <span style="margin-left:4px;">Duda</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-duda" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-          </div>
-
-          <!-- No Tel (Hp, Rumah, Pejabat) -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:4px;gap:4px;font-size:10.5px;">
-            <span>No. Tel : (Hp)</span>
-            <span class="bfrd-dotted-fill" style="flex:1.2;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;" id="bfrd-print-tel-hp">+673 8765432</span>
-            <span>( Rumah ) :</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;" id="bfrd-print-tel-rumah">-</span>
-            <span>(Pejabat) :</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;" id="bfrd-print-tel-pejabat">-</span>
-          </div>
-
-          <!-- Kemahiran Berenang -->
-          <div style="display:flex;align-items:center;margin-bottom:4px;gap:6px;font-size:10.5px;">
-            <span>Kemahiran Berenang :</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-renang-tidak" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-            <span>Tidak Pandai</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-renang-beginner" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-            <span>Beginner</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-renang-weak" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;"></span>
-            <span>Weak</span>
-            <span class="bfrd-box-tick" id="bfrd-print-box-renang-stronger" style="display:inline-block;width:15px;height:14px;border:1px solid #000;text-align:center;line-height:13px;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;">✓</span>
-            <span>Stronger</span>
-          </div>
-
-          <!-- Pekerjaan Sekarang -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:8px;">
-            <span style="white-space:nowrap;font-size:10.5px;">Pekerjaan Sekarang :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;" id="bfrd-print-pekerjaan">PEKERJA SENDIRI</span>
-          </div>
-
-          <!-- 2. KETERANGAN KELULUSAN (QUALIFICATION) -->
-          <div style="font-size:10.5px;font-weight:bold;text-decoration:underline;margin-top:4px;margin-bottom:4px;">
-            2. KETERANGAN KELULUSAN (QUALIFICATION)
-          </div>
-
-          <!-- University/Maktab/Sekolah & Tahun -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:4px;">
-            <span style="white-space:nowrap;font-size:10.5px;">University/Maktab/Sekolah:&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="bfrd-print-institusi">SEKOLAH MENENGAH SAYYIDINA HUSAIN</span>
-            <span style="white-space:nowrap;font-size:10.5px;margin-left:8px;">Tahun:&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="width:75px;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;text-align:center;" id="bfrd-print-tahun-institusi">2021</span>
-          </div>
-
-          <!-- Kelulusan Tertinggi -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:4px;">
-            <span style="white-space:nowrap;font-size:10.5px;">Kelulusan Tertinggi :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;" id="bfrd-print-kelulusan">GCE 'O' LEVEL (4 KREDIT)</span>
-          </div>
-
-          <!-- Pengakuan Pemohon -->
-          <div style="font-size:9.5px;margin-top:3px;margin-bottom:3px;">
-            Saya mengaku bahawa maklumat yang dinyatakan di atas adalah betul dan benar.
-          </div>
-
-          <!-- Tandatangan Pemohon & Tarikh -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:6px;font-size:10.5px;">
-            <span style="white-space:nowrap;">Tandatangan Pemohon :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;height:16px;"></span>
-            <span style="white-space:nowrap;margin-left:14px;">Tarikh :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="width:125px;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;text-align:center;" id="bfrd-print-tarikh-pemohon">09/11/2026</span>
-          </div>
-
-          <!-- Kod Pemeriksa S1, Tandatangan, Tarikh -->
-          <div style="display:flex;align-items:center;margin-bottom:8px;font-size:10.5px;">
-            <span style="white-space:nowrap;">Kod Pemeriksa :&nbsp;</span>
-            <span style="display:inline-block;width:75px;height:20px;border:1px solid #000;text-align:center;line-height:19px;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;" id="bfrd-print-kod-s1">P-001</span>
-            <span style="white-space:nowrap;margin-left:16px;">Tandatangan :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;height:16px;"></span>
-            <span style="white-space:nowrap;margin-left:14px;">Tarikh :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="width:125px;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;text-align:center;" id="bfrd-print-tarikh-s1">09/11/2026</span>
-          </div>
-
-          <!-- 3. SUKATAN TINGGI DAN TIMBANGAN (BODY MASS INDEX) -->
-          <div style="font-size:10.5px;font-weight:bold;text-decoration:underline;margin-bottom:4px;">
-            3. SUKATAN TINGGI DAN TIMBANGAN (BODY MASS INDEX)
-          </div>
-
-          <!-- Table Body Mass Index -->
-          <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-bottom:6px;font-size:10px;">
-            <thead>
-              <tr style="background:#F1F5F9;">
-                <th style="border:1px solid #000;width:30%;padding:4px 6px;text-align:left;font-weight:bold;">UKURAN FIZIKAL</th>
-                <th style="border:1px solid #000;width:24%;padding:4px 6px;text-align:center;font-weight:bold;">LELAKI</th>
-                <th style="border:1px solid #000;width:24%;padding:4px 6px;text-align:center;font-weight:bold;">WANITA</th>
-                <th style="border:1px solid #000;width:22%;padding:4px 6px;text-align:left;font-weight:bold;">STATUS BMI</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="border:1px solid #000;padding:5px 8px;vertical-align:top;line-height:1.5;">
-                  <div>Berat : <span style="font-family:Arial,sans-serif;font-size:11px;font-weight:bold;" id="bfrd-print-berat">68.5</span> kg</div>
-                  <div>Tinggi: <span style="font-family:Arial,sans-serif;font-size:11px;font-weight:bold;" id="bfrd-print-tinggi">172.0</span> cm</div>
-                  <div>Dada: <span style="font-family:Arial,sans-serif;font-size:11px;font-weight:bold;" id="bfrd-print-dada">84.0</span> cm</div>
-                  <div style="font-weight:bold;margin-top:2px;">B.M.I = <span style="font-family:Arial,sans-serif;font-size:11.5px;font-weight:bold;" id="bfrd-print-bmi">23.15</span></div>
-                </td>
-                <td style="border:1px solid #000;padding:5px 8px;text-align:center;vertical-align:middle;">
-                  <div style="font-weight:bold;font-size:10.5px;">B.M.I<br>tidak melebihi 23</div>
-                  <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;margin-top:4px;" id="bfrd-print-lelaki-check">[ ✓ MEMATUHI ]</div>
-                </td>
-                <td style="border:1px solid #000;padding:5px 8px;text-align:center;vertical-align:middle;">
-                  <div style="font-weight:bold;font-size:10.5px;">B.M.I<br>tidak melebihi 24</div>
-                  <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;margin-top:4px;" id="bfrd-print-wanita-check">-</div>
-                </td>
-                <td style="border:1px solid #000;padding:5px 8px;vertical-align:middle;line-height:1.45;">
-                  <div>Under Weight = <span style="font-family:Arial,sans-serif;font-weight:bold;" id="bfrd-print-bmi-under">[ &nbsp; ]</span></div>
-                  <div>Normal = <span style="font-family:Arial,sans-serif;font-weight:bold;" id="bfrd-print-bmi-normal">[ ✓ ]</span></div>
-                  <div>Overweight = <span style="font-family:Arial,sans-serif;font-weight:bold;" id="bfrd-print-bmi-over">[ &nbsp; ]</span></div>
-                  <div>Obesity = <span style="font-family:Arial,sans-serif;font-weight:bold;" id="bfrd-print-bmi-obese">[ &nbsp; ]</span></div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- Kod Pemeriksa S2, Tandatangan, Tarikh -->
-          <div style="display:flex;align-items:center;margin-bottom:8px;font-size:10.5px;">
-            <span style="white-space:nowrap;">Kod Pemeriksa :&nbsp;</span>
-            <span style="display:inline-block;width:75px;height:20px;border:1px solid #000;text-align:center;line-height:19px;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;" id="bfrd-print-kod-s2">P-002</span>
-            <span style="white-space:nowrap;margin-left:16px;">Tandatangan :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;height:16px;"></span>
-            <span style="white-space:nowrap;margin-left:14px;">Tarikh :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="width:125px;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;text-align:center;" id="bfrd-print-tarikh-s2">09/11/2026</span>
-          </div>
-
-          <!-- DISAHKAN OLEH PEGAWAI (Section 4) -->
-          <div style="font-size:10.5px;font-weight:bold;text-decoration:underline;text-align:center;margin-top:6px;margin-bottom:5px;">
-            DISAHKAN OLEH PEGAWAI
-          </div>
-
-          <!-- Boxes Cukup Syarat vs Tidak Cukup Syarat -->
-          <div style="display:flex;justify-content:center;align-items:center;gap:60px;margin-bottom:6px;font-size:10.5px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="display:inline-block;width:32px;height:20px;border:1.5px solid #000;text-align:center;line-height:19px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;" id="bfrd-print-box-cukup">✓</span>
-              <span style="font-weight:bold;">Cukup Syarat</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="display:inline-block;width:32px;height:20px;border:1.5px solid #000;text-align:center;line-height:19px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;" id="bfrd-print-box-tidak-cukup"></span>
-              <span style="font-weight:bold;">Tidak Cukup Syarat</span>
-            </div>
-          </div>
-
-          <!-- Ulasan -->
-          <div style="display:flex;align-items:flex-end;margin-bottom:7px;">
-            <span style="white-space:nowrap;font-size:10.5px;">Ulasan :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;padding-left:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="bfrd-print-ulasan">CALON MEMENUHI KESELURUHAN SYARAT FIZIKAL DAN DOKUMEN ASAL.</span>
-          </div>
-
-          <!-- Kod Pemeriksa S4, Tandatangan, Tarikh -->
-          <div style="display:flex;align-items:center;font-size:10.5px;">
-            <span style="white-space:nowrap;">Kod Pemeriksa :&nbsp;</span>
-            <span style="display:inline-block;width:75px;height:20px;border:1px solid #000;text-align:center;line-height:19px;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;" id="bfrd-print-kod-s4">KP-4088</span>
-            <span style="white-space:nowrap;margin-left:16px;">Tandatangan :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="flex:1;border-bottom:1px dotted #000;height:16px;"></span>
-            <span style="white-space:nowrap;margin-left:14px;">Tarikh :&nbsp;</span>
-            <span class="bfrd-dotted-fill" style="width:125px;border-bottom:1px dotted #000;font-family:Arial,sans-serif;font-size:10.5px;font-weight:bold;text-align:center;" id="bfrd-print-tarikh-s4">09/11/2026</span>
-          </div>
-
-        </div>
+        <!-- TEMPLATE GAMBAR ASAL BORANG KETERANGAN PERIBADI PEMOHON -->
+        <img src="img/borang-bfrd-template.jpg" alt="Borang Rasmi BFRD" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:fill;pointer-events:none;display:block;" id="bfrd-template-img">
+        
+        <!-- LAPISAN FILL-IN BOXES (FONT: ARIAL BOLD) -->
+        <div id="bfrd-print-bil-pendaftaran" style="position:absolute;left:81.75%;top:2.34%;width:13.00%;height:3.13%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-jawatan" style="position:absolute;left:40.75%;top:12.21%;width:29.00%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-nama" style="position:absolute;left:18.50%;top:20.80%;width:74.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-alamat" style="position:absolute;left:20.63%;top:23.54%;width:46.88%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-poskod" style="position:absolute;left:75.25%;top:23.54%;width:17.25%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-ic" style="position:absolute;left:18.50%;top:26.17%;width:13.13%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-k" style="position:absolute;left:39.63%;top:25.59%;width:3.88%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-m" style="position:absolute;left:47.13%;top:25.59%;width:3.88%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-h" style="position:absolute;left:54.63%;top:25.59%;width:3.88%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tlahir" style="position:absolute;left:68.75%;top:26.17%;width:13.75%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-umur" style="position:absolute;left:88.25%;top:26.17%;width:4.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-bangsa" style="position:absolute;left:14.75%;top:29.10%;width:19.25%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-kerakyatan" style="position:absolute;left:43.50%;top:29.10%;width:20.63%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-agama" style="position:absolute;left:71.00%;top:29.10%;width:21.75%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-lelaki" style="position:absolute;left:19.63%;top:31.25%;width:3.62%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-wanita" style="position:absolute;left:30.88%;top:31.25%;width:3.62%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-bujang" style="position:absolute;left:55.50%;top:31.25%;width:3.62%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-kahwin" style="position:absolute;left:67.13%;top:31.25%;width:3.62%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-janda" style="position:absolute;left:78.00%;top:31.25%;width:3.62%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-duda" style="position:absolute;left:89.25%;top:31.25%;width:3.62%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tel-hp" style="position:absolute;left:17.75%;top:35.25%;width:35.00%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tel-rumah" style="position:absolute;left:61.00%;top:35.25%;width:12.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tel-pejabat" style="position:absolute;left:81.00%;top:35.25%;width:12.25%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-renang-tidak" style="position:absolute;left:17.13%;top:38.38%;width:4.00%;height:2.25%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-renang-beginner" style="position:absolute;left:34.63%;top:38.38%;width:4.00%;height:2.25%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-renang-weak" style="position:absolute;left:52.63%;top:38.38%;width:4.00%;height:2.25%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-renang-stronger" style="position:absolute;left:68.38%;top:38.38%;width:4.00%;height:2.25%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-pekerjaan" style="position:absolute;left:21.50%;top:41.99%;width:71.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-institusi" style="position:absolute;left:27.25%;top:47.56%;width:49.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tahun-institusi" style="position:absolute;left:83.50%;top:47.56%;width:9.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-kelulusan" style="position:absolute;left:22.25%;top:50.39%;width:70.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tarikh-pemohon" style="position:absolute;left:72.75%;top:55.47%;width:20.00%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-kod-s1" style="position:absolute;left:23.25%;top:58.11%;width:10.50%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tarikh-s1" style="position:absolute;left:79.50%;top:58.40%;width:13.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-berat" style="position:absolute;left:12.00%;top:65.72%;width:10.00%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tinggi" style="position:absolute;left:12.00%;top:68.36%;width:10.00%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-dada" style="position:absolute;left:11.50%;top:71.29%;width:10.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-bmi" style="position:absolute;left:13.00%;top:74.12%;width:10.50%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-lelaki-check" style="position:absolute;left:29.00%;top:72.46%;width:19.50%;height:1.95%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-wanita-check" style="position:absolute;left:50.00%;top:72.46%;width:23.13%;height:1.95%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-bmi-under" style="position:absolute;left:87.75%;top:64.65%;width:5.75%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-bmi-normal" style="position:absolute;left:82.25%;top:67.48%;width:5.75%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-bmi-over" style="position:absolute;left:85.25%;top:70.41%;width:5.75%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-bmi-obese" style="position:absolute;left:82.25%;top:73.34%;width:5.75%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-kod-s2" style="position:absolute;left:22.00%;top:77.44%;width:10.50%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tarikh-s2" style="position:absolute;left:80.25%;top:77.73%;width:12.75%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-cukup" style="position:absolute;left:15.25%;top:84.67%;width:7.50%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:16px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-box-tidak-cukup" style="position:absolute;left:54.63%;top:84.67%;width:7.50%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:900;font-size:16px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-ulasan" style="position:absolute;left:14.00%;top:89.36%;width:79.00%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-kod-s4" style="position:absolute;left:22.75%;top:91.60%;width:10.50%;height:2.34%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:11px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
+        <div id="bfrd-print-tarikh-s4" style="position:absolute;left:80.25%;top:92.09%;width:12.75%;height:1.76%;font-family:Arial,Helvetica,sans-serif !important;font-weight:bold;font-size:10.5px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;text-align:center;justify-content:center;line-height:1.2;box-sizing:border-box;pointer-events:none;"></div>
       </div>
     </div>
   </div>
@@ -2542,7 +2350,7 @@
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=2.4.0"></script>
-  <script src="js/app.js?v=2.4.0"></script>
+  <script src="js/config.js?v=2.5.0"></script>
+  <script src="js/app.js?v=2.5.0"></script>
 </body>
 </html>
