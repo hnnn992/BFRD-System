@@ -807,6 +807,7 @@ function initBorangKaunter() {
   generateDraftId();
   calcBMI();
   updateFormProgress();
+  broadcastCandidateToiPad(true);
 }
 
 function generateDraftId() {
@@ -1093,6 +1094,7 @@ function applyNumpad() {
 
 function nextCandidate() {
   resetFormSaringan();
+  broadcastCandidateToiPad(true);
   showToast('Borang saringan dikosongkan untuk giliran calon seterusnya.', 'info');
 }
 
@@ -1600,6 +1602,7 @@ function resetFormSaringan() {
   generateDraftId();
   calcBMI();
   updateFormProgress();
+  broadcastCandidateToiPad(true);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2205,6 +2208,15 @@ function setupEventListeners() {
       closeApiKeyModal();
       closeNumpad();
       closeDeviceModal();
+    }
+  });
+
+  // Segerakkan maklumat pemohon ke iPad secara automatik semasa ditaip di PC
+  ['inp-nama', 'inp-ic', 'inp-jawatan'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => broadcastCandidateToiPad(false));
+      el.addEventListener('change', () => broadcastCandidateToiPad(false));
     }
   });
 }
@@ -2910,6 +2922,11 @@ function initDesktopCompanionHost() {
         updateCompanionUI(true);
         showToast('📱 iPad / Telefon Pegawai berjaya dipautkan secara langsung (LIVE SYNC)!', 'success');
 
+        // Segerakkan maklumat calon aktif ke iPad semerta
+        setTimeout(() => {
+          broadcastCandidateToiPad(false);
+        }, 500);
+
         conn.on('data', data => {
           handleIncomingLiveMeasurement(data);
         });
@@ -3014,9 +3031,72 @@ function openCompanionInNewTab() {
 }
 
 /**
+ * Pancarkan maklumat calon aktif daripada PC ke iPad
+ */
+function broadcastCandidateToiPad(shouldResetNumbers = false) {
+  const inpNama = document.getElementById('inp-nama');
+  const inpIc = document.getElementById('inp-ic');
+  const inpJawatan = document.getElementById('inp-jawatan');
+  const txtDraftId = document.getElementById('txt-draft-id');
+
+  const nama = inpNama && inpNama.value ? inpNama.value.trim().toUpperCase() : 'CALON SEMASA (STESEN ZON 1)';
+  const ic = inpIc ? inpIc.value.trim() : '';
+  const jawatan = inpJawatan ? inpJawatan.value : 'Ahli Bomba dan Penyelamat';
+  const draftId = txtDraftId ? txtDraftId.textContent.trim() : '';
+
+  const payload = {
+    type: 'CANDIDATE_CHANGED',
+    sessionId: hostSessionCode,
+    nama: nama,
+    ic: ic,
+    jawatan: jawatan,
+    draftId: draftId,
+    shouldReset: shouldResetNumbers,
+    timestamp: Date.now()
+  };
+
+  if (activeCompanionConn && activeCompanionConn.open) {
+    try { activeCompanionConn.send(payload); } catch (e) {}
+  }
+  try {
+    localStorage.setItem('bfrd_companion_to_remote', JSON.stringify(payload));
+  } catch (e) {}
+}
+
+/**
  * Terima bacaan langsung daripada iPad di komputer desktop
  */
 function handleIncomingLiveMeasurement(data) {
+  if (!data) return;
+
+  // Permintaan calon seterusnya daripada iPad
+  if (data.type === 'NEXT_CANDIDATE_REQUEST') {
+    nextCandidate();
+    showToast('🔄 Permintaan calon seterusnya diterima daripada iPad. Borang PC sedia.', 'info');
+    return;
+  }
+
+  // Pengesahan dan kunci bacaan daripada iPad
+  if (data.type === 'CONFIRM_LOCK') {
+    if (data.height) currentHeight = parseFloat(data.height);
+    if (data.weight) currentWeight = parseFloat(data.weight);
+    if (data.chest) currentChest = parseFloat(data.chest);
+    isHold = true;
+    updateHeightDisplay();
+    updateWeightDisplay();
+    updateChestDisplay();
+    calcBMI();
+
+    const holdBtn = document.getElementById('hold-btn');
+    const holdTxt = document.getElementById('hold-btn-text');
+    if (holdBtn && holdTxt) {
+      holdBtn.classList.add('hold-active');
+      holdTxt.textContent = 'Hold Aktif (Kunci)';
+    }
+    showToast('🔒 Bacaan timbangan dikunci oleh Pegawai Lapangan (iPad)!', 'success');
+    return;
+  }
+
   if (data.height) currentHeight = parseFloat(data.height);
   if (data.weight) currentWeight = parseFloat(data.weight);
   if (data.chest) currentChest = parseFloat(data.chest);
@@ -3066,6 +3146,11 @@ function initRemoteCompanion(code) {
           sendRemoteLiveBroadcast();
         });
 
+        // Terima maklumat calon & reset dari PC
+        remoteConnToHost.on('data', data => {
+          handleIncomingMessageFromHost(data);
+        });
+
         remoteConnToHost.on('close', () => {
           if (statusTxt) statusTxt.textContent = `🔴 SAMBUNGAN TERPUTUS`;
           showToast('Sambungan ke komputer terputus.', 'error');
@@ -3075,6 +3160,16 @@ function initRemoteCompanion(code) {
       console.warn('PeerJS remote error:', e);
     }
   }
+
+  // Sandaran Pengezonan Tempatan (StorageEvent untuk ujian split window)
+  window.addEventListener('storage', e => {
+    if (e.key === 'bfrd_companion_to_remote' && e.newValue) {
+      try {
+        const data = JSON.parse(e.newValue);
+        handleIncomingMessageFromHost(data);
+      } catch (err) {}
+    }
+  });
 
   // Tetapkan nilai awal
   updateRemoteDisplay();
@@ -3194,10 +3289,100 @@ function sendRemoteLiveBroadcast() {
   } catch (e) {}
 }
 
+/**
+ * Terima mesej arahan / maklumat calon daripada komputer PC ke skrin iPad
+ */
+function handleIncomingMessageFromHost(data) {
+  if (!data) return;
+
+  if (data.type === 'CANDIDATE_CHANGED') {
+    const elName = document.getElementById('remote-cand-name');
+    const elJawatan = document.getElementById('remote-cand-jawatan');
+
+    if (elName) {
+      elName.textContent = data.nama + (data.ic ? ` (${data.ic})` : '');
+    }
+    if (elJawatan) {
+      elJawatan.textContent = data.jawatan || 'Ahli Bomba dan Penyelamat';
+    }
+
+    if (data.shouldReset) {
+      remoteHeight = 168.0;
+      remoteWeight = 65.0;
+      remoteChest = 33.0;
+      remoteHold = false;
+      const holdBtn = document.getElementById('remote-hold-btn');
+      const holdTxt = document.getElementById('remote-hold-txt');
+      if (holdBtn && holdTxt) {
+        holdBtn.classList.remove('hold-active');
+        holdTxt.textContent = 'Kunci Bacaan Hold';
+      }
+      updateRemoteDisplay();
+    }
+
+    showToast(`Giliran Calon: ${data.nama}`, 'info');
+    hapticFeedback();
+  }
+}
+
 function remoteConfirmValues() {
-  sendRemoteLiveBroadcast();
+  remoteHold = true;
+  const holdBtn = document.getElementById('remote-hold-btn');
+  const holdTxt = document.getElementById('remote-hold-txt');
+  if (holdBtn && holdTxt) {
+    holdBtn.classList.add('hold-active');
+    holdTxt.textContent = 'Hold Aktif (Kunci)';
+  }
+
+  const payload = {
+    type: 'CONFIRM_LOCK',
+    sessionId: hostSessionCode,
+    height: remoteHeight,
+    weight: remoteWeight,
+    chest: remoteChest,
+    isHold: true,
+    timestamp: Date.now()
+  };
+
+  if (remoteConnToHost && remoteConnToHost.open) {
+    remoteConnToHost.send(payload);
+  }
+  try {
+    localStorage.setItem('bfrd_companion_sync', JSON.stringify(payload));
+  } catch (e) {}
+
   hapticFeedback();
   showToast('Bacaan disahkan dan dikunci ke komputer utama!', 'success');
+}
+
+/**
+ * Butang Calon Seterusnya di skrin iPad (Kosongkan Pad untuk Calon Baru)
+ */
+function remoteNextCandidate() {
+  hapticFeedback();
+  remoteHold = false;
+  const holdBtn = document.getElementById('remote-hold-btn');
+  const holdTxt = document.getElementById('remote-hold-txt');
+  if (holdBtn && holdTxt) {
+    holdBtn.classList.remove('hold-active');
+    holdTxt.textContent = 'Kunci Bacaan Hold';
+  }
+  updateRemoteDisplay();
+
+  const payload = {
+    type: 'NEXT_CANDIDATE_REQUEST',
+    sessionId: hostSessionCode,
+    timestamp: Date.now()
+  };
+
+  if (remoteConnToHost && remoteConnToHost.open) {
+    remoteConnToHost.send(payload);
+  }
+  try {
+    localStorage.setItem('bfrd_companion_sync', JSON.stringify(payload));
+  } catch (e) {}
+
+  showToast('Permintaan giliran calon seterusnya dihantar ke PC.', 'info');
 }
 
 function hapticFeedback() {
