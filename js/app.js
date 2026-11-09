@@ -263,7 +263,7 @@ function mockPost(action, data, token) {
 window.addEventListener('DOMContentLoaded', async () => {
   initAppSession();
   setupEventListeners();
-  startLiveClock(); // Jam masa nyata Command Dashboard
+  startLiveClock();
 
   // Kemas kini tarikh sesi semasa di topbar
   const now = new Date();
@@ -281,6 +281,29 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Semak status pengesahan sesi
   checkAuth();
 });
+
+/**
+ * Jam Langsung Waktu Sistem Brunei (Command Dashboard Clock)
+ */
+function startLiveClock() {
+  const hariArr = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+  const bulanArr = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+
+  function tick() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const dateStr = `${hariArr[now.getDay()]}, ${pad(now.getDate())} ${bulanArr[now.getMonth()]} ${now.getFullYear()}`;
+
+    const elTime = document.getElementById('cmd-clock-time');
+    const elDate = document.getElementById('cmd-clock-date');
+    if (elTime) elTime.textContent = timeStr;
+    if (elDate) elDate.textContent = dateStr;
+  }
+
+  tick();
+  setInterval(tick, 1000);
+}
 
 function initAppSession() {
   const token = sessionStorage.getItem('bfrdToken');
@@ -592,132 +615,240 @@ async function loadDashboardData() {
     stats.gagal = STATE.pemohonList.filter(p => p['Keputusan Akhir'] === 'Tidak Layak').length;
   }
 
-  // Kemas kini kad metrik Command Dashboard
+  // Kemas kini kad metrik
   const elHadir = document.getElementById('kpi-hadir');
   const elLayak = document.getElementById('kpi-layak');
   const elSemakan = document.getElementById('kpi-semakan');
-  const elGagal = document.getElementById('kpi-gagal');
 
-  // Paparkan data sebenar jika ada, atau nilai rujukan operasi portal (seperti screenshot)
-  const displayHadir = stats.hadir > 0 ? stats.hadir : 248;
-  const displayLayak = stats.layak > 0 ? stats.layak : 56;
-  const displaySemakan = stats.semakan > 0 ? stats.semakan : 38;
+  if (elHadir) elHadir.textContent = stats.hadir;
+  if (elLayak) elLayak.textContent = stats.layak;
+  if (elSemakan) elSemakan.textContent = stats.semakan;
 
-  if (elHadir) elHadir.textContent = displayHadir;
-  if (elLayak) elLayak.textContent = displayLayak;
-  if (elSemakan) elSemakan.textContent = displaySemakan;
-  if (elGagal) elGagal.textContent = stats.gagal;
+  const pct = v => stats.hadir > 0 ? Math.round((v / stats.hadir) * 100) : 0;
+  const elLayakPct = document.getElementById('kpi-layak-pct');
+  const elSemakanPct = document.getElementById('kpi-semakan-pct');
+  if (elLayakPct) elLayakPct.textContent = `${pct(stats.layak)}% daripada hadir`;
+  if (elSemakanPct) elSemakanPct.textContent = `${pct(stats.semakan)}% daripada hadir`;
 
-  // Kemas kini 6 Peringkat Candidate Pipeline Tracker
-  const p1 = displayHadir;
-  const p2 = stats.hadir > 0 ? Math.round(displayHadir * 0.83) : 206;
-  const p3 = stats.hadir > 0 ? Math.round(displayHadir * 0.69) : 172;
-  const p4 = displayLayak;
-  const p5 = stats.hadir > 0 ? Math.round(displayLayak * 0.60) : 34;
-  const p6 = stats.hadir > 0 ? Math.round(displayLayak * 0.32) : 18;
-
-  const setPipe = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  setPipe('pipe-val-1', p1);
-  setPipe('pipe-val-2', p2);
-  setPipe('pipe-val-3', p3);
-  setPipe('pipe-val-4', p4);
-  setPipe('pipe-val-5', p5);
-  setPipe('pipe-val-6', p6);
-
-  // Jika ada pemohon sebenar dalam senarai, muatkan ke Quick Candidate Evaluation Hub
-  if (STATE.pemohonList && STATE.pemohonList.length > 0) {
-    const cand = STATE.pemohonList[0];
-    const cId = document.getElementById('hub-cand-id');
-    const cName = document.getElementById('hub-cand-name');
-    const cApp = document.getElementById('hub-cand-app');
-    const cHeight = document.getElementById('hub-bio-height');
-    const cBmi = document.getElementById('hub-bio-bmi');
-    const cChest = document.getElementById('hub-bio-chest');
-
-    if (cId) cId.textContent = cand['ID Pendaftaran'] || 'BFRD-2026-0248';
-    if (cName) cName.textContent = cand['Nama Penuh'] || 'Md. Aiman bin Haji Salleh';
-    if (cApp) cApp.textContent = `Application: ${cand['Jawatan Dipohon'] || 'Walk-In'}`;
-    if (cHeight) cHeight.value = cand['Tinggi (cm)'] ? `${(parseFloat(cand['Tinggi (cm)']) / 100).toFixed(2)} m` : '1.68 m';
-    if (cBmi) cBmi.value = cand['Nilai BMI'] ? parseFloat(cand['Nilai BMI']).toFixed(1) : '22.4';
-    if (cChest) cChest.value = cand['Ukuran Dada (inci)'] ? `${Math.round(cand['Ukuran Dada (inci)'] * 2.54)} cm (${cand['Ukuran Dada (inci)']}″)` : '88 cm (34.6″)';
+  // Kemas kini nama pegawai di banner komando
+  const elCmdUser = document.getElementById('cmd-user-name');
+  if (elCmdUser) {
+    elCmdUser.textContent = (STATE.user && STATE.user.nama) || 'Pegawai Bertugas BFRD';
   }
+
+  // Kemas kini pecahan jawatan dipohon
+  updatePositionBreakdown();
+
+  // Kemas kini pipeline tracker (6 peringkat)
+  updatePipelineTracker(stats);
+
+  // Kemas kini Hab Penilaian Pantas (calon terkini)
+  updateQuickEvaluationHub();
 
   // Render carta
   renderChart(stats);
 
   // Render aktiviti terkini
   renderDashboardActivity();
+}
+
+/**
+ * Kemas kini pecahan bilangan pemohon mengikut jawatan (Slots Breakdown)
+ */
+function updatePositionBreakdown() {
+  const abpCount = STATE.pemohonList.filter(p => (p['Jawatan Dipohon'] || '').includes('Ahli Bomba')).length;
+  const pbCount = STATE.pemohonList.filter(p => (p['Jawatan Dipohon'] || '').includes('Pegawai Balai') && !(p['Jawatan Dipohon'] || '').includes('Timbalan')).length;
+  const tpbCount = STATE.pemohonList.filter(p => (p['Jawatan Dipohon'] || '').includes('Timbalan Pegawai')).length;
+  const pbpCount = STATE.pemohonList.filter(p => (p['Jawatan Dipohon'] || '').includes('Penguasa')).length;
+
+  const elAbp = document.getElementById('slot-abp-count');
+  const elPb = document.getElementById('slot-pb-count');
+  const elTpb = document.getElementById('slot-tpb-count');
+  const elPbp = document.getElementById('slot-pbp-count');
+
+  if (elAbp) elAbp.textContent = abpCount;
+  if (elPb) elPb.textContent = pbCount;
+  if (elTpb) elTpb.textContent = tpbCount;
+  if (elPbp) elPbp.textContent = pbpCount;
+}
+
+/**
+ * Kemas kini bilangan calon dalam Jejak Saluran Pengambilan (Pipeline Tracker)
+ */
+function updatePipelineTracker(stats) {
+  const total = STATE.pemohonList.length;
+
+  // Peringkat 1: Pendaftaran Kaunter / Walk-in
+  const elP1 = document.getElementById('pipe-count-1');
+  if (elP1) elP1.textContent = total;
+
+  // Peringkat 2: Pengesahan Dokumen & Akademik
+  const docOkCount = STATE.pemohonList.filter(p => p['Semakan Kad Pengenalan'] === 'Ya' && p['Semakan Surat Panggilan'] === 'Ya').length;
+  const elP2 = document.getElementById('pipe-count-2');
+  if (elP2) elP2.textContent = docOkCount;
+
+  // Peringkat 3: Ukuran Fizikal & Antropometrik
+  const fizikalCount = STATE.pemohonList.filter(p => parseFloat(p['Tinggi (cm)'] || 0) > 0).length;
+  const elP3 = document.getElementById('pipe-count-3');
+  if (elP3) elP3.textContent = fizikalCount;
+
+  // Peringkat 4: Ujian Ketangkasan Fizikal (Layak ke PAFT/IPPT)
+  const elP4 = document.getElementById('pipe-count-4');
+  if (elP4) elP4.textContent = stats.layak;
+
+  // Peringkat 5: Lembaga Temuduga & Ujian Khas (Perlu Semakan / Tapisan Khas)
+  const elP5 = document.getElementById('pipe-count-5');
+  if (elP5) elP5.textContent = stats.semakan;
+
+  // Peringkat 6: Pemilihan Akhir (Sasaran Melepasi Saringan)
+  const elP6 = document.getElementById('pipe-count-6');
+  if (elP6) elP6.textContent = Math.max(0, stats.layak - stats.semakan);
+}
+
+/**
+ * Kemas kini Hab Penilaian Pantas dengan maklumat calon terkini yang disaring
+ */
+function updateQuickEvaluationHub() {
+  const container = document.getElementById('hub-content-container');
+  if (!container) return;
+
+  const latest = STATE.pemohonList[0];
+
+  const elAvatar = document.getElementById('hub-avatar');
+  const elId = document.getElementById('hub-id');
+  const elNama = document.getElementById('hub-nama');
+  const elJawatan = document.getElementById('hub-jawatan');
+  const elStatusBadge = document.getElementById('hub-status-badge');
+
+  const elValTinggi = document.getElementById('hub-val-tinggi');
+  const elBadgeTinggi = document.getElementById('hub-badge-tinggi');
+  const elValBMI = document.getElementById('hub-val-bmi');
+  const elBadgeBMI = document.getElementById('hub-badge-bmi');
+  const elValDada = document.getElementById('hub-val-dada');
+  const elBadgeDada = document.getElementById('hub-badge-dada');
+
+  const elBtnDetail = document.getElementById('hub-btn-detail');
+  const elBtnPrint = document.getElementById('hub-btn-print');
+  const elFooterInfo = document.getElementById('hub-footer-info');
+
+  if (!latest) {
+    if (elAvatar) elAvatar.textContent = '?';
+    if (elId) elId.textContent = 'BFRD-TIADA-REKOD';
+    if (elNama) elNama.textContent = 'Belum Ada Calon Disaring Hari Ini';
+    if (elJawatan) elJawatan.textContent = 'Sila mulakan pemeriksaan di Kaunter Saringan.';
+    if (elStatusBadge) {
+      elStatusBadge.className = 'badge badge-amber';
+      elStatusBadge.textContent = 'Menunggu Saringan';
+    }
+    if (elValTinggi) elValTinggi.textContent = '- cm';
+    if (elValBMI) elValBMI.textContent = '-';
+    if (elValDada) elValDada.textContent = '-';
+    if (elBtnDetail) elBtnDetail.disabled = true;
+    if (elBtnPrint) elBtnPrint.disabled = true;
+    return;
+  }
+
+  // Ada calon terkini
+  if (elAvatar) {
+    const inisial = (latest['Nama Penuh'] || 'Calon').trim().charAt(0).toUpperCase();
+    elAvatar.textContent = inisial;
+  }
+  if (elId) elId.textContent = latest['ID Pendaftaran'] || 'BFRD-CALON';
+  if (elNama) elNama.textContent = latest['Nama Penuh'] || '-';
+  if (elJawatan) elJawatan.textContent = `${latest['Jawatan Dipohon'] || '-'} • ${latest['Jantina'] || 'Lelaki'}`;
+
+  const kep = latest['Keputusan Akhir'] || 'Layak';
+  if (elStatusBadge) {
+    if (kep === 'Layak') {
+      elStatusBadge.className = 'badge badge-green';
+      elStatusBadge.textContent = 'LULUS / LAYAK';
+    } else if (kep === 'Perlu Semakan') {
+      elStatusBadge.className = 'badge badge-amber';
+      elStatusBadge.textContent = 'PERLU SEMAKAN';
+    } else {
+      elStatusBadge.className = 'badge badge-red';
+      elStatusBadge.textContent = 'TIDAK LAYAK / GAGAL';
+    }
+  }
+
+  // Ketinggian Minimum (161 cm Lelaki, 152 cm Perempuan)
+  const t = parseFloat(latest['Tinggi (cm)'] || 0);
+  const minT = latest['Jantina'] === 'Perempuan' ? 152 : 161;
+  const isTLayak = t >= minT;
+  if (elValTinggi) elValTinggi.textContent = `${t.toFixed(1)} cm`;
+  if (elBadgeTinggi) {
+    elBadgeTinggi.className = isTLayak ? 'hub-badge-ok' : 'hub-badge-fail';
+    elBadgeTinggi.innerHTML = isTLayak ? `<i data-lucide="check" style="width:12px;height:12px;"></i> Lulus (&ge; ${minT} cm)` : `<i data-lucide="x" style="width:12px;height:12px;"></i> Di Bawah Had (&lt; ${minT} cm)`;
+  }
+
+  // Julat BMI (19.0 - 27.0)
+  const b = parseFloat(latest['Nilai BMI'] || 0);
+  const isBMILulus = b >= 19.0 && b <= 27.0;
+  const isBMIPerhatian = b > 27.0 && b <= 29.5;
+  if (elValBMI) elValBMI.textContent = b.toFixed(2);
+  if (elBadgeBMI) {
+    if (isBMILulus) {
+      elBadgeBMI.className = 'hub-badge-ok';
+      elBadgeBMI.innerHTML = `<i data-lucide="check" style="width:12px;height:12px;"></i> Julat Ideal (19–27)`;
+    } else if (isBMIPerhatian) {
+      elBadgeBMI.className = 'hub-badge-warn';
+      elBadgeBMI.innerHTML = `<i data-lucide="alert-triangle" style="width:12px;height:12px;"></i> Perhatian (27.1–29.5)`;
+    } else {
+      elBadgeBMI.className = 'hub-badge-fail';
+      elBadgeBMI.innerHTML = `<i data-lucide="x" style="width:12px;height:12px;"></i> Di Luar Julat`;
+    }
+  }
+
+  // Ukuran Dada (< 34" / 86 cm untuk Lelaki)
+  if (latest['Jantina'] === 'Lelaki') {
+    const dInci = parseFloat(latest['Ukuran Dada (inci)'] || 33.0);
+    const dCm = Math.round(dInci * 2.54);
+    const isDadaOk = dInci < 34;
+    if (elValDada) elValDada.textContent = `${dInci}" (${dCm} cm)`;
+    if (elBadgeDada) {
+      elBadgeDada.className = isDadaOk ? 'hub-badge-ok' : 'hub-badge-warn';
+      elBadgeDada.innerHTML = isDadaOk ? `<i data-lucide="check" style="width:12px;height:12px;"></i> Lulus (&lt; 34")` : `<i data-lucide="alert-triangle" style="width:12px;height:12px;"></i> &ge; 34"`;
+    }
+  } else {
+    if (elValDada) elValDada.textContent = 'N/A (Wanita)';
+    if (elBadgeDada) {
+      elBadgeDada.className = 'hub-badge-ok';
+      elBadgeDada.innerHTML = `Tidak Berkaitan`;
+    }
+  }
+
+  // Status Dokumen
+  const setDocBadge = (id, isOk, okLabel = 'Lengkap', missLabel = 'Belum') => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = isOk ? 'hub-badge-ok' : 'hub-badge-warn';
+    el.innerHTML = isOk ? `<i data-lucide="check" style="width:11px;height:11px;"></i> ${okLabel}` : `<i data-lucide="alert-triangle" style="width:11px;height:11px;"></i> ${missLabel}`;
+  };
+
+  setDocBadge('hub-doc-ic', latest['Semakan Kad Pengenalan'] === 'Ya' && latest['Semakan Surat Panggilan'] === 'Ya', 'Disahkan');
+  setDocBadge('hub-doc-sijil', latest['Semakan Sijil Akademik'] === 'Ya', 'Lengkap');
+  setDocBadge('hub-doc-deria', latest['Semakan Dokumen Khas'] === 'Ya', 'Lulus');
+  setDocBadge('hub-doc-medikal', latest['Semakan Pasfoto'] === 'Ya', 'Memuaskan');
+
+  if (elFooterInfo) {
+    elFooterInfo.textContent = `Menunjukkan calon terkini: ${latest['Nama Penuh']} (${latest['ID Pendaftaran']}) • Masa: ${latest['Tarikh & Masa'] || 'Hari ini'}`;
+  }
+
+  if (elBtnDetail) elBtnDetail.disabled = false;
+  if (elBtnPrint) elBtnPrint.disabled = false;
+
   refreshIcons();
 }
 
-// ── Live Clock untuk Command Dashboard ──
-function startLiveClock() {
-  function tick() {
-    const now = new Date();
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const dayStr = days[now.getDay()];
-    const dateStr = String(now.getDate()).padStart(2, '0');
-    const monthStr = months[now.getMonth()];
-    const yearStr = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const mins = String(now.getMinutes()).padStart(2, '0');
-    const secs = String(now.getSeconds()).padStart(2, '0');
-
-    const formatted = `${dayStr}, ${dateStr} ${monthStr} ${yearStr} | ${hours}:${mins}:${secs}`;
-    const el = document.getElementById('dashboard-live-clock');
-    if (el) el.textContent = formatted;
-  }
-  tick();
-  setInterval(tick, 1000);
-}
-
-// ── Toggle View Pipeline (Kanban / Funnel) ──
-function switchPipelineView(mode) {
-  const btnK = document.getElementById('btn-toggle-kanban');
-  const btnF = document.getElementById('btn-toggle-funnel');
-  if (btnK && btnF) {
-    if (mode === 'kanban') {
-      btnK.classList.add('active');
-      btnF.classList.remove('active');
-      showToast('Paparan saluran pemohon ditukar ke format Kanban.', 'info');
-    } else {
-      btnF.classList.add('active');
-      btnK.classList.remove('active');
-      showToast('Paparan saluran pemohon ditukar ke format Corong (Funnel).', 'info');
-    }
+function viewLatestCandidateDetail() {
+  if (STATE.pemohonList.length > 0) {
+    viewDetailPemohon(STATE.pemohonList[0]['ID Pendaftaran']);
   }
 }
 
-// ── Tindakan Pantas di Quick Candidate Evaluation Hub ──
-function handleQuickDisposition(decision) {
-  const badge = document.getElementById('hub-cand-badge');
-  const name = document.getElementById('hub-cand-name')?.textContent || 'Calon';
-
-  if (decision === 'pass') {
-    if (badge) {
-      badge.textContent = 'PASS (LULUS)';
-      badge.style.background = 'rgba(16, 185, 129, 0.25)';
-      badge.style.color = '#34D399';
-      badge.style.borderColor = 'rgba(16, 185, 129, 0.5)';
-    }
-    showToast(`Keputusan saringan untuk ${name} telah direkodkan: LULUS (PASS)`, 'success');
-  } else if (decision === 'fail') {
-    if (badge) {
-      badge.textContent = 'FAIL / DISQUALIFIED';
-      badge.style.background = 'rgba(239, 68, 68, 0.25)';
-      badge.style.color = '#F87171';
-      badge.style.borderColor = 'rgba(239, 68, 68, 0.5)';
-    }
-    showToast(`Keputusan saringan untuk ${name} telah direkodkan: TIDAK LAYAK`, 'error');
-  } else if (decision === 'pending') {
-    if (badge) {
-      badge.textContent = 'PENDING MEDICAL REVIEW';
-      badge.style.background = 'rgba(245, 158, 11, 0.25)';
-      badge.style.color = '#FBBF24';
-      badge.style.borderColor = 'rgba(245, 158, 11, 0.5)';
-    }
-    showToast(`Status calon ${name} dirujuk ke Pegawai Perubatan Kerajaan`, 'warning');
+function printLatestCandidate() {
+  if (STATE.pemohonList.length > 0) {
+    openPrintModal(STATE.pemohonList[0]);
   }
 }
 
