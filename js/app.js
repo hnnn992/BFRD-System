@@ -678,6 +678,9 @@ async function loadDashboardData() {
 
   // Render aktiviti terkini
   renderDashboardActivity();
+
+  // Kemas kini giliran calon Meja Ketua Penguji (Stesen 4)
+  renderStation4Queue();
 }
 
 /**
@@ -3733,7 +3736,9 @@ function handleCandidateQrIdentified(query, stationNum) {
     loadCandidateIntoStation3(cand);
     navigateTo('stesen-3');
   } else if (stationNum === 4) {
-    openStation4Review(cand);
+    loadCandidateIntoStation4(cand);
+    navigateTo('dashboard');
+    showToast('Permohonan penuh ' + cand['Nama Penuh'] + ' dimuatkan ke Meja Ketua Penguji!', 'success');
   }
 }
 
@@ -4029,8 +4034,337 @@ function resetStation3() {
 
 /**
  * Logik Stesen 4: Meja Ketua Penguji & Final Check (Laptop)
+ * Memaparkan KESELURUHAN PERMOHONAN (The Whole Application) Calon
  */
-function openStation4Review(cand) {
+function loadCandidateIntoStation4(cand) {
+  if (!cand) return;
+  activeStation4Candidate = cand;
+
+  const empty = document.getElementById('s4-empty-state');
+  const activeBox = document.getElementById('s4-active-content');
+  if (empty) empty.style.display = 'none';
+  if (activeBox) activeBox.style.display = 'block';
+
+  // Header Calon
+  const elNama = document.getElementById('s4-main-nama');
+  const elId = document.getElementById('s4-main-id');
+  const elIc = document.getElementById('s4-main-ic');
+  const elJawatan = document.getElementById('s4-main-jawatan');
+  const elUmur = document.getElementById('s4-main-umur');
+  const elJantina = document.getElementById('s4-main-jantina');
+  const elAvatar = document.getElementById('s4-main-avatar');
+  const elStatusTag = document.getElementById('s4-main-status-tag');
+
+  const nama = cand['Nama Penuh'] || '-';
+  const id = cand['ID Pendaftaran'] || '-';
+  const ic = cand['No. IC'] || '-';
+  const jawatan = cand['Jawatan Dipohon'] || 'Ahli Bomba dan Penyelamat';
+  const umur = cand['Umur'] || 0;
+  const jantina = cand['Jantina'] || 'Lelaki';
+
+  if (elNama) elNama.textContent = nama;
+  if (elId) elId.textContent = id;
+  if (elIc) elIc.textContent = ic;
+  if (elJawatan) elJawatan.textContent = jawatan;
+  if (elUmur) elUmur.textContent = `${umur} Tahun`;
+  if (elJantina) elJantina.textContent = jantina;
+  if (elAvatar) elAvatar.textContent = nama.charAt(0).toUpperCase();
+
+  const kep = cand['Keputusan Akhir'] || 'Menunggu Pengesahan';
+  if (elStatusTag) {
+    elStatusTag.textContent = kep.toUpperCase();
+    if (kep === 'Layak' || kep === 'Lulus') {
+      elStatusTag.style.background = '#DCFCE7';
+      elStatusTag.style.color = '#166534';
+    } else if (kep === 'Perlu Semakan') {
+      elStatusTag.style.background = '#FEF3C7';
+      elStatusTag.style.color = '#92400E';
+    } else if (kep === 'Tidak Layak') {
+      elStatusTag.style.background = '#FEE2E2';
+      elStatusTag.style.color = '#991B1B';
+    } else {
+      elStatusTag.style.background = '#FEF3C7';
+      elStatusTag.style.color = '#92400E';
+    }
+  }
+
+  // 1. Data Peribadi (Stesen 1)
+  const elKerakyatan = document.getElementById('s4-field-kerakyatan');
+  const elKahwin = document.getElementById('s4-field-kahwin');
+  const elTlahir = document.getElementById('s4-field-tlahir');
+  const elTel = document.getElementById('s4-field-tel');
+  const elEmel = document.getElementById('s4-field-emel');
+
+  if (elKerakyatan) elKerakyatan.textContent = cand['Status Kerakyatan'] || 'Rakyat Brunei Darussalam';
+  if (elKahwin) elKahwin.textContent = cand['Status Perkahwinan'] || 'Bujang';
+  if (elTlahir) elTlahir.textContent = cand['Tarikh Lahir'] || '-';
+  if (elTel) elTel.textContent = cand['No. Telefon'] || '-';
+  if (elEmel) elEmel.textContent = cand['Emel'] || '-';
+
+  // 2. Ukuran Fizikal & BMI (Stesen 2)
+  const elTinggi = document.getElementById('s4-field-tinggi');
+  const elBerat = document.getElementById('s4-field-berat');
+  const elDada = document.getElementById('s4-field-dada');
+  const elBmi = document.getElementById('s4-field-bmi');
+  const elBmiStatus = document.getElementById('s4-field-bmistatus');
+  const elBadgeFizikal = document.getElementById('s4-badge-fizikal');
+
+  const t = parseFloat(cand['Tinggi (cm)']) || 0;
+  const w = parseFloat(cand['Berat (kg)']) || 0;
+  const c = parseFloat(cand['Ukuran Dada (inci)']) || 0;
+  const bmi = parseFloat(cand['Nilai BMI']) || 0;
+  const minTinggi = (jantina === 'Perempuan') ? 152.0 : 161.0;
+
+  if (elTinggi) elTinggi.innerHTML = `${t.toFixed(1)} cm <span style="font-size:11px;color:${t >= minTinggi ? '#166534' : '#DC2626'}">(${t >= minTinggi ? '≥ Syarat Min ' + minTinggi : 'Gagal Min ' + minTinggi})</span>`;
+  if (elBerat) elBerat.textContent = `${w.toFixed(1)} kg`;
+  if (elDada) {
+    if (jantina === 'Perempuan') {
+      elDada.innerHTML = `<span style="color:var(--slate-muted)">N/A (Calon Wanita)</span>`;
+    } else {
+      elDada.innerHTML = `${c.toFixed(1)}" <span style="font-size:11px;color:${c < 34.0 ? '#166534' : '#DC2626'}">(${c < 34.0 ? 'Mematuhi < 34"' : 'Melebihi 34"'})</span>`;
+    }
+  }
+  if (elBmi) elBmi.textContent = bmi.toFixed(2);
+  if (elBmiStatus) elBmiStatus.textContent = cand['Status BMI'] || 'OPTIMAL (Julat 19 - 27)';
+
+  if (elBadgeFizikal) {
+    const isFizikalPass = t >= minTinggi && (jantina === 'Perempuan' || c < 34.0) && (bmi >= 19.0 && bmi <= 27.0);
+    elBadgeFizikal.textContent = isFizikalPass ? 'Lulus Fizikal' : 'Perlu Semakan';
+    elBadgeFizikal.style.background = isFizikalPass ? '#DCFCE7' : '#FEF3C7';
+    elBadgeFizikal.style.color = isFizikalPass ? '#166534' : '#92400E';
+  }
+
+  // 3. Semakan Dokumen Asal (Stesen 3)
+  const docKeys = [
+    'Semakan Surat Panggilan',
+    'Semakan Kad Pengenalan',
+    'Semakan Sijil Akademik',
+    'Semakan CV & Surat',
+    'Semakan Dokumen Khas',
+    'Semakan Pasfoto'
+  ];
+  let docCount = 0;
+  docKeys.forEach((k, idx) => {
+    const isOk = cand[k] === 'Ya';
+    if (isOk) docCount++;
+    const elDoc = document.getElementById(`s4-doc-${idx}`);
+    if (elDoc) {
+      elDoc.textContent = isOk ? 'Ya' : 'Tidak';
+      elDoc.style.background = isOk ? '#DCFCE7' : '#FEE2E2';
+      elDoc.style.color = isOk ? '#166534' : '#991B1B';
+    }
+  });
+
+  const elDocStatus = document.getElementById('s4-field-docstatus');
+  if (elDocStatus) {
+    elDocStatus.textContent = `${docCount} / 6 Disahkan`;
+    elDocStatus.style.background = docCount === 6 ? '#DCFCE7' : '#FEF3C7';
+    elDocStatus.style.color = docCount === 6 ? '#166534' : '#92400E';
+  }
+
+  // Radio keputusan ketua penguji
+  const radioVal = cand['Keputusan Akhir'] || 'Lulus';
+  const radio = document.querySelector(`input[name="s4-page-decision-choice"][value="${radioVal}"]`);
+  if (radio) radio.checked = true;
+
+  // Catatan rasmi
+  const elCatatan = document.getElementById('s4-page-catatan-inp');
+  if (elCatatan) {
+    elCatatan.value = cand['Catatan Pegawai'] || 'Calon disahkan melepasi saringan 4 stesen. Memenuhi kriteria fizikal dan dokumen rasmi BFRD. Layak ke ujian kecergasan padang.';
+  }
+
+  // Juga kemas kini modal jika wujud
+  openStation4Review(cand, false);
+
+  refreshIcons();
+}
+
+/**
+ * Render Senarai Calon Giliran Meja Ketua Penguji (Stesen 4)
+ */
+function renderStation4Queue(filterText = '') {
+  const tbody = document.getElementById('s4-queue-table-body');
+  if (!tbody) return;
+
+  const query = (filterText || '').trim().toLowerCase();
+  let list = STATE.pemohonList || [];
+
+  if (query) {
+    list = list.filter(p =>
+      (p['Nama Penuh'] || '').toLowerCase().includes(query) ||
+      (p['No. IC'] || '').toLowerCase().includes(query) ||
+      (p['ID Pendaftaran'] || '').toLowerCase().includes(query) ||
+      (p['Jawatan Dipohon'] || '').toLowerCase().includes(query)
+    );
+  }
+
+  if (list.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center;padding:28px;color:var(--slate-muted);">
+          <div style="font-size:14px;font-weight:700;">Tiada calon dalam giliran pada masa ini.</div>
+          <div style="font-size:12px;margin-top:4px;">Imbas QR calon di Stesen 1, 2 atau 3 untuk mendaftar calon ke dalam sistem.</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Jika belum ada calon aktif di Stesen 4, muat calon pertama secara automatik
+  if (!activeStation4Candidate && list.length > 0) {
+    loadCandidateIntoStation4(list[0]);
+  }
+
+  tbody.innerHTML = list.map(p => {
+    const isCur = activeStation4Candidate && activeStation4Candidate['ID Pendaftaran'] === p['ID Pendaftaran'];
+    const rowBg = isCur ? 'background:rgba(37,99,235,0.06);font-weight:600;' : '';
+    const t = parseFloat(p['Tinggi (cm)']) || 0;
+    const bmi = parseFloat(p['Nilai BMI']) || 0;
+    const fizikalTxt = t > 0 ? `${t.toFixed(0)}cm / ${bmi.toFixed(1)}` : '<span style="color:var(--slate-muted)">Menunggu S2</span>';
+
+    let docPass = 0;
+    if (p['Semakan Surat Panggilan'] === 'Ya') docPass++;
+    if (p['Semakan Kad Pengenalan'] === 'Ya') docPass++;
+    if (p['Semakan Sijil Akademik'] === 'Ya') docPass++;
+    if (p['Semakan CV & Surat'] === 'Ya') docPass++;
+    if (p['Semakan Dokumen Khas'] === 'Ya') docPass++;
+    if (p['Semakan Pasfoto'] === 'Ya') docPass++;
+    const docTxt = docPass > 0 ? `${docPass}/6 Sah` : '<span style="color:var(--slate-muted)">Menunggu S3</span>';
+
+    const kep = p['Keputusan Akhir'] || 'Menunggu S4';
+    let kepBadge = '<span class="badge-tag" style="background:#FEF3C7;color:#92400E;">Semakan S4</span>';
+    if (kep === 'Layak' || kep === 'Lulus') {
+      kepBadge = '<span class="badge-tag" style="background:#DCFCE7;color:#166534;">Layak (PAFT)</span>';
+    } else if (kep === 'Tidak Layak') {
+      kepBadge = '<span class="badge-tag" style="background:#FEE2E2;color:#991B1B;">Gagal</span>';
+    } else if (kep === 'Perlu Semakan') {
+      kepBadge = '<span class="badge-tag" style="background:#FEF3C7;color:#92400E;">Semakan Khas</span>';
+    }
+
+    return `
+      <tr style="${rowBg}">
+        <td><strong>${p['ID Pendaftaran'] || '-'}</strong></td>
+        <td>
+          <div style="font-weight:800;color:var(--slate-dark);">${p['Nama Penuh'] || '-'}</div>
+          <div style="font-size:11px;color:var(--slate-muted);">${p['Jantina'] || 'Lelaki'} &bull; ${p['Umur'] || 0} Tahun</div>
+        </td>
+        <td><span style="font-family:monospace;font-weight:700;">${p['No. IC'] || '-'}</span></td>
+        <td style="font-size:12px;">${p['Jawatan Dipohon'] || '-'}</td>
+        <td style="font-size:12px;">${fizikalTxt}</td>
+        <td style="font-size:12px;">${docTxt}</td>
+        <td>${kepBadge}</td>
+        <td style="text-align:right;">
+          <button type="button" class="btn btn-navy" style="padding:6px 12px;font-size:12px;font-weight:700;" onclick="selectStation4Candidate('${p['ID Pendaftaran']}')">
+            <i data-lucide="eye" style="width:13px;height:13px;"></i>
+            <span>Semak Permohonan</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  refreshIcons();
+}
+
+function filterStation4Queue() {
+  const inp = document.getElementById('s4-search-queue-inp');
+  renderStation4Queue(inp ? inp.value : '');
+}
+
+function selectStation4Candidate(id) {
+  const cand = STATE.pemohonList.find(p => p['ID Pendaftaran'] === id);
+  if (!cand) return;
+  loadCandidateIntoStation4(cand);
+  const container = document.getElementById('s4-active-content');
+  if (container) {
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  showToast(`Permohonan penuh ${cand['Nama Penuh']} sedia disemak.`, 'info');
+}
+
+function loadNextCandidateStation4() {
+  const list = STATE.pemohonList || [];
+  if (list.length === 0) {
+    showToast('Tiada calon dalam rekod saringan.', 'warn');
+    return;
+  }
+  if (!activeStation4Candidate) {
+    loadCandidateIntoStation4(list[0]);
+    return;
+  }
+  const idx = list.findIndex(p => p['ID Pendaftaran'] === activeStation4Candidate['ID Pendaftaran']);
+  const nextIdx = (idx + 1) % list.length;
+  loadCandidateIntoStation4(list[nextIdx]);
+  const container = document.getElementById('s4-active-content');
+  if (container) {
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  showToast(`Calon seterusnya: ${list[nextIdx]['Nama Penuh']}`, 'info');
+}
+
+function reprintQrFromStation4() {
+  if (!activeStation4Candidate) {
+    showToast('Tiada calon aktif dipilih.', 'warn');
+    return;
+  }
+  showCandidateQrPass(activeStation4Candidate);
+}
+
+/**
+ * Pengesahan Akhir dari Halaman Stesen 4 (Laptop Ketua Penguji)
+ */
+async function submitStation4DecisionFromPage(shouldPrint = false) {
+  if (!activeStation4Candidate) {
+    showToast('Sila pilih atau imbas calon terlebih dahulu.', 'warn');
+    return;
+  }
+
+  const radio = document.querySelector('input[name="s4-page-decision-choice"]:checked');
+  const decision = radio ? radio.value : 'Lulus';
+  const catatan = document.getElementById('s4-page-catatan-inp')?.value || 'Disahkan melepasi saringan 4 stesen BFRD.';
+
+  activeStation4Candidate['Keputusan Akhir'] = decision;
+  activeStation4Candidate['Catatan Pegawai'] = catatan;
+
+  // Kemas kini paparan status
+  const elStatusTag = document.getElementById('s4-main-status-tag');
+  if (elStatusTag) {
+    elStatusTag.textContent = decision.toUpperCase();
+    if (decision === 'Lulus' || decision === 'Layak') {
+      elStatusTag.style.background = '#DCFCE7';
+      elStatusTag.style.color = '#166534';
+    } else if (decision === 'Perlu Semakan') {
+      elStatusTag.style.background = '#FEF3C7';
+      elStatusTag.style.color = '#92400E';
+    } else {
+      elStatusTag.style.background = '#FEE2E2';
+      elStatusTag.style.color = '#991B1B';
+    }
+  }
+
+  showToast(`Keputusan Akhir ${activeStation4Candidate['Nama Penuh']}: [${decision.toUpperCase()}] berjaya disahkan!`, 'success');
+
+  // Hantar ke Google Sheets backend
+  apiPost('kemaskinPemohon', {
+    idPendaftaran: activeStation4Candidate['ID Pendaftaran'],
+    data: {
+      'Keputusan Akhir': decision,
+      'Catatan Pegawai': catatan
+    }
+  }).catch(err => console.warn('Latar belakang update:', err));
+
+  // Kemas kini giliran meja
+  renderStation4Queue();
+
+  if (shouldPrint) {
+    openPrintModal(activeStation4Candidate);
+  }
+}
+
+/**
+ * Logik Stesen 4: Modal Semakan Pantas (Fallback)
+ */
+function openStation4Review(cand, showModal = true) {
   activeStation4Candidate = cand;
   const modal = document.getElementById('modal-station4-review');
   if (!modal) return;
@@ -4085,7 +4419,9 @@ function openStation4Review(cand) {
   if (cand['Semakan Pasfoto'] === 'Ya') docPass++;
   if (elDocs) elDocs.textContent = `${docPass} / 6 DISAHKAN`;
 
-  modal.style.display = 'flex';
+  if (showModal) {
+    modal.style.display = 'flex';
+  }
   refreshIcons();
 }
 
@@ -4095,28 +4431,6 @@ function closeStation4Review() {
 }
 
 async function submitStation4FinalDecision() {
-  if (!activeStation4Candidate) return;
-
-  const radio = document.querySelector('input[name="s4-decision-choice"]:checked');
-  const decision = radio ? radio.value : 'Lulus';
-  const catatan = document.getElementById('s4-catatan-inp')?.value || 'Disahkan melepasi saringan fizikal BFRD.';
-
-  activeStation4Candidate['Keputusan Akhir'] = decision;
-  activeStation4Candidate['Catatan Pegawai'] = catatan;
-
-  showToast(`Keputusan Akhir ${activeStation4Candidate['Nama Penuh']}: [${decision.toUpperCase()}] disahkan.`, 'success');
-
-  // Update ke backend
-  apiPost('kemaskinPemohon', {
-    idPendaftaran: activeStation4Candidate['ID Pendaftaran'],
-    data: {
-      'Keputusan Akhir': decision,
-      'Catatan Pegawai': catatan
-    }
-  }).catch(err => console.warn('Latar belakang update:', err));
-
+  await submitStation4DecisionFromPage(true);
   closeStation4Review();
-
-  // Buka Slip A4 Rasmi untuk dicetak oleh Ketua Penguji
-  openPrintModal(activeStation4Candidate);
 }

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BFRD System — Body Fitness & Requirement Data System</title>
   <link rel="icon" type="image/png" href="img/logo-bomba.png">
-  <link rel="stylesheet" href="css/style.css?v=2.0.0">
+  <link rel="stylesheet" href="css/style.css?v=2.1.0">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js -->
@@ -176,9 +176,294 @@
       <main id="page-content">
 
         <!-- ============================================================
-             PAGE 2: DASHBOARD (Pusat Operasi & Papan Pemuka Komando)
+             PAGE 2: STESEN 4: MEJA KETUA PENGUJI & PEMERIKSAAN AKHIR (LAPTOP)
              ============================================================ -->
         <section id="page-dashboard" class="page">
+          
+          <!-- Banner Stesen 4: Meja Ketua Penguji -->
+          <div class="station-banner-card" style="background:linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%);padding:18px 22px;border-radius:12px;margin-bottom:18px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;width:100%;">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div class="station-avatar-circle" style="width:56px;height:56px;font-size:24px;background:#EFF6FF;color:var(--navy);border:2px solid #60A5FA;">
+                  <i data-lucide="laptop" style="width:28px;height:28px;"></i>
+                </div>
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span class="station-badge-tag" style="background:#DC2626;color:#FFF;">
+                      <i data-lucide="shield-check" style="width:13px;height:13px;"></i> STESEN 4: MEJA KETUA PENGUJI (LAPTOP)
+                    </span>
+                    <span class="station-badge-tag" style="background:rgba(255,255,255,0.15);color:#BFDBFE;" id="s4-header-session">
+                      Pemeriksaan Keseluruhan Permohonan Calon
+                    </span>
+                  </div>
+                  <h2 style="font-size:22px;font-weight:900;color:#FFFFFF;margin-top:6px;letter-spacing:0.02em;line-height:1.2;">
+                    Semakan Keseluruhan Permohonan Calon (The Whole Application)
+                  </h2>
+                  <p style="font-size:13px;color:#BFDBFE;margin-top:4px;">
+                    Imbas kod QR calon dari slip pengenalan atau pilih calon dari senarai giliran untuk menyemak data peribadi (S1), ukuran fizikal (S2), dan dokumen asal (S3).
+                  </p>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button type="button" class="btn btn-navy" style="background:#2563EB;color:#FFF;border:1px solid #60A5FA;padding:10px 16px;font-weight:700;display:flex;align-items:center;gap:8px;" onclick="startStationQrScanner(4)">
+                  <i data-lucide="camera" style="width:18px;height:18px;"></i>
+                  <span>Imbas QR Calon (Kamera)</span>
+                </button>
+                <button type="button" class="btn btn-outlined" style="background:rgba(255,255,255,0.1);color:#FFF;border-color:rgba(255,255,255,0.3);padding:10px 16px;font-weight:700;display:flex;align-items:center;gap:8px;" onclick="loadNextCandidateStation4()">
+                  <i data-lucide="skip-forward" style="width:16px;height:16px;"></i>
+                  <span>Calon Seterusnya</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State (Jika Tiada Calon Dipilih) -->
+          <div id="s4-empty-state" class="card" style="display:none;padding:36px;text-align:center;border:2px dashed #CBD5E1;border-radius:12px;margin-bottom:20px;">
+            <div style="width:64px;height:64px;border-radius:50%;background:#EFF6FF;color:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+              <i data-lucide="user-search" style="width:32px;height:32px;"></i>
+            </div>
+            <h3 style="font-size:18px;font-weight:800;color:var(--slate-dark);">Tiada Calon Dipilih Saat Ini</h3>
+            <p style="font-size:13px;color:var(--slate-muted);max-width:500px;margin:6px auto 16px;">
+              Sila imbas Kod QR calon pada kamera laptop atau klik mana-mana calon dalam senarai di bawah untuk melihat keseluruhan permohonan.
+            </p>
+            <button type="button" class="btn btn-navy" onclick="startStationQrScanner(4)">
+              <i data-lucide="camera"></i>
+              <span>Imbas Kod QR Calon Sekarang</span>
+            </button>
+          </div>
+
+          <!-- Panel Semakan Keseluruhan Permohonan (The Whole Application Workspace) -->
+          <div id="s4-active-content" class="card" style="padding:22px;border:2px solid #E2E8F0;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,0.06);margin-bottom:24px;">
+            <!-- Header Profil Calon Yang Sedang Disemak -->
+            <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #F1F5F9;padding-bottom:16px;margin-bottom:18px;flex-wrap:wrap;gap:14px;">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div class="station-avatar-circle" id="s4-main-avatar" style="width:58px;height:58px;font-size:24px;background:var(--navy);color:#FFF;">A</div>
+                <div>
+                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <span class="station-badge-tag" style="background:#1E3A8A;color:#FFF;" id="s4-main-id">BFRD-20261109-0001</span>
+                    <span class="station-badge-tag" style="background:#FEF3C7;color:#92400E;font-weight:800;" id="s4-main-status-tag">SEDANG DISEMAK (STESEN 4)</span>
+                  </div>
+                  <h3 id="s4-main-nama" style="font-size:20px;font-weight:900;color:var(--slate-dark);margin-top:4px;">AWANG MUHAMMAD HAZIQ BIN HJ ISMAIL</h3>
+                  <div style="font-size:13px;color:var(--slate-muted);display:flex;gap:10px;flex-wrap:wrap;margin-top:2px;">
+                    <span>NO. IC: <strong id="s4-main-ic" style="color:var(--slate-dark);font-size:14px;">01-123456</strong></span>
+                    <span>&bull;</span>
+                    <span>JAWATAN: <strong id="s4-main-jawatan" style="color:var(--navy);">Ahli Bomba dan Penyelamat</strong></span>
+                    <span>&bull;</span>
+                    <span>UMUR: <strong id="s4-main-umur">22 Tahun</strong> (<span id="s4-main-jantina">Lelaki</span>)</span>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button type="button" class="btn btn-outlined" style="padding:8px 14px;font-size:13px;" onclick="reprintQrFromStation4()">
+                  <i data-lucide="qr-code" style="width:15px;height:15px;"></i>
+                  <span>Cetak Semula Kad QR</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3 Grid Kad Permohonan Mengikut Stesen (Stesen 1, Stesen 2, Stesen 3) -->
+            <div class="grid-3" style="gap:16px;margin-bottom:20px;">
+              
+              <!-- KAD 1: MAKLUMAT PERIBADI (STESEN 1) -->
+              <div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid #CBD5E1;padding-bottom:8px;margin-bottom:12px;">
+                  <strong style="color:var(--navy);font-size:13px;display:flex;align-items:center;gap:6px;">
+                    <i data-lucide="user-check" style="width:16px;height:16px;color:#2563EB;"></i>
+                    1. MAKLUMAT PERIBADI (S1)
+                  </strong>
+                  <span class="badge-tag" style="background:#DCFCE7;color:#166534;font-size:11px;">Lengkap</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;">
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Status Kerakyatan:</span>
+                    <strong id="s4-field-kerakyatan" style="color:var(--slate-dark);">Rakyat Brunei</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Status Perkahwinan:</span>
+                    <strong id="s4-field-kahwin" style="color:var(--slate-dark);">Bujang</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Tarikh Lahir:</span>
+                    <strong id="s4-field-tlahir" style="color:var(--slate-dark);">15/04/2004</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">No. Telefon:</span>
+                    <strong id="s4-field-tel" style="color:var(--navy);">+673 8123456</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Alamat Emel:</span>
+                    <strong id="s4-field-emel" style="color:var(--slate-dark);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">calon@domain.com</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Kelayakan Am:</span>
+                    <strong style="color:#166534;"><i data-lucide="check" style="width:13px;height:13px;display:inline;"></i> Mematuhi Syarat Am</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KAD 2: UKURAN FIZIKAL & BMI (STESEN 2) -->
+              <div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid #CBD5E1;padding-bottom:8px;margin-bottom:12px;">
+                  <strong style="color:var(--navy);font-size:13px;display:flex;align-items:center;gap:6px;">
+                    <i data-lucide="scale" style="width:16px;height:16px;color:#D97706;"></i>
+                    2. UKURAN FIZIKAL (S2)
+                  </strong>
+                  <span class="badge-tag" id="s4-badge-fizikal" style="background:#DCFCE7;color:#166534;font-size:11px;">Lulus Fizikal</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;">
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Tinggi Calon:</span>
+                    <strong id="s4-field-tinggi" style="color:var(--slate-dark);">172.0 cm <span style="color:#166534;font-size:11px;">(≥ 161 cm)</span></strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Berat Badan:</span>
+                    <strong id="s4-field-berat" style="color:var(--slate-dark);">68.5 kg</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Ukuran Dada:</span>
+                    <strong id="s4-field-dada" style="color:var(--slate-dark);">33.0" <span style="color:#166534;font-size:11px;">(&lt; 34")</span></strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Indeks BMI:</span>
+                    <strong id="s4-field-bmi" style="color:#166534;font-size:14px;font-weight:900;">23.15</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Kategori BMI:</span>
+                    <strong id="s4-field-bmistatus" style="color:#166534;">OPTIMAL (Julat 19 - 27)</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--slate-muted);">Status Timbangan:</span>
+                    <strong style="color:#166534;"><i data-lucide="check" style="width:13px;height:13px;display:inline;"></i> Pengukuran Sah</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KAD 3: PENGESAHAN DOKUMEN ASAL (STESEN 3) -->
+              <div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid #CBD5E1;padding-bottom:8px;margin-bottom:12px;">
+                  <strong style="color:var(--navy);font-size:13px;display:flex;align-items:center;gap:6px;">
+                    <i data-lucide="file-check" style="width:16px;height:16px;color:#16A34A;"></i>
+                    3. SEMAKAN DOKUMEN (S3)
+                  </strong>
+                  <span class="badge-tag" id="s4-field-docstatus" style="background:#DCFCE7;color:#166534;font-size:11px;">6 / 6 Disahkan</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>1. Surat Panggilan Asal:</span>
+                    <span id="s4-doc-0" class="badge-tag" style="background:#DCFCE7;color:#166534;">Ya</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>2. Kad Pengenalan Pintar:</span>
+                    <span id="s4-doc-1" class="badge-tag" style="background:#DCFCE7;color:#166534;">Ya</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>3. Sijil Akademik Asal:</span>
+                    <span id="s4-doc-2" class="badge-tag" style="background:#DCFCE7;color:#166534;">Ya</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>4. CV & Surat Iringan:</span>
+                    <span id="s4-doc-3" class="badge-tag" style="background:#DCFCE7;color:#166534;">Ya</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>5. Sijil Khas Tambahan:</span>
+                    <span id="s4-doc-4" class="badge-tag" style="background:#DCFCE7;color:#166534;">Ya</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>6. Pasfoto Berukuran Pasport:</span>
+                    <span id="s4-doc-5" class="badge-tag" style="background:#DCFCE7;color:#166534;">Ya</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Bahagian Tindakan & Pengesahan Akhir Ketua Penguji -->
+            <div style="background:#FFFFFF;border:2px solid #E2E8F0;border-radius:12px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+              <label style="font-size:14px;font-weight:900;color:var(--navy);display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <i data-lucide="gavel" style="width:18px;height:18px;color:#DC2626;"></i>
+                <span>PERAKUAN & KEPUTUSAN KETUA PENGUJI (FINAL DISPOSITION):</span>
+              </label>
+
+              <div class="station4-radio-group" style="margin-bottom:16px;">
+                <label class="station4-radio-card pass" style="cursor:pointer;padding:12px;border-radius:8px;border:2px solid #16A34A;display:flex;align-items:center;gap:8px;">
+                  <input type="radio" name="s4-page-decision-choice" value="Lulus" checked>
+                  <strong style="color:#166534;">🟢 LAYAK KE UJIAN KECERGASAN JASMANI (PAFT)</strong>
+                </label>
+                <label class="station4-radio-card warn" style="cursor:pointer;padding:12px;border-radius:8px;border:2px solid #D97706;display:flex;align-items:center;gap:8px;">
+                  <input type="radio" name="s4-page-decision-choice" value="Perlu Semakan">
+                  <strong style="color:#92400E;">🟡 PERLU SEMAKAN PERUBATAN KHAS</strong>
+                </label>
+                <label class="station4-radio-card fail" style="cursor:pointer;padding:12px;border-radius:8px;border:2px solid #DC2626;display:flex;align-items:center;gap:8px;">
+                  <input type="radio" name="s4-page-decision-choice" value="Tidak Layak">
+                  <strong style="color:#991B1B;">🔴 TIDAK LAYAK / GAGAL SARINGAN</strong>
+                </label>
+              </div>
+
+              <div style="margin-bottom:16px;">
+                <label style="font-size:12px;font-weight:800;color:var(--slate-muted);display:block;margin-bottom:6px;">
+                  CATATAN / ULASAN RASMI KETUA PENGUJI:
+                </label>
+                <input type="text" id="s4-page-catatan-inp" class="field-input" style="height:44px;font-size:14px;" value="Calon disahkan melepasi saringan 4 stesen. Memenuhi kriteria fizikal dan dokumen rasmi BFRD. Layak ke ujian kecergasan padang.">
+              </div>
+
+              <!-- Bar Butang Tindakan -->
+              <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-red btn-lg" style="flex:2;height:54px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(220,38,38,0.35);" onclick="submitStation4DecisionFromPage(true)">
+                  <i data-lucide="printer" style="width:20px;height:20px;"></i>
+                  <span>SAHKAN & CETAK SLIP A4 RASMI KERAJAAN</span>
+                </button>
+                <button type="button" class="btn btn-navy" style="flex:1;height:54px;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="submitStation4DecisionFromPage(false)">
+                  <i data-lucide="save" style="width:18px;height:18px;"></i>
+                  <span>Simpan Sahaja</span>
+                </button>
+                <button type="button" class="btn btn-outlined" style="height:54px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;" onclick="loadNextCandidateStation4()">
+                  <i data-lucide="rotate-ccw"></i>
+                  <span>Calon Seterusnya</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Senarai Giliran Calon Menunggu di Stesen 4 (Live Candidates Queue Table) -->
+          <div class="card" style="padding:20px;border-radius:12px;margin-bottom:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+              <div>
+                <h3 style="font-size:16px;font-weight:800;color:var(--slate-dark);display:flex;align-items:center;gap:8px;">
+                  <i data-lucide="users" style="width:18px;height:18px;color:var(--navy);"></i>
+                  <span>Senarai Calon Untuk Semakan Meja Ketua Penguji (Stesen 4)</span>
+                </h3>
+                <p style="font-size:12px;color:var(--slate-muted);margin-top:2px;">
+                  Pilih mana-mana calon di bawah untuk memaparkan keseluruhan permohonan mereka secara langsung.
+                </p>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input type="text" id="s4-search-queue-inp" class="field-input" placeholder="Cari Nama / No. IC / ID..." style="height:36px;width:240px;font-size:12.5px;" oninput="filterStation4Queue()">
+              </div>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="data-table" style="width:100%;">
+                <thead>
+                  <tr>
+                    <th>No. Rujukan</th>
+                    <th>Nama Penuh Calon</th>
+                    <th>No. Kad Pengenalan</th>
+                    <th>Jawatan Dipohon</th>
+                    <th>Tinggi / BMI (S2)</th>
+                    <th>Dokumen (S3)</th>
+                    <th>Keputusan Akhir</th>
+                    <th style="text-align:right;">Tindakan</th>
+                  </tr>
+                </thead>
+                <tbody id="s4-queue-table-body">
+                  <tr>
+                    <td colspan="8" style="text-align:center;padding:24px;color:var(--slate-muted);">Memuatkan senarai calon...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           
           <!-- 1. Command Center Banner -->
           <div class="command-banner">
@@ -2053,7 +2338,7 @@
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=2.0.0"></script>
-  <script src="js/app.js?v=2.0.0"></script>
+  <script src="js/config.js?v=2.1.0"></script>
+  <script src="js/app.js?v=2.1.0"></script>
 </body>
 </html>
