@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BFRD System — Body Fitness & Requirement Data System</title>
   <link rel="icon" type="image/png" href="img/logo-bomba.png">
-  <link rel="stylesheet" href="css/style.css?v=1.1.0">
+  <link rel="stylesheet" href="css/style.css?v=2.0.0">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js -->
@@ -87,40 +87,34 @@
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-section-label">Menu Utama</div>
-        <button type="button" class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
-          <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
-          <span>Papan Pemuka</span>
-        </button>
-        <button type="button" class="nav-item" data-page="kaunter" onclick="navigateTo('kaunter')">
+        <div class="nav-section-label">Stesen Bertugas (4 Stesen)</div>
+        <button type="button" class="nav-item nav-station active" data-page="kaunter" onclick="switchStation(1)">
           <span class="nav-icon"><i data-lucide="user-plus"></i></span>
-          <span>Kaunter Saringan</span>
-        </button>
-        <button type="button" class="nav-item" data-page="senarai" onclick="navigateTo('senarai')">
-          <span class="nav-icon"><i data-lucide="users"></i></span>
-          <span>Senarai Pemohon</span>
-          <span class="nav-badge" id="nav-count-pemohon">0</span>
-        </button>
-
-        <div class="nav-section-label">Stesen Bertugas (Aliran 4 Stesen)</div>
-        <button type="button" class="nav-item nav-station" data-page="kaunter" onclick="switchStation(1)">
-          <span class="nav-icon"><i data-lucide="user-check"></i></span>
-          <span>1. Pendaftaran (QR)</span>
+          <span>1. Pendaftaran & Kad QR</span>
         </button>
         <button type="button" class="nav-item nav-station" data-page="stesen-2" onclick="switchStation(2)">
           <span class="nav-icon"><i data-lucide="scale"></i></span>
-          <span>2. Timbangan (QR)</span>
+          <span>2. Timbangan & Fizikal</span>
         </button>
         <button type="button" class="nav-item nav-station" data-page="stesen-3" onclick="switchStation(3)">
           <span class="nav-icon"><i data-lucide="file-check"></i></span>
-          <span>3. Dokumen (QR)</span>
+          <span>3. Semakan Dokumen</span>
         </button>
         <button type="button" class="nav-item nav-station" data-page="dashboard" onclick="switchStation(4)">
           <span class="nav-icon"><i data-lucide="laptop"></i></span>
           <span>4. Final Check (Laptop)</span>
         </button>
 
-        <div class="nav-section-label">Pengurusan</div>
+        <div class="nav-section-label">Papan Pemuka & Rekod</div>
+        <button type="button" class="nav-item" data-page="senarai" onclick="navigateTo('senarai')">
+          <span class="nav-icon"><i data-lucide="users"></i></span>
+          <span>Senarai Pemohon</span>
+          <span class="nav-badge" id="nav-count-pemohon">0</span>
+        </button>
+        <button type="button" class="nav-item" data-page="dashboard" onclick="navigateTo('dashboard')">
+          <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
+          <span>Papan Pemuka Komando</span>
+        </button>
         <button type="button" class="nav-item" data-page="syarat" onclick="navigateTo('syarat')">
           <span class="nav-icon"><i data-lucide="sliders"></i></span>
           <span>Syarat Jawatan</span>
@@ -153,16 +147,16 @@
         <button type="button" class="hamburger-btn" onclick="toggleSidebar(true)" title="Menu">
           <i data-lucide="menu"></i>
         </button>
-        <h1 class="topbar-title" id="page-title">Papan Pemuka Kaunter</h1>
+        <h1 class="topbar-title" id="page-title">Stesen 1: Pendaftaran & Kad QR Calon</h1>
 
         <!-- Stesen Selector Dropdown -->
         <div class="station-topbar-pill">
           <span class="station-pill-label"><i data-lucide="layers" style="width:13px;height:13px;"></i> Stesen:</span>
           <select id="topbar-station-select" onchange="switchStation(this.value)" class="station-dropdown">
-            <option value="4">💻 Stesen 4: Final Check (Laptop)</option>
-            <option value="1">🏢 Stesen 1: Pendaftaran (QR)</option>
-            <option value="2">⚖️ Stesen 2: Timbangan (QR)</option>
-            <option value="3">📋 Stesen 3: Dokumen (QR)</option>
+            <option value="1" selected>🏢 Stesen 1: Pendaftaran & Kad QR Calon</option>
+            <option value="2">⚖️ Stesen 2: Timbangan & Ukuran Fizikal</option>
+            <option value="3">📋 Stesen 3: Pengesahan Dokumen Fizikal</option>
+            <option value="4">💻 Stesen 4: Pemeriksaan Akhir & Cetakan (Laptop)</option>
           </select>
         </div>
 
@@ -184,7 +178,7 @@
         <!-- ============================================================
              PAGE 2: DASHBOARD (Pusat Operasi & Papan Pemuka Komando)
              ============================================================ -->
-        <section id="page-dashboard" class="page active">
+        <section id="page-dashboard" class="page">
           
           <!-- 1. Command Center Banner -->
           <div class="command-banner">
@@ -378,7 +372,7 @@
         <!-- ============================================================
              PAGE 3: KAUNTER (Screening Form & Stesen Timbang Lapangan)
              ============================================================ -->
-        <section id="page-kaunter" class="page">
+        <section id="page-kaunter" class="page active">
           <!-- Kad Maklumat Calon Semasa di Bahagian Paling Atas (Top Candidate Card) -->
           <div class="station-banner-card" style="background:linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%);padding:18px 22px;border-radius:12px;margin-bottom:16px;">
             <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;width:100%;">
@@ -1354,21 +1348,25 @@
        MOBILE & TABLET BOTTOM TAB BAR (NAVIGASI PANTAS LAPANGAN)
        ============================================================ -->
   <nav class="mobile-bottom-nav" id="mobile-tab-bar">
-    <button type="button" class="mobile-nav-btn" id="mob-nav-senarai" onclick="navigateTo('senarai')">
-      <i data-lucide="clipboard-list"></i>
-      <span>Antrian</span>
+    <button type="button" class="mobile-nav-btn active" id="mob-nav-stesen-1" onclick="switchStation(1)">
+      <i data-lucide="user-plus"></i>
+      <span>S1: Daftar</span>
     </button>
-    <button type="button" class="mobile-nav-btn active" id="mob-nav-kaunter" onclick="navigateTo('kaunter')">
+    <button type="button" class="mobile-nav-btn" id="mob-nav-stesen-2" onclick="switchStation(2)">
       <i data-lucide="scale"></i>
-      <span>Timbang</span>
+      <span>S2: Timbang</span>
     </button>
-    <button type="button" class="mobile-nav-btn" id="mob-nav-dashboard" onclick="navigateTo('dashboard')">
-      <i data-lucide="bar-chart-3"></i>
-      <span>Statistik</span>
+    <button type="button" class="mobile-nav-btn" id="mob-nav-stesen-3" onclick="switchStation(3)">
+      <i data-lucide="file-check"></i>
+      <span>S3: Dokumen</span>
     </button>
-    <button type="button" class="mobile-nav-btn" id="mob-nav-peranti" onclick="openDeviceModal()">
-      <i data-lucide="settings-2"></i>
-      <span>Peranti</span>
+    <button type="button" class="mobile-nav-btn" id="mob-nav-stesen-4" onclick="switchStation(4)">
+      <i data-lucide="laptop"></i>
+      <span>S4: Semak</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" id="mob-nav-senarai" onclick="navigateTo('senarai')">
+      <i data-lucide="users"></i>
+      <span>Senarai</span>
     </button>
   </nav>
 
@@ -2055,7 +2053,7 @@
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=1.1.0"></script>
-  <script src="js/app.js?v=1.1.0"></script>
+  <script src="js/config.js?v=2.0.0"></script>
+  <script src="js/app.js?v=2.0.0"></script>
 </body>
 </html>

@@ -288,16 +288,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Muat data awal (Syarat jawatan di-cache di localStorage)
   await loadInitialData();
 
-  // Semak status pengesahan sesi
+  // Semak status pengesahan sesi & buka stesen aktif secara automatik
   checkAuth();
-
-  // Semak sama ada peranti ini dikonfigurasi untuk Stesen tertentu (?stesen=1, 2, 3, 4)
-  const stesenParam = urlParams.get('stesen') || urlParams.get('station');
-  if (stesenParam) {
-    setTimeout(() => {
-      switchStation(stesenParam);
-    }, 350);
-  }
 });
 
 /**
@@ -348,7 +340,11 @@ function checkAuth() {
   } else {
     pageLogin.style.display = 'none';
     appShell.style.display = 'flex';
-    navigateTo('dashboard');
+    
+    // Semak URL param (?stesen=1/2/3/4) atau pilihan stesen disimpan (lalai: Stesen 1)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetStn = urlParams.get('stesen') || urlParams.get('station') || localStorage.getItem('bfrd_active_station') || '1';
+    switchStation(targetStn);
   }
 }
 
@@ -531,8 +527,10 @@ function navigateTo(pageId) {
 
   // Kemas kini tajuk topbar
   const titles = {
-    'dashboard': 'Papan Pemuka Kaunter',
-    'kaunter': 'Borang Saringan Fizikal Pemohon',
+    'dashboard': 'Stesen 4: Pemeriksaan Akhir & Cetakan (Laptop)',
+    'kaunter': 'Stesen 1: Pendaftaran & Kad QR Calon',
+    'stesen-2': 'Stesen 2: Timbangan & Ukuran Fizikal (Imbas QR)',
+    'stesen-3': 'Stesen 3: Pengesahan Dokumen Fizikal (Imbas QR)',
     'senarai': 'Pangkalan Data & Rekod Pemohon',
     'syarat': 'Konfigurasi Syarat Fizikal Jawatan BFRD',
     'aktiviti': 'Jejak Audit & Rekod Aktiviti Sistem'
@@ -3543,38 +3541,49 @@ let activeStation4Candidate = null;
  * Tukar Mod Stesen Pengambilan (1, 2, 3, atau 4)
  */
 function switchStation(stn) {
-  const stationNum = parseInt(stn) || 4;
+  const stationNum = parseInt(stn) || 1;
   activeStation = stationNum;
+  try {
+    localStorage.setItem('bfrd_active_station', String(stationNum));
+  } catch (e) {}
 
   // Kemas kini dropdown topbar
   const select = document.getElementById('topbar-station-select');
   if (select) select.value = String(stationNum);
 
-  // Kemas kini sidebar links
+  // Kemas kini butang aktif di sidebar
   document.querySelectorAll('.nav-station').forEach(btn => {
     btn.classList.remove('active');
   });
+
+  // Kemas kini butang aktif di mobile bottom tab bar
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const mobBtn = document.getElementById(`mob-nav-stesen-${stationNum}`);
+  if (mobBtn) mobBtn.classList.add('active');
 
   if (stationNum === 1) {
     navigateTo('kaunter');
     const navBtn = document.querySelector('.nav-station[data-page="kaunter"]');
     if (navBtn) navBtn.classList.add('active');
-    showToast('🏢 Beralih ke Stesen 1: Pendaftaran & Kad QR Calon.', 'info');
+    updateStation1TopBanner();
+    showToast('🏢 Mod Stesen 1 Aktif: Pendaftaran & Kad QR Calon.', 'info');
   } else if (stationNum === 2) {
     navigateTo('stesen-2');
     const navBtn = document.querySelector('.nav-station[data-page="stesen-2"]');
     if (navBtn) navBtn.classList.add('active');
-    showToast('⚖️ Beralih ke Stesen 2: Timbangan & Ukuran Fizikal (Imbas QR).', 'info');
+    showToast('⚖️ Mod Stesen 2 Aktif: Timbangan & Ukuran Fizikal (Imbas QR).', 'info');
   } else if (stationNum === 3) {
     navigateTo('stesen-3');
     const navBtn = document.querySelector('.nav-station[data-page="stesen-3"]');
     if (navBtn) navBtn.classList.add('active');
-    showToast('📋 Beralih ke Stesen 3: Pengesahan Dokumen Fizikal (Imbas QR).', 'info');
+    showToast('📋 Mod Stesen 3 Aktif: Pengesahan Dokumen Fizikal (Imbas QR).', 'info');
   } else {
     navigateTo('dashboard');
     const navBtn = document.querySelector('.nav-station[data-page="dashboard"]');
     if (navBtn) navBtn.classList.add('active');
-    showToast('💻 Beralih ke Stesen 4: Meja Ketua Penguji & Final Check (Laptop).', 'info');
+    showToast('💻 Mod Stesen 4 Aktif: Meja Ketua Penguji & Final Check (Laptop).', 'info');
   }
 
   refreshIcons();
