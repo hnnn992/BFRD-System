@@ -1705,18 +1705,25 @@ function openPrintModal(p) {
   const formatCleanDate = (raw) => {
     if (!raw) return '-';
     try {
-      const str = String(raw).trim();
+      let str = String(raw).trim();
       if (str.includes('T')) {
-        const d = new Date(str);
-        if (!isNaN(d.getTime())) {
-          const pad = n => String(n).padStart(2, '0');
-          return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-        }
-        return str.split('T')[0];
+        str = str.split('T')[0];
       }
-      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
-        const parts = str.split('-');
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(str)) return str;
+      const dashParts = str.split('-');
+      if (dashParts.length === 3) {
+        if (dashParts[0].length === 4) {
+          return `${dashParts[2].padStart(2, '0')}/${dashParts[1].padStart(2, '0')}/${dashParts[0]}`;
+        } else if (dashParts[2].length === 4) {
+          return `${dashParts[0].padStart(2, '0')}/${dashParts[1].padStart(2, '0')}/${dashParts[2]}`;
+        } else {
+          return `${dashParts[2].padStart(2, '0')}/${dashParts[1].padStart(2, '0')}/20${dashParts[0].padStart(2, '0')}`;
+        }
+      }
+      const d = new Date(raw);
+      if (!isNaN(d.getTime())) {
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
       }
       return str;
     } catch (e) {
