@@ -4003,4 +4003,333 @@ select.field-input { cursor: pointer; }
   100% { transform: rotate(360deg); }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   IPAD / TELEFON COMPANION SYNC & MOD TERMINAL LAPANGAN
+   ═══════════════════════════════════════════════════════════ */
+
+/* Modal QR Code & Sesi Sync */
+.companion-qr-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+  border-radius: 16px;
+  padding: 10px;
+  background: var(--white);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.companion-qr-code {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.session-pin-badge {
+  display: inline-block;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--navy);
+  background: #E0E7FF;
+  padding: 6px 18px;
+  border-radius: 10px;
+  border: 1.5px dashed var(--navy);
+  margin-top: 4px;
+}
+
+.companion-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.companion-status-indicator.active {
+  background: var(--green-bg);
+  border-color: #A7F3D0;
+  color: var(--green-text);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FULLSCREEN REMOTE TERMINAL (IPAD / TELEFON PEGAWAI)
+   ═══════════════════════════════════════════════════════════ */
+#page-remote-terminal {
+  min-height: 100vh;
+  background: #0B1120;
+  color: var(--white);
+  padding-bottom: 40px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.remote-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #0F172A;
+  border-bottom: 1px solid #1E293B;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.remote-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remote-conn-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10B981;
+  color: #6EE7B7;
+  letter-spacing: 0.04em;
+}
+
+.remote-content-container {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.remote-candidate-card {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.remote-cand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--navy);
+  color: #93C5FD;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.remote-cand-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.remote-cand-info .sub {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #94A3B8;
+  letter-spacing: 0.04em;
+}
+
+.remote-cand-info strong {
+  font-size: 14px;
+  color: var(--white);
+}
+
+.remote-cand-info .jawatan {
+  font-size: 11px;
+  color: #60A5FA;
+}
+
+.remote-measure-card {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.remote-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #E2E8F0;
+}
+
+.remote-eval-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94A3B8;
+}
+
+.remote-led-display {
+  background: #020617;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+
+.remote-led-display.compact {
+  padding: 10px;
+}
+
+.remote-led-num {
+  font-size: 52px;
+  font-weight: 900;
+  line-height: 1;
+  color: #F8FAFC;
+  letter-spacing: -0.03em;
+}
+
+.remote-led-unit {
+  font-size: 18px;
+  font-weight: 800;
+  color: #60A5FA;
+}
+
+.remote-stepper-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.remote-step-btn {
+  height: 54px;
+  border-radius: 10px;
+  background: #334155;
+  border: 1px solid #475569;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.12s ease;
+}
+
+.remote-step-btn:hover { background: #475569; }
+.remote-step-btn:active { background: #64748B; transform: scale(0.93); }
+
+.remote-step-btn strong {
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.remote-step-btn span {
+  font-size: 10px;
+  color: #94A3B8;
+}
+
+.remote-preset-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.remote-pill {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #CBD5E1;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.remote-pill.active {
+  background: #2563EB;
+  color: var(--white);
+  border-color: #3B82F6;
+}
+
+.remote-action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.remote-action-btn {
+  height: 48px;
+  border-radius: 10px;
+  background: #334155;
+  border: 1px solid #475569;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.remote-action-btn:active { transform: scale(0.95); }
+
+.remote-action-btn.hold-active {
+  background: #2563EB;
+  border-color: #3B82F6;
+}
+
+.remote-bmi-summary {
+  background: linear-gradient(135deg, #1E3A8A 0%, #172554 100%);
+  border: 1px solid #3B82F6;
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.bmi-mini-title {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #93C5FD;
+  letter-spacing: 0.04em;
+}
+
+.bmi-mini-val {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+
 

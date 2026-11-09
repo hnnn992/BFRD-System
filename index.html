@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BFRD System — Body Fitness & Requirement Data System</title>
   <link rel="icon" type="image/png" href="img/logo-bomba.png">
-  <link rel="stylesheet" href="css/style.css?v=1.0.8">
+  <link rel="stylesheet" href="css/style.css?v=1.1.0">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PeerJS: P2P Live Remote Sync iPad/Phone to PC Zero Latency -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <!-- Tesseract.js: Client-Side Real OCR Engine for Form Photos -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -354,22 +358,23 @@
             </div>
           </div>
 
-          <!-- Stesen Timbang Status & Bluetooth Connection Bar -->
+          <!-- Stesen Timbang Status & iPad/Telefon Live Sync Connection Bar -->
           <div class="station-status-bar">
             <div class="station-status-info">
               <div class="station-pulse-badge">
-                <span class="pulse-dot-amber"></span>
-                <span class="station-status-title">Mod Input Manual (Luar Talian)</span>
+                <span class="pulse-dot-green" id="sync-pulse-dot"></span>
+                <span class="station-status-title" id="sync-status-title">Penyegerakan Langsung iPad / Telefon (Live Remote Sync)</span>
+                <span class="badge-tag" id="companion-conn-badge" style="background:#E0E7FF;color:var(--navy);">Sedia Dipautkan</span>
               </div>
               <div class="station-status-sub">
-                <i data-lucide="bluetooth-off" style="width:13px;height:13px;"></i>
-                <span>SECA 704s Tidak Terhubung • Penimbang Mekanikal Zon 1 Aktif</span>
+                <i data-lucide="smartphone" style="width:13px;height:13px;"></i>
+                <span id="remote-sync-status-txt">Tiada penimbang bluetooth diperlukan. Pegawai boleh mengisi berat & tinggi di iPad/telefon, sistem di PC akan dikemas kini serta-merta (LIVE)!</span>
               </div>
             </div>
             <div class="station-status-actions">
-              <button type="button" class="btn-reconnect-device" onclick="reconnectDevice()">
-                <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i>
-                <span>Sambung Semula</span>
+              <button type="button" class="btn btn-navy btn-companion-sync" onclick="openCompanionModal()">
+                <i data-lucide="qr-code" style="width:15px;height:15px;"></i>
+                <span>📱 Pautkan iPad / Telefon (QR Code)</span>
               </button>
             </div>
           </div>
@@ -1748,11 +1753,209 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       MODAL: PAUTAN SESI IPAD / TELEFON LAPANGAN (COMPANION SYNC)
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-companion-sync" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-companion-sync')">
+    <div class="modal" style="max-width:520px;text-align:center;">
+      <div class="modal-header" style="text-align:left;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--navy);color:#FFF;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="smartphone" style="width:20px;height:20px;"></i>
+          </div>
+          <div>
+            <h3 class="modal-title">Pautkan iPad / Telefon (Live Sync)</h3>
+            <span style="font-size:12px;color:var(--slate-muted);">Penyegerakan Pengukuran Tanpa Wayar Masa Nyata</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close" onclick="closeCompanionModal()"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding:24px 20px;">
+        <div class="companion-qr-wrap">
+          <img id="companion-qr-img" src="" alt="QR Code Pautan iPad" class="companion-qr-code">
+          <div class="qr-pulse-ring"></div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <span style="font-size:11px;font-weight:700;color:var(--slate-muted);text-transform:uppercase;letter-spacing:0.05em;">Kod Sesi Pautan:</span>
+          <div class="session-pin-badge" id="companion-session-code">MEMUATKAN...</div>
+        </div>
+
+        <p style="font-size:12.5px;color:var(--slate-muted);margin:12px auto;max-width:400px;line-height:1.5;">
+          Imbas kod QR di atas menggunakan kamera iPad atau telefon bimbit anda. Pegawai boleh menimbang dan menekan ukuran di telefon, dan komputer ini akan <strong>dikemas kini secara langsung (LIVE)</strong> serta-merta!
+        </p>
+
+        <div class="companion-status-indicator" id="companion-modal-status">
+          <span class="pulse-dot-amber"></span>
+          <span id="companion-modal-status-txt">Menunggu imbasan daripada iPad / telefon bimbit...</span>
+        </div>
+
+        <div style="margin-top:14px;padding:10px;background:#F1F5F9;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span style="font-size:11.5px;color:var(--slate-dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="companion-direct-url">https://...</span>
+          <button type="button" class="btn btn-sm btn-outlined" onclick="copyCompanionUrl()">Salin</button>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content:space-between;">
+        <button type="button" class="btn btn-outlined" onclick="openCompanionInNewTab()">
+          <i data-lucide="external-link" style="width:14px;height:14px;"></i>
+          <span>Uji di Tab Baharu (Ujian Skrin Pisah)</span>
+        </button>
+        <button type="button" class="btn btn-navy" onclick="closeCompanionModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE 6: TERMINAL KAWALAN LAPANGAN (IPAD / TELEFON COMPANION MODE)
+       ============================================================ -->
+  <div id="page-remote-terminal" style="display:none;">
+    <!-- Terminal Header Bar -->
+    <header class="remote-header">
+      <div class="remote-brand">
+        <img src="img/logo-bomba.png" alt="BFRD" style="width:34px;height:34px;object-fit:contain;">
+        <div>
+          <h2 style="font-size:14px;font-weight:800;color:var(--white);line-height:1.1;">TERMINAL LAPANGAN BFRD</h2>
+          <span style="font-size:10px;color:#BFDBFE;">Pad Pengukur iPad / Telefon Pegawai</span>
+        </div>
+      </div>
+      <div class="remote-conn-status" id="remote-peer-status">
+        <span class="pulse-dot-green"></span>
+        <span id="remote-conn-txt">LIVE SYNC AKTIF</span>
+      </div>
+    </header>
+
+    <div class="remote-content-container">
+      <!-- Active Candidate Banner -->
+      <div class="remote-candidate-card">
+        <div class="remote-cand-icon"><i data-lucide="user"></i></div>
+        <div class="remote-cand-info">
+          <span class="sub">Calon Sedang Ditimbang di Kaunter:</span>
+          <strong id="remote-cand-name">CALON SEMASA (STESEN ZON 1)</strong>
+          <span class="jawatan" id="remote-cand-jawatan">Ahli Bomba dan Penyelamat</span>
+        </div>
+      </div>
+
+      <!-- KETINGGIAN (CM) TACTILE CARD -->
+      <div class="remote-measure-card">
+        <div class="remote-card-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="ruler" style="color:var(--navy);width:18px;height:18px;"></i>
+            <strong>KETINGGIAN FIZIKAL</strong>
+          </div>
+          <span class="remote-eval-pill" id="remote-height-eval">Syarat Min: 161.0 cm</span>
+        </div>
+
+        <div class="remote-led-display">
+          <span class="remote-led-num" id="remote-height-val">168.0</span>
+          <span class="remote-led-unit">CM</span>
+        </div>
+
+        <!-- Giant Steppers -->
+        <div class="remote-stepper-grid">
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustHeight(-0.5)"><strong>-0.5</strong><span>cm</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustHeight(-0.1)"><strong>-0.1</strong><span>cm</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustHeight(0.1)"><strong>+0.1</strong><span>cm</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustHeight(0.5)"><strong>+0.5</strong><span>cm</span></button>
+        </div>
+
+        <!-- Presets -->
+        <div class="remote-preset-row">
+          <button type="button" class="remote-pill" onclick="remoteSetHeight(161.0)">161.0 Min</button>
+          <button type="button" class="remote-pill" onclick="remoteSetHeight(165.0)">165.0</button>
+          <button type="button" class="remote-pill active" onclick="remoteSetHeight(168.0)">168.0</button>
+          <button type="button" class="remote-pill" onclick="remoteSetHeight(170.0)">170.0</button>
+          <button type="button" class="remote-pill" onclick="remoteSetHeight(172.0)">172.0</button>
+        </div>
+      </div>
+
+      <!-- BERAT BADAN (KG) TACTILE CARD -->
+      <div class="remote-measure-card">
+        <div class="remote-card-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="scale" style="color:var(--navy);width:18px;height:18px;"></i>
+            <strong>BERAT BADAN FIZIKAL</strong>
+          </div>
+          <span class="remote-eval-pill" id="remote-weight-tare-pill">Tare 0.00 kg</span>
+        </div>
+
+        <div class="remote-led-display">
+          <span class="remote-led-num" id="remote-weight-val">65.0</span>
+          <span class="remote-led-unit">KG</span>
+        </div>
+
+        <!-- Giant Steppers -->
+        <div class="remote-stepper-grid">
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustWeight(-0.5)"><strong>-0.5</strong><span>kg</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustWeight(-0.1)"><strong>-0.1</strong><span>kg</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustWeight(0.1)"><strong>+0.1</strong><span>kg</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustWeight(0.5)"><strong>+0.5</strong><span>kg</span></button>
+        </div>
+
+        <!-- Actions: Tare & Hold -->
+        <div class="remote-action-grid">
+          <button type="button" class="remote-action-btn" id="remote-tare-btn" onclick="remoteToggleTare()">
+            <i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i>
+            <span>Sahkan Tare (0.00)</span>
+          </button>
+          <button type="button" class="remote-action-btn" id="remote-hold-btn" onclick="remoteToggleHold()">
+            <i data-lucide="lock" style="width:16px;height:16px;"></i>
+            <span id="remote-hold-txt">Kunci Bacaan Hold</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- UKURAN DADA (INCI) TACTILE CARD -->
+      <div class="remote-measure-card">
+        <div class="remote-card-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="activity" style="color:var(--navy);width:18px;height:18px;"></i>
+            <strong>UKURAN DADA BIASA (LELAKI)</strong>
+          </div>
+          <span class="remote-eval-pill">&lt; 34" Syarat BFRD</span>
+        </div>
+
+        <div class="remote-led-display compact">
+          <span class="remote-led-num" id="remote-chest-val">33.0</span>
+          <span class="remote-led-unit">INCI</span>
+        </div>
+
+        <!-- Giant Steppers -->
+        <div class="remote-stepper-grid">
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustChest(-0.5)"><strong>-0.5</strong><span>"</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustChest(-0.1)"><strong>-0.1</strong><span>"</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustChest(0.1)"><strong>+0.1</strong><span>"</span></button>
+          <button type="button" class="remote-step-btn" onclick="remoteAdjustChest(0.5)"><strong>+0.5</strong><span>"</span></button>
+        </div>
+      </div>
+
+      <!-- Live Calculated BMI Badge on iPad -->
+      <div class="remote-bmi-summary">
+        <div class="bmi-mini-title">INDEKS JISIM BADAN (BMI) MASA NYATA:</div>
+        <div class="bmi-mini-val">
+          <span id="remote-bmi-num">23.03</span> kg/m²
+          <span class="badge-tag pass" id="remote-bmi-status">LULUS</span>
+        </div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:4px;">
+          Setiap butang yang ditekan pada iPad ini disegerakkan secara langsung ke komputer pendaftaran utama.
+        </p>
+      </div>
+
+      <div style="margin-top:16px;margin-bottom:32px;">
+        <button type="button" class="btn btn-red" style="width:100%;height:52px;font-size:15px;font-weight:800;" onclick="remoteConfirmValues()">
+          <i data-lucide="send" style="width:18px;height:18px;"></i>
+          <span>SAHKAN & SELESAIKAN TIMBANGAN</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=1.0.9"></script>
-  <script src="js/app.js?v=1.0.9"></script>
+  <script src="js/config.js?v=1.1.0"></script>
+  <script src="js/app.js?v=1.1.0"></script>
 </body>
 </html>

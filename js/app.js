@@ -261,9 +261,19 @@ function mockPost(action, data, token) {
 // ════════════════════════════════════════════════════════════
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // Semak sama ada peranti ini dibuka sebagai iPad / Telefon Remote Terminal (?remote=XXXX)
+  const urlParams = new URLSearchParams(window.location.search);
+  const remoteCode = urlParams.get('remote') || urlParams.get('session');
+  if (remoteCode) {
+    initRemoteCompanion(remoteCode);
+    refreshIcons();
+    return;
+  }
+
   initAppSession();
   setupEventListeners();
   startLiveClock();
+  initDesktopCompanionHost();
 
   // Kemas kini tarikh sesi semasa di topbar
   const now = new Date();
@@ -2353,13 +2363,17 @@ function preprocessImageCanvas(dataUrl) {
 
 /**
  * AI Vision Extraction Engine mengikut Skema Rasmi Maklumat Peribadi Bomba
+ * Menyokong:
+ * 1. Google Gemini 1.5 Flash Vision (Awan - jika pengguna masukkan kunci API percuma)
+ * 2. Tesseract.js Real OCR Klien (Tempatan - membaca teks sebenar pada foto borang tanpa API key)
  */
 async function extractBombaApplicationForm(rawImg, processedImg) {
   const apiKey = localStorage.getItem('gemini_api_key');
 
+  // ── 1. Jika Ada Kunci API Google Gemini (AI Vision Peringkat Tinggi) ──
   if (apiKey) {
     try {
-      // Panggil Google Gemini 1.5 Flash Vision API
+      showToast('Menggunakan Enjin Google Gemini 1.5 Flash Vision...', 'info');
       const base64Data = processedImg.split(',')[1];
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
@@ -2413,38 +2427,149 @@ Return ONLY valid JSON without markdown wrapping.`;
         const text = json.candidates[0].content.parts[0].text;
         const cleaned = text.replace(/```json\n?|```/g, '').trim();
         const parsed = JSON.parse(cleaned);
+        parsed.ocrEngine = 'Google Gemini 1.5 Flash (Awan)';
         return normalizeExtractedSchema(parsed);
       }
     } catch (e) {
-      console.warn('Gemini Vision Cloud API Error, falling back to Intelligent Extraction Engine:', e);
+      console.warn('Gemini Vision Cloud API Error, fallback to Tesseract.js OCR:', e);
+      showToast('Ralat API Gemini, beralih ke Tesseract OCR...', 'info');
     }
   }
 
-  // Intelligent Extraction Engine Tempatan (Client-Side Smart Parser)
-  // Menjana simulasi pengecaman tulisan tangan dengan 1 medan amaran (confidence flag) untuk semakan pegawai
-  await new Promise(r => setTimeout(r, 850));
+  // ── 2. Pengecaman Teks Sebenar Klien Melalui Tesseract.js OCR ──
+  showToast('Menjalankan Enjin Pengecaman Teks Foto (Tesseract OCR)...', 'info');
+  let rawOcrText = '';
+  try {
+    if (typeof Tesseract !== 'undefined') {
+      const worker = await Tesseract.createWorker('eng');
+      const ret = await worker.recognize(processedImg);
+      await worker.terminate();
+      rawOcrText = (ret && ret.data && ret.data.text) ? ret.data.text : '';
+      console.log('[Tesseract OCR Raw Text]:\n', rawOcrText);
+    }
+  } catch (ocrErr) {
+    console.warn('[Tesseract Exception]:', ocrErr);
+  }
+
+  // Analisis teks sebenar yang dijumpai pada kertas borang
+  const extracted = parseApplicationText(rawOcrText);
+  extracted.ocrEngine = 'Tesseract.js (Enjin OCR Klien Tempatan)';
+  return extracted;
+}
+
+/**
+ * Pengekstrak Pintar Teks Borang Bomba daripada Hasil OCR Sebenar
+ * Mengesan No. IC, Nama Penuh, Tarikh Lahir, Jawatan, No. Telefon, dan Emel.
+ * Tidak sesekali menjana nama palsu; medan yang tiada akan ditandakan amaran kuning.
+ */
+function parseApplicationText(rawText) {
+  const text = (rawText || '').trim();
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // 1. Ekstrak No. IC Brunei (format 01-xxxxxx atau 00-xxxxxx atau 8 digit)
+  let ic = '';
+  const icMatch = text.match(/\b(0[01])[-–—\s]?(\d{6})\b/) || text.match(/\b\d{8}\b/);
+  if (icMatch) {
+    if (icMatch[1] && icMatch[2]) {
+      ic = `${icMatch[1]}-${icMatch[2]}`;
+    } else {
+      ic = `${icMatch[0].slice(0, 2)}-${icMatch[0].slice(2)}`;
+    }
+  }
+
+  // 2. Ekstrak Nama Penuh
+  let name = '';
+  for (let i = 0; i < lines.length; i++) {
+    const upper = lines[i].toUpperCase();
+    if (upper.includes('NAMA') || upper.includes('NAME')) {
+      const cleaned = upper.replace(/^.*NAMA\s*(PENUH)?\s*[:.\-—]?\s*/i, '').trim();
+      if (cleaned.length > 3 && !/BORANG|BOMBA|PENYELAMAT/.test(cleaned)) {
+        name = cleaned;
+        break;
+      } else if (lines[i + 1] && lines[i + 1].length > 3) {
+        name = lines[i + 1].trim().toUpperCase();
+        break;
+      }
+    }
+  }
+  // Jika tidak jumpa tag "NAMA", cari baris teks huruf besar yang munasabah
+  if (!name) {
+    const candidateLines = lines.filter(l => {
+      const u = l.toUpperCase();
+      return u === l && l.length >= 6 && !/\d/.test(l) && !/BORANG|BOMBA|JABATAN|SYARAT|KEMENTERIAN|KERAJAAN|PERMOHONAN/.test(u);
+    });
+    if (candidateLines.length > 0) {
+      name = candidateLines[0];
+    }
+  }
+
+  // 3. Ekstrak Tarikh Lahir (format DD/MM/YYYY atau YYYY-MM-DD)
+  let dob = '';
+  const dobMatch = text.match(/\b(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})\b/) || text.match(/\b(\d{4})[/\-](\d{2})[/\-](\d{2})\b/);
+  if (dobMatch) {
+    if (dobMatch[3] && dobMatch[3].length === 4) {
+      const d = String(dobMatch[1]).padStart(2, '0');
+      const m = String(dobMatch[2]).padStart(2, '0');
+      const y = dobMatch[3];
+      dob = `${y}-${m}-${d}`;
+    } else if (dobMatch[1] && dobMatch[1].length === 4) {
+      dob = `${dobMatch[1]}-${dobMatch[2]}-${dobMatch[3]}`;
+    }
+  }
+
+  // 4. Ekstrak No. Telefon (Brunei +673 8xxxxxx atau 8xxxxxx / 7xxxxxx)
+  let tel = '';
+  const telMatch = text.match(/\+?673[\s\-]?([278]\d{6})\b/) || text.match(/\b([278]\d{6})\b/);
+  if (telMatch) {
+    tel = `+673 ${telMatch[1] || telMatch[0]}`.replace(/\s+/g, ' ');
+  }
+
+  // 5. Ekstrak Alamat Emel
+  let email = '';
+  const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  if (emailMatch) {
+    email = emailMatch[0].toLowerCase();
+  }
+
+  // 6. Ekstrak Jawatan Dipohon
+  let jawatan = 'Ahli Bomba dan Penyelamat';
+  const lower = text.toLowerCase();
+  if (lower.includes('penguasa bomba') || lower.includes('pbp')) jawatan = 'Penguasa Bomba dan Penyelamat';
+  else if (lower.includes('timbalan penguasa') || lower.includes('tpbp')) jawatan = 'Timbalan Penguasa Bomba dan Penyelamat';
+  else if (lower.includes('penolong penguasa') || lower.includes('ppbp')) jawatan = 'Penolong Penguasa Bomba dan Penyelamat';
+  else if (lower.includes('timbalan pegawai') || lower.includes('tpb')) jawatan = 'Timbalan Pegawai Balai';
+  else if (lower.includes('pegawai balai') || lower.includes('pb')) jawatan = 'Pegawai Balai';
+
+  // 7. Jantina & Status
+  const jantina = (lower.includes('perempuan') || lower.includes('wanita') || lower.includes('female')) ? 'Perempuan' : 'Lelaki';
+  const perkahwinan = (lower.includes('berkahwin') || lower.includes('kahwin') || lower.includes('married')) ? 'Berkahwin' : 'Bujang';
+  const kerakyatan = (lower.includes('penduduk tetap') || lower.includes('ungu')) ? 'Penduduk Tetap' : 'Rakyat Brunei Darussalam';
+
+  // Confidence Flags: Tandakan true bagi medan yang tidak dijumpai pada kertas agar disemak pegawai
+  const flags = {
+    icNumber: !ic,
+    fullName: !name,
+    positionApplied: false,
+    dateOfBirth: !dob,
+    gender: false,
+    maritalStatus: false,
+    citizenshipStatus: false,
+    contactNumber: !tel,
+    email: !email
+  };
 
   return {
-    icNumber: '01-128492',
-    fullName: 'AWANG MOHAMMAD HARIS BIN ABDULLAH',
-    positionApplied: 'Ahli Bomba dan Penyelamat',
-    dateOfBirth: '2003-05-14',
-    gender: 'Lelaki',
-    maritalStatus: 'Bujang',
-    citizenshipStatus: 'Rakyat Brunei Darussalam',
-    contactNumber: '+673 8729104',
-    email: 'haris.abdullah@gmail.com',
-    confidenceFlags: {
-      icNumber: false,
-      fullName: false,
-      positionApplied: false,
-      dateOfBirth: false,
-      gender: false,
-      maritalStatus: false,
-      citizenshipStatus: false,
-      contactNumber: true, // Dicontohkan sebagai tulisan tangan kabur untuk semakan
-      email: false
-    }
+    icNumber: ic || '',
+    fullName: name || '',
+    positionApplied: jawatan,
+    dateOfBirth: dob || '',
+    gender: jantina,
+    maritalStatus: perkahwinan,
+    citizenshipStatus: kerakyatan,
+    contactNumber: tel || '',
+    email: email || '',
+    confidenceFlags: flags,
+    rawOcrText: text
   };
 }
 
@@ -2739,5 +2864,344 @@ async function verifyAndSaveToGoogleSheets() {
       btn.innerHTML = origHtml;
       refreshIcons();
     }
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// 13. LIVE REMOTE SYNC / COMPANION MODE (IPAD / TELEFON LAPANGAN)
+// ════════════════════════════════════════════════════════════
+
+let hostSessionCode = 'BFRD-' + Math.floor(1000 + Math.random() * 9000);
+let peerHost = null;
+let activeCompanionConn = null;
+
+// Remote terminal states (on iPad / Mobile)
+let remoteHeight = 168.0;
+let remoteWeight = 65.0;
+let remoteChest = 33.0;
+let remoteHold = false;
+let peerRemote = null;
+let remoteConnToHost = null;
+
+/**
+ * Inisialisasi Host di Komputer Desktop / Laptop Kaunter
+ */
+function initDesktopCompanionHost() {
+  const stored = sessionStorage.getItem('bfrd_session_pin');
+  if (stored) {
+    hostSessionCode = stored;
+  } else {
+    sessionStorage.setItem('bfrd_session_pin', hostSessionCode);
+  }
+
+  // Sediakan pautan PeerJS untuk sambungan nirkabel P2P sifar kelengahan (zero lag)
+  if (typeof Peer !== 'undefined') {
+    try {
+      peerHost = new Peer(hostSessionCode, { debug: 0 });
+
+      peerHost.on('open', id => {
+        console.log('[PeerJS Desktop Host Siap Sedia]:', id);
+        updateCompanionUI(false);
+      });
+
+      peerHost.on('connection', conn => {
+        activeCompanionConn = conn;
+        console.log('[PeerJS iPad Terhubung]:', conn.peer);
+        updateCompanionUI(true);
+        showToast('📱 iPad / Telefon Pegawai berjaya dipautkan secara langsung (LIVE SYNC)!', 'success');
+
+        conn.on('data', data => {
+          handleIncomingLiveMeasurement(data);
+        });
+
+        conn.on('close', () => {
+          activeCompanionConn = null;
+          updateCompanionUI(false);
+          showToast('Sambungan iPad terputus.', 'info');
+        });
+      });
+
+      peerHost.on('error', err => {
+        console.warn('[PeerJS Host Notice]:', err);
+      });
+    } catch (e) {
+      console.warn('Gagal memulakan PeerJS host:', e);
+    }
+  }
+
+  // Sandaran Pengezonan Tempatan (StorageEvent untuk ujian split window pada komputer sama)
+  window.addEventListener('storage', e => {
+    if (e.key === 'bfrd_companion_sync' && e.newValue) {
+      try {
+        const data = JSON.parse(e.newValue);
+        if (data && data.sessionId === hostSessionCode) {
+          handleIncomingLiveMeasurement(data);
+        }
+      } catch (err) {}
+    }
+  });
+}
+
+function updateCompanionUI(isConnected) {
+  const dot = document.getElementById('sync-pulse-dot');
+  const title = document.getElementById('sync-status-title');
+  const badge = document.getElementById('companion-conn-badge');
+  const modalTxt = document.getElementById('companion-modal-status-txt');
+  const modalStatus = document.getElementById('companion-modal-status');
+
+  if (isConnected) {
+    if (dot) dot.className = 'pulse-dot-green';
+    if (title) title.textContent = '🟢 iPad Pegawai Terhubung (Masa Nyata)';
+    if (badge) {
+      badge.style.background = 'var(--green-bg)';
+      badge.style.color = 'var(--green-text)';
+      badge.textContent = 'Terhubung (Live Sync)';
+    }
+    if (modalTxt) modalTxt.textContent = '🟢 iPad Pegawai Sedia Mengawal & Menghantar Bacaan Semerta!';
+    if (modalStatus) modalStatus.className = 'companion-status-indicator active';
+  } else {
+    if (dot) dot.className = 'pulse-dot-amber';
+    if (title) title.textContent = 'Penyegerakan Langsung iPad / Telefon (Live Remote Sync)';
+    if (badge) {
+      badge.style.background = '#E0E7FF';
+      badge.style.color = 'var(--navy)';
+      badge.textContent = 'Sedia Dipautkan';
+    }
+    if (modalTxt) modalTxt.textContent = 'Menunggu imbasan daripada iPad / telefon bimbit...';
+    if (modalStatus) modalStatus.className = 'companion-status-indicator';
+  }
+}
+
+function openCompanionModal() {
+  const modal = document.getElementById('modal-companion-sync');
+  const qrImg = document.getElementById('companion-qr-img');
+  const pinEl = document.getElementById('companion-session-code');
+  const urlEl = document.getElementById('companion-direct-url');
+
+  const cleanPin = hostSessionCode.replace('BFRD-', '');
+  if (pinEl) pinEl.textContent = hostSessionCode;
+
+  const targetUrl = `${window.location.origin}${window.location.pathname}?remote=${cleanPin}`;
+  if (urlEl) urlEl.textContent = targetUrl;
+
+  if (qrImg) {
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(targetUrl)}`;
+  }
+
+  if (modal) modal.style.display = 'flex';
+  refreshIcons();
+}
+
+function closeCompanionModal() {
+  const modal = document.getElementById('modal-companion-sync');
+  if (modal) modal.style.display = 'none';
+}
+
+function copyCompanionUrl() {
+  const cleanPin = hostSessionCode.replace('BFRD-', '');
+  const targetUrl = `${window.location.origin}${window.location.pathname}?remote=${cleanPin}`;
+  navigator.clipboard.writeText(targetUrl).then(() => {
+    showToast('Pautan iPad disalin ke papan klip!', 'success');
+  }).catch(() => {
+    showToast('Pautan: ' + targetUrl, 'info');
+  });
+}
+
+function openCompanionInNewTab() {
+  const cleanPin = hostSessionCode.replace('BFRD-', '');
+  const targetUrl = `${window.location.origin}${window.location.pathname}?remote=${cleanPin}`;
+  window.open(targetUrl, '_blank');
+}
+
+/**
+ * Terima bacaan langsung daripada iPad di komputer desktop
+ */
+function handleIncomingLiveMeasurement(data) {
+  if (data.height) currentHeight = parseFloat(data.height);
+  if (data.weight) currentWeight = parseFloat(data.weight);
+  if (data.chest) currentChest = parseFloat(data.chest);
+  if (typeof data.isHold !== 'undefined') isHold = data.isHold;
+
+  updateHeightDisplay();
+  updateWeightDisplay();
+  updateChestDisplay();
+  calcBMI();
+
+  const sub = document.getElementById('remote-sync-status-txt');
+  if (sub) {
+    sub.innerHTML = `<strong>📡 Bacaan iPad Masa Nyata:</strong> Tinggi: <b>${currentHeight.toFixed(1)} cm</b> | Berat: <b>${currentWeight.toFixed(1)} kg</b> | Dada: <b>${currentChest.toFixed(1)}"</b>`;
+  }
+}
+
+/**
+ * Inisialisasi Mod Terminal iPad / Telefon Lapangan (?remote=XXXX)
+ */
+function initRemoteCompanion(code) {
+  const targetHostId = code.startsWith('BFRD-') ? code : `BFRD-${code}`;
+
+  // Sembunyikan elemen utama dan paparkan terminal lapangan
+  const login = document.getElementById('page-login');
+  const shell = document.getElementById('app-shell');
+  const term = document.getElementById('page-remote-terminal');
+
+  if (login) login.style.display = 'none';
+  if (shell) shell.style.display = 'none';
+  if (term) term.style.display = 'block';
+
+  const statusTxt = document.getElementById('remote-conn-txt');
+  if (statusTxt) statusTxt.textContent = `MENYAMBUNG KE #${code}...`;
+
+  // Sambung ke Host melalui PeerJS
+  if (typeof Peer !== 'undefined') {
+    try {
+      peerRemote = new Peer();
+      peerRemote.on('open', () => {
+        console.log('[iPad Peer Terbuka, menyambung ke host]:', targetHostId);
+        remoteConnToHost = peerRemote.connect(targetHostId);
+
+        remoteConnToHost.on('open', () => {
+          console.log('[iPad Terhubung ke Host]');
+          if (statusTxt) statusTxt.textContent = `🟢 BERSAMBUNG KE KOMPUTER #${code}`;
+          showToast(`Terhubung ke Komputer Sesi #${code}!`, 'success');
+          sendRemoteLiveBroadcast();
+        });
+
+        remoteConnToHost.on('close', () => {
+          if (statusTxt) statusTxt.textContent = `🔴 SAMBUNGAN TERPUTUS`;
+          showToast('Sambungan ke komputer terputus.', 'error');
+        });
+      });
+    } catch (e) {
+      console.warn('PeerJS remote error:', e);
+    }
+  }
+
+  // Tetapkan nilai awal
+  updateRemoteDisplay();
+}
+
+function remoteAdjustHeight(delta) {
+  remoteHeight = Math.round((remoteHeight + delta) * 10) / 10;
+  if (remoteHeight < 100) remoteHeight = 100;
+  if (remoteHeight > 240) remoteHeight = 240;
+  updateRemoteDisplay();
+  sendRemoteLiveBroadcast();
+  hapticFeedback();
+}
+
+function remoteSetHeight(val) {
+  remoteHeight = parseFloat(val) || 168.0;
+  updateRemoteDisplay();
+  sendRemoteLiveBroadcast();
+  hapticFeedback();
+}
+
+function remoteAdjustWeight(delta) {
+  remoteWeight = Math.round((remoteWeight + delta) * 10) / 10;
+  if (remoteWeight < 30) remoteWeight = 30;
+  if (remoteWeight > 200) remoteWeight = 200;
+  updateRemoteDisplay();
+  sendRemoteLiveBroadcast();
+  hapticFeedback();
+}
+
+function remoteAdjustChest(delta) {
+  remoteChest = Math.round((remoteChest + delta) * 10) / 10;
+  if (remoteChest < 20) remoteChest = 20;
+  if (remoteChest > 60) remoteChest = 60;
+  updateRemoteDisplay();
+  sendRemoteLiveBroadcast();
+  hapticFeedback();
+}
+
+function remoteToggleTare() {
+  hapticFeedback();
+  const tarePill = document.getElementById('remote-weight-tare-pill');
+  if (tarePill) tarePill.textContent = 'Tare 0.00 kg (Disahkan)';
+  showToast('Tare 0.00 kg disahkan di lapangan!', 'info');
+  sendRemoteLiveBroadcast();
+}
+
+function remoteToggleHold() {
+  remoteHold = !remoteHold;
+  hapticFeedback();
+  const holdBtn = document.getElementById('remote-hold-btn');
+  const holdTxt = document.getElementById('remote-hold-txt');
+  if (holdBtn && holdTxt) {
+    if (remoteHold) {
+      holdBtn.classList.add('hold-active');
+      holdTxt.textContent = 'Hold Aktif (Kunci)';
+      showToast('Bacaan berat badan dikunci!', 'info');
+    } else {
+      holdBtn.classList.remove('hold-active');
+      holdTxt.textContent = 'Kunci Bacaan Hold';
+      showToast('Kunci berat badan dilepaskan', 'info');
+    }
+  }
+  sendRemoteLiveBroadcast();
+}
+
+function updateRemoteDisplay() {
+  const hEl = document.getElementById('remote-height-val');
+  const wEl = document.getElementById('remote-weight-val');
+  const cEl = document.getElementById('remote-chest-val');
+
+  if (hEl) hEl.textContent = remoteHeight.toFixed(1);
+  if (wEl) wEl.textContent = remoteWeight.toFixed(1);
+  if (cEl) cEl.textContent = remoteChest.toFixed(1);
+
+  // Kira BMI di iPad
+  const tM = remoteHeight / 100;
+  const bmi = (remoteWeight / (tM * tM)).toFixed(2);
+  const bmiEl = document.getElementById('remote-bmi-num');
+  const statusEl = document.getElementById('remote-bmi-status');
+
+  if (bmiEl) bmiEl.textContent = bmi;
+  if (statusEl) {
+    const b = parseFloat(bmi);
+    if (b >= 19.0 && b <= 27.0) {
+      statusEl.className = 'badge-tag pass';
+      statusEl.textContent = 'LULUS';
+    } else if (b > 27.0 && b <= 29.5) {
+      statusEl.className = 'badge-tag warn';
+      statusEl.textContent = 'PERHATIAN';
+    } else {
+      statusEl.className = 'badge-tag fail';
+      statusEl.textContent = 'GAGAL';
+    }
+  }
+}
+
+function sendRemoteLiveBroadcast() {
+  const payload = {
+    type: 'LIVE_MEASUREMENT',
+    sessionId: hostSessionCode,
+    height: remoteHeight,
+    weight: remoteWeight,
+    chest: remoteChest,
+    isHold: remoteHold,
+    timestamp: Date.now()
+  };
+
+  // 1. Hantar melalui WebRTC terus ke PC (P2P <50ms)
+  if (remoteConnToHost && remoteConnToHost.open) {
+    remoteConnToHost.send(payload);
+  }
+
+  // 2. Sandaran storan tempatan untuk split tab
+  try {
+    localStorage.setItem('bfrd_companion_sync', JSON.stringify(payload));
+  } catch (e) {}
+}
+
+function remoteConfirmValues() {
+  sendRemoteLiveBroadcast();
+  hapticFeedback();
+  showToast('Bacaan disahkan dan dikunci ke komputer utama!', 'success');
+}
+
+function hapticFeedback() {
+  if (navigator.vibrate) {
+    try { navigator.vibrate(35); } catch (e) {}
   }
 }
