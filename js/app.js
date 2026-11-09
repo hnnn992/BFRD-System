@@ -389,26 +389,31 @@ async function handleLogin(e) {
     const res = await apiPost('login', { idPegawai, pin });
 
     if (res.success && res.token) {
+      const userRole = res.role || (res.user && res.user.role) || 'pegawai';
+      const userNama = res.nama || (res.user && res.user.nama) || 'Pegawai Bertugas';
+      const userId   = (res.user && res.user.idPegawai) || idPegawai;
+
       STATE.user = {
         token: res.token,
-        idPegawai: res.user.idPegawai,
-        role: res.user.role,
-        nama: res.user.nama
+        idPegawai: userId,
+        role: userRole,
+        nama: userNama
       };
 
       sessionStorage.setItem('bfrdToken', res.token);
-      sessionStorage.setItem('bfrdId', res.user.idPegawai);
-      sessionStorage.setItem('bfrdRole', res.user.role);
-      sessionStorage.setItem('bfrdNama', res.user.nama);
+      sessionStorage.setItem('bfrdId', userId);
+      sessionStorage.setItem('bfrdRole', userRole);
+      sessionStorage.setItem('bfrdNama', userNama);
 
-      showToast(`Selamat bertugas, ${res.user.nama}!`, 'success');
+      showToast(`Selamat bertugas, ${userNama}!`, 'success');
       updateUserInterface();
       checkAuth();
     } else {
       showToast(res.message || 'Log masuk gagal.', 'error');
     }
   } catch (err) {
-    showToast('Ralat sambungan pelayan semasa log masuk.', 'error');
+    console.error('Login error detail:', err);
+    showToast(`Ralat semasa log masuk: ${err.message}`, 'error');
   } finally {
     btnSubmit.disabled = false;
     btnSubmit.innerHTML = `<i data-lucide="log-in"></i><span>Log Masuk Kaunter</span>`;
