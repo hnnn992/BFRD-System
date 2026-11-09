@@ -392,6 +392,41 @@
             </div>
           </div>
 
+          <!-- Kad AI Vision: Pengekstrakan Borang Fizikal Automatik -->
+          <div class="ai-vision-card">
+            <div class="ai-vision-left">
+              <div class="ai-vision-icon">
+                <i data-lucide="scan-line"></i>
+              </div>
+              <div class="ai-vision-info">
+                <div class="ai-vision-tag">
+                  <span class="pulse-dot-green"></span>
+                  <strong>AI VISION & EXTRACTION • BORANG KERTAS</strong>
+                  <span class="ai-chip-ready">Gemini Vision Siap Sedia</span>
+                </div>
+                <h3 class="ai-vision-title">Ekstrak Data Borang Fizikal Pemohon Menggunakan AI</h3>
+                <p class="ai-vision-desc">
+                  Ambil foto borang permohonan fizikal melalui kamera atau muat naik fail. Sistem akan memproses imej (HTML5 Canvas grayscale & lonjakan kontras binarize), mengekstrak tulisan tangan calon mengikut skema rasmi Bomba, dan memaparkan <strong>Semakan Bersebelahan (Side-by-Side Review)</strong>.
+                </p>
+              </div>
+            </div>
+            <div class="ai-vision-actions">
+              <button type="button" class="btn btn-navy btn-ai-camera" onclick="openCameraAlignmentModal()">
+                <i data-lucide="camera" style="width:16px;height:16px;"></i>
+                <span>Imbas Kamera (Panduan Bingkai)</span>
+              </button>
+              <button type="button" class="btn btn-outlined btn-ai-upload" onclick="triggerFileInput()">
+                <i data-lucide="file-up" style="width:15px;height:15px;"></i>
+                <span>Muat Naik Imej Borang</span>
+              </button>
+              <button type="button" class="btn-ai-key-config" onclick="openApiKeyModal()" title="Konfigurasi Kunci API Gemini">
+                <i data-lucide="key" style="width:14px;height:14px;"></i>
+              </button>
+              <!-- Hidden Input File & Capture -->
+              <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display:none;" onchange="handleFormPhotoSelected(event)">
+            </div>
+          </div>
+
           <form id="form-saringan" onsubmit="handleSimpanPemohon(event)">
             <!-- Bahagian 1: Data Peribadi -->
             <div class="card form-section">
@@ -1447,6 +1482,271 @@
       <span>Peranti</span>
     </button>
   </nav>
+
+  <!-- ============================================================
+       MODAL 1: PANDUAN PENJAJARAN BINGKAI KAMERA (ALIGNMENT OVERLAY)
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-camera-align" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-camera-align')">
+    <div class="camera-align-modal">
+      <div class="camera-align-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#FFF;">
+            <i data-lucide="viewfinder" style="width:20px;height:20px;"></i>
+          </div>
+          <div>
+            <h3 style="color:#FFF;font-size:15px;font-weight:700;">Panduan Penjajaran Borang Fizikal</h3>
+            <span style="color:#94A3B8;font-size:11.5px;">Bomba Brunei • Penangkapan Imej Bersepadu</span>
+          </div>
+        </div>
+        <button type="button" class="numpad-close-btn" style="color:#FFF;" onclick="closeCameraAlignmentModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="camera-align-viewfinder">
+        <!-- Semi-transparent overlay with central clear A4 guide -->
+        <div class="align-frame-box">
+          <div class="corner-bracket top-left"></div>
+          <div class="corner-bracket top-right"></div>
+          <div class="corner-bracket bottom-left"></div>
+          <div class="corner-bracket bottom-right"></div>
+          <div class="align-crosshair-h"></div>
+          <div class="align-crosshair-v"></div>
+          <div class="align-guide-text">
+            <i data-lucide="file-text" style="width:28px;height:28px;margin-bottom:6px;"></i>
+            <span>SEJAJARKAN KERTAS BORANG A4 DI DALAM BINGKAI INI</span>
+            <small>Pastikan nama, No. IC & tulisan tangan terang tanpa silau cahaya</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="camera-align-footer">
+        <div style="font-size:12px;color:#CBD5E1;">
+          <i data-lucide="info" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>
+          Imej akan diproses secara automatik menerusi HTML5 Canvas (Grayscale & Binarization).
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button type="button" class="btn btn-outlined" style="color:#FFF;border-color:rgba(255,255,255,0.3);" onclick="closeCameraAlignmentModal()">Batal</button>
+          <button type="button" class="btn btn-red" onclick="triggerCameraCapture()">
+            <i data-lucide="camera" style="width:16px;height:16px;"></i>
+            <span>Buka Kamera Sekarang</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 2: DASHBOARD SEMAKAN BERSEBELAHAN (SIDE-BY-SIDE VERIFICATION)
+       ============================================================ -->
+  <div class="sidebyside-modal-overlay" id="modal-ai-sidebyside" style="display:none;">
+    <div class="sidebyside-modal">
+      <!-- Header -->
+      <div class="sidebyside-header">
+        <div class="sidebyside-header-left">
+          <div class="sidebyside-badge">
+            <i data-lucide="sparkles" style="width:14px;height:14px;"></i>
+            <span>AI VISION EXTRACTION VERIFIED</span>
+          </div>
+          <h2 class="sidebyside-title">Semakan Bersebelahan: Imej Borang Fizikal vs Data Ekstraksi</h2>
+        </div>
+        <div class="sidebyside-header-right">
+          <div class="confidence-summary-pill" id="ai-confidence-pill">
+            <span class="dot-green" id="ai-conf-dot"></span>
+            <span id="ai-confidence-text">9 / 9 Medan Sah (Sedia Disahkan)</span>
+          </div>
+          <button type="button" class="sidebyside-close-btn" onclick="closeSideBySideModal()" title="Tutup">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Side-by-Side Content Grid -->
+      <div class="sidebyside-body">
+        <!-- Left Column: Image Viewer with Zoom/Pan -->
+        <div class="sidebyside-left-pane">
+          <div class="viewer-toolbar">
+            <div class="viewer-toggles">
+              <button type="button" class="view-btn active" id="btn-view-processed" onclick="toggleViewerMode('processed')">
+                <i data-lucide="contrast" style="width:13px;height:13px;"></i>
+                <span>Imej Kontras AI (Canvas)</span>
+              </button>
+              <button type="button" class="view-btn" id="btn-view-raw" onclick="toggleViewerMode('raw')">
+                <i data-lucide="image" style="width:13px;height:13px;"></i>
+                <span>Imej Asal</span>
+              </button>
+            </div>
+            <div class="viewer-zoom-controls">
+              <button type="button" class="zoom-btn" onclick="zoomImage(-0.2)" title="Zum Keluar"><i data-lucide="minus"></i></button>
+              <span class="zoom-level-text" id="lbl-zoom-level">100%</span>
+              <button type="button" class="zoom-btn" onclick="zoomImage(0.2)" title="Zum Masuk"><i data-lucide="plus"></i></button>
+              <button type="button" class="zoom-btn" onclick="resetZoom()" title="Set Semula Zum"><i data-lucide="maximize-2"></i></button>
+            </div>
+          </div>
+
+          <div class="image-viewport" id="image-viewport" onmousedown="startPan(event)" onmousemove="doPan(event)" onmouseup="endPan()" onmouseleave="endPan()">
+            <img id="sidebyside-preview-img" src="" alt="Pratinjau Borang Permohonan" class="zoomable-form-img">
+            <div class="viewport-hint">
+              <i data-lucide="move" style="width:12px;height:12px;"></i>
+              <span>Klik dan seret untuk gerakkan imej (Pan)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Verification Form with Highlighting -->
+        <div class="sidebyside-right-pane">
+          <div class="form-review-notice">
+            <i data-lucide="shield-alert" style="width:16px;height:16px;color:var(--gold-dark);flex-shrink:0;"></i>
+            <span>Sila semak maklumat yang diekstrak daripada tulisan tangan. Medan bertanda <strong>kuning</strong> menunjukkan keyakinan rendah atau teks kabur yang memerlukan semakan pegawai.</span>
+          </div>
+
+          <form id="sidebyside-form" onsubmit="event.preventDefault();">
+            <div class="sidebyside-form-grid">
+              <!-- No. IC -->
+              <div class="review-field-group" id="group-review-ic">
+                <div class="review-label-row">
+                  <label for="review-inp-ic">No. Kad Pengenalan (IC) <span class="req">*</span></label>
+                  <span class="confidence-badge" id="badge-review-ic">Disahkan</span>
+                </div>
+                <input type="text" class="review-input" id="review-inp-ic" placeholder="01-123456" oninput="markFieldVerified('ic')">
+              </div>
+
+              <!-- Nama Penuh -->
+              <div class="review-field-group full-width" id="group-review-nama">
+                <div class="review-label-row">
+                  <label for="review-inp-nama">Nama Penuh Calon (Huruf Besar) <span class="req">*</span></label>
+                  <span class="confidence-badge" id="badge-review-nama">Disahkan</span>
+                </div>
+                <input type="text" class="review-input uppercase" id="review-inp-nama" placeholder="AWANG MOHAMMAD HARIS BIN ABDULLAH" oninput="markFieldVerified('nama')">
+              </div>
+
+              <!-- Jawatan Dipohon -->
+              <div class="review-field-group" id="group-review-jawatan">
+                <div class="review-label-row">
+                  <label for="review-inp-jawatan">Jawatan Dipohon <span class="req">*</span></label>
+                  <span class="confidence-badge" id="badge-review-jawatan">Disahkan</span>
+                </div>
+                <select class="review-input" id="review-inp-jawatan" onchange="markFieldVerified('jawatan')">
+                  <option value="Ahli Bomba dan Penyelamat">Ahli Bomba dan Penyelamat (ABP)</option>
+                  <option value="Timbalan Pegawai Balai">Timbalan Pegawai Balai (TPB)</option>
+                  <option value="Pegawai Balai">Pegawai Balai (PB)</option>
+                  <option value="Penolong Penguasa Bomba dan Penyelamat">Penolong Penguasa (PPBP)</option>
+                  <option value="Timbalan Penguasa Bomba dan Penyelamat">Timbalan Penguasa (TPBP)</option>
+                  <option value="Penguasa Bomba dan Penyelamat">Penguasa Bomba (PBP)</option>
+                </select>
+              </div>
+
+              <!-- Tarikh Lahir -->
+              <div class="review-field-group" id="group-review-tlahir">
+                <div class="review-label-row">
+                  <label for="review-inp-tlahir">Tarikh Lahir <span class="req">*</span></label>
+                  <span class="confidence-badge" id="badge-review-tlahir">Disahkan</span>
+                </div>
+                <input type="date" class="review-input" id="review-inp-tlahir" onchange="markFieldVerified('tlahir')">
+              </div>
+
+              <!-- Jantina -->
+              <div class="review-field-group" id="group-review-jantina">
+                <div class="review-label-row">
+                  <label for="review-inp-jantina">Jantina <span class="req">*</span></label>
+                  <span class="confidence-badge" id="badge-review-jantina">Disahkan</span>
+                </div>
+                <select class="review-input" id="review-inp-jantina" onchange="markFieldVerified('jantina')">
+                  <option value="Lelaki">Lelaki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+              </div>
+
+              <!-- Status Perkahwinan -->
+              <div class="review-field-group" id="group-review-perkahwinan">
+                <div class="review-label-row">
+                  <label for="review-inp-perkahwinan">Status Perkahwinan <span class="req">*</span></label>
+                  <span class="confidence-badge" id="badge-review-perkahwinan">Disahkan</span>
+                </div>
+                <select class="review-input" id="review-inp-perkahwinan" onchange="markFieldVerified('perkahwinan')">
+                  <option value="Bujang">Bujang (Belum Berkahwin)</option>
+                  <option value="Berkahwin">Berkahwin</option>
+                </select>
+              </div>
+
+              <!-- Status Kerakyatan -->
+              <div class="review-field-group" id="group-review-kerakyatan">
+                <div class="review-label-row">
+                  <label for="review-inp-kerakyatan">Status Kerakyatan <span class="req">*</span></label>
+                  <span class="confidence-badge" id="badge-review-kerakyatan">Disahkan</span>
+                </div>
+                <select class="review-input" id="review-inp-kerakyatan" onchange="markFieldVerified('kerakyatan')">
+                  <option value="Rakyat Brunei Darussalam">Rakyat Brunei Darussalam (Kuning)</option>
+                  <option value="Penduduk Tetap">Penduduk Tetap (Ungu)</option>
+                  <option value="Bukan Warganegara">Bukan Warganegara (Hijau / Asing)</option>
+                </select>
+              </div>
+
+              <!-- No. Telefon -->
+              <div class="review-field-group" id="group-review-tel">
+                <div class="review-label-row">
+                  <label for="review-inp-tel">No. Telefon <span class="req">*</span></label>
+                  <span class="confidence-badge" id="badge-review-tel">Disahkan</span>
+                </div>
+                <input type="tel" class="review-input" id="review-inp-tel" placeholder="+673 8xxxxxx" oninput="markFieldVerified('tel')">
+              </div>
+
+              <!-- Alamat Emel -->
+              <div class="review-field-group full-width" id="group-review-emel">
+                <div class="review-label-row">
+                  <label for="review-inp-emel">Alamat Emel</label>
+                  <span class="confidence-badge" id="badge-review-emel">Disahkan</span>
+                </div>
+                <input type="email" class="review-input" id="review-inp-emel" placeholder="pemohon@domain.com" oninput="markFieldVerified('emel')">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Footer Action Bar -->
+      <div class="sidebyside-footer">
+        <button type="button" class="btn btn-outlined" onclick="closeSideBySideModal()">
+          Batal & Tutup
+        </button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-navy" onclick="applyExtractedDataToKaunter()">
+            <i data-lucide="arrow-right-circle" style="width:16px;height:16px;"></i>
+            <span>Terapkan ke Kaunter Saringan</span>
+          </button>
+          <button type="button" class="btn btn-red" id="btn-verify-save-sheets" onclick="verifyAndSaveToGoogleSheets()">
+            <i data-lucide="cloud-upload" style="width:16px;height:16px;"></i>
+            <span>Sahkan & Simpan ke Pangkalan Data (Google Sheets)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 3: KONFIGURASI KUNCI API GEMINI VISION (OPSIONAL)
+       ============================================================ -->
+  <div class="modal-overlay" id="modal-gemini-key" style="display:none;" onclick="closeModalOnOverlay(event, 'modal-gemini-key')">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Konfigurasi Kunci API Gemini Vision</h3>
+        <button type="button" class="modal-close" onclick="closeApiKeyModal()"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:12.5px;color:var(--slate-muted);margin-bottom:12px;">
+          Masukkan Google Gemini API Key anda untuk membolehkan pengecaman tulisan tangan berkuasa tinggi berasaskan model <code>gemini-1.5-flash</code> secara langsung dari pelayar. Sekiranya dibiarkan kosong, sistem menggunakan enjin pengekstrakan pintar tempatan.
+        </p>
+        <div class="field-group">
+          <label class="field-label" for="inp-gemini-key">Gemini API Key</label>
+          <input type="password" class="field-input" id="inp-gemini-key" placeholder="AIzaSy...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outlined" onclick="closeApiKeyModal()">Tutup</button>
+        <button type="button" class="btn btn-navy" onclick="saveGeminiApiKey()">Simpan Kunci</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Container -->
   <div id="toast-container"></div>
