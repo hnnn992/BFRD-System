@@ -25,114 +25,9 @@ const STATE = {
   activeDetailData: null
 };
 
-// ── Data Contoh Asas (Digunakan untuk mod pratonton jika GAS_URL belum disambung) ──
-const SEED_JAWATAN = [
-  {
-    'Kod Jawatan': 'AB-01',
-    'Nama Jawatan': 'Ahli Bomba Lelaki Gred AB1',
-    'Min. Tinggi Lelaki (cm)': 165.0,
-    'Min. Tinggi Wanita (cm)': 0,
-    'Min. BMI': 18.5,
-    'Maks. BMI': 25.0,
-    'Syarat Tambahan': 'Memegang Lesen Memandu Kelas 3 & 4 yang sah'
-  },
-  {
-    'Kod Jawatan': 'PB-01',
-    'Nama Jawatan': 'Pegawai Bomba Wanita Gred C1',
-    'Min. Tinggi Lelaki (cm)': 0,
-    'Min. Tinggi Wanita (cm)': 157.0,
-    'Min. BMI': 18.0,
-    'Maks. BMI': 24.5,
-    'Syarat Tambahan': 'Lulus Ujian Penglihatan & Pendengaran'
-  },
-  {
-    'Kod Jawatan': 'PB-02',
-    'Nama Jawatan': 'Pegawai Bomba Lelaki Gred C1',
-    'Min. Tinggi Lelaki (cm)': 167.0,
-    'Min. Tinggi Wanita (cm)': 0,
-    'Min. BMI': 18.5,
-    'Maks. BMI': 25.0,
-    'Syarat Tambahan': 'Ijazah Sarjana Muda & Ujian Kecergasan Fizikal'
-  }
-];
-
-const SEED_PEMOHON = [
-  {
-    'ID Pendaftaran': 'BFRD-20261109-0001',
-    'Tarikh & Masa': '09/11/2026 09:15',
-    'No. IC': '01-123456',
-    'Nama Penuh': 'AWANG MOHAMMAD HARIS BIN ABDULLAH',
-    'Tarikh Lahir': '2003-05-14',
-    'Umur': 23,
-    'Jantina': 'Lelaki',
-    'No. Telefon': '+673 8765432',
-    'Emel': 'haris.abdullah@example.com',
-    'Jawatan Dipohon': 'Ahli Bomba Lelaki Gred AB1',
-    'Tinggi (cm)': 172.0,
-    'Berat (kg)': 68.5,
-    'Nilai BMI': 23.15,
-    'Status BMI': 'Lulus',
-    'Semakan Surat Panggilan': 'Ya',
-    'Semakan Kad Pengenalan': 'Ya',
-    'Semakan Sijil Akademik': 'Ya',
-    'Semakan CV & Surat': 'Ya',
-    'Semakan Dokumen Khas': 'Ya',
-    'Semakan Pasfoto': 'Ya',
-    'Keputusan Akhir': 'Layak',
-    'Catatan Pegawai': 'Calon dalam keadaan fizikal cergas dan memenuhi syarat asas bomba.',
-    'Pegawai Pemeriksa': 'p001'
-  },
-  {
-    'ID Pendaftaran': 'BFRD-20261109-0002',
-    'Tarikh & Masa': '09/11/2026 09:30',
-    'No. IC': '01-234567',
-    'Nama Penuh': 'DAYANG NURUL AIN BINTI HAJI IBRAHIM',
-    'Tarikh Lahir': '2002-11-20',
-    'Umur': 24,
-    'Jantina': 'Perempuan',
-    'No. Telefon': '+673 8899112',
-    'Emel': 'nurul.ain@example.com',
-    'Jawatan Dipohon': 'Pegawai Bomba Wanita Gred C1',
-    'Tinggi (cm)': 159.0,
-    'Berat (kg)': 54.0,
-    'Nilai BMI': 21.36,
-    'Status BMI': 'Lulus',
-    'Semakan Surat Panggilan': 'Ya',
-    'Semakan Kad Pengenalan': 'Ya',
-    'Semakan Sijil Akademik': 'Ya',
-    'Semakan CV & Surat': 'Ya',
-    'Semakan Dokumen Khas': 'Ya',
-    'Semakan Pasfoto': 'Ya',
-    'Keputusan Akhir': 'Layak',
-    'Catatan Pegawai': 'Dokumen lengkap. Keputusan fizikal sangat memuaskan.',
-    'Pegawai Pemeriksa': 'p001'
-  },
-  {
-    'ID Pendaftaran': 'BFRD-20261109-0003',
-    'Tarikh & Masa': '09/11/2026 09:45',
-    'No. IC': '01-345678',
-    'Nama Penuh': 'AWANG AHMAD SYAFIQ BIN ROSLI',
-    'Tarikh Lahir': '2004-03-08',
-    'Umur': 22,
-    'Jantina': 'Lelaki',
-    'No. Telefon': '+673 7123456',
-    'Emel': 'syafiq.rosli@example.com',
-    'Jawatan Dipohon': 'Ahli Bomba Lelaki Gred AB1',
-    'Tinggi (cm)': 162.0,
-    'Berat (kg)': 76.0,
-    'Nilai BMI': 28.96,
-    'Status BMI': 'Tidak Lulus',
-    'Semakan Surat Panggilan': 'Ya',
-    'Semakan Kad Pengenalan': 'Ya',
-    'Semakan Sijil Akademik': 'Ya',
-    'Semakan CV & Surat': 'Ya',
-    'Semakan Dokumen Khas': 'Tidak',
-    'Semakan Pasfoto': 'Ya',
-    'Keputusan Akhir': 'Tidak Layak',
-    'Catatan Pegawai': 'Tinggi tidak mencapai 165cm dan BMI kategori obesiti.',
-    'Pegawai Pemeriksa': 'p001'
-  }
-];
+// ── Tiada Data Tiruan (Persekitaran Pengeluaran Sebenar) ──
+const SEED_JAWATAN = [];
+const SEED_PEMOHON = [];
 
 // ════════════════════════════════════════════════════════════
 // 1. KOMUNIKASI API (GAS-PRO-API & CORS-Safe Pattern)
@@ -543,29 +438,29 @@ async function loadInitialData() {
     try {
       STATE.jawatanList = JSON.parse(cachedSyarat);
     } catch (e) {
-      STATE.jawatanList = SEED_JAWATAN;
+      STATE.jawatanList = [];
     }
   } else {
-    // Muat dari API
+    // Muat data syarat jawatan sebenar dari API Google Sheets
     const res = await apiGet('getSyaratJawatan');
-    if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+    if (res && res.success && Array.isArray(res.data)) {
       STATE.jawatanList = res.data;
       localStorage.setItem('cache_syarat', JSON.stringify(res.data));
       localStorage.setItem('cache_syarat_time', String(Date.now()));
     } else {
-      STATE.jawatanList = SEED_JAWATAN;
+      STATE.jawatanList = [];
     }
   }
 
   // Isi dropdown jawatan
   populateJawatanDropdowns();
 
-  // Muat data pemohon awal
+  // 2. Muat data rekod pemohon sebenar secara terus daripada Google Sheets
   const resP = await apiGet('getPemohon');
-  if (resP.success && Array.isArray(resP.data) && resP.data.length > 0) {
+  if (resP && resP.success && Array.isArray(resP.data)) {
     STATE.pemohonList = resP.data;
   } else {
-    STATE.pemohonList = SEED_PEMOHON;
+    STATE.pemohonList = [];
   }
   updateNavBadgeCount();
 }
