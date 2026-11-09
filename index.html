@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BFRD System — Body Fitness & Requirement Data System</title>
   <link rel="icon" type="image/png" href="img/logo-bomba.png">
-  <link rel="stylesheet" href="css/style.css?v=1.0.7">
+  <link rel="stylesheet" href="css/style.css?v=1.0.8">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js -->
@@ -307,120 +307,7 @@
             </div>
           </div>
 
-          <!-- 4. Hab Penilaian Pantas / Rekod Calon Terkini (Quick Candidate Evaluation Hub) -->
-          <div class="evaluation-hub-card">
-            <div class="section-header-row">
-              <div class="section-header-title">
-                <i data-lucide="user-check"></i>
-                <span>Hab Penilaian Pantas Calon Terkini (Quick Candidate Evaluation Hub)</span>
-              </div>
-              <div class="badge badge-blue" id="hub-session-tag">
-                <i data-lucide="activity" style="width:12px;height:12px;"></i> Saringan Semasa
-              </div>
-            </div>
-
-            <div id="hub-content-container">
-              <!-- Rendered dynamically by JS; placeholder shown if no candidate -->
-              <div class="hub-grid">
-                <!-- Profile Column -->
-                <div class="hub-profile-box">
-                  <div class="hub-avatar" id="hub-avatar">?</div>
-                  <div class="hub-candidate-id" id="hub-id">BFRD-TIADA-REKOD</div>
-                  <div class="hub-candidate-name" id="hub-nama">Belum Ada Calon Disaring Hari Ini</div>
-                  <div class="hub-candidate-pos" id="hub-jawatan">Sila mulakan pemeriksaan di Kaunter Saringan</div>
-                  <div class="hub-candidate-status">
-                    <span class="badge badge-amber" id="hub-status-badge">Menunggu Saringan</span>
-                  </div>
-                </div>
-
-                <!-- Biometric & Physical Quick Check -->
-                <div class="hub-subpanel">
-                  <div class="hub-subpanel-title">
-                    <i data-lucide="activity" style="color:var(--gold-dark);width:16px;height:16px;"></i>
-                    <span>Semakan Biometrik & Fizikal Pantas</span>
-                  </div>
-
-                  <div>
-                    <div class="hub-metric-row">
-                      <span class="hub-metric-lbl">Tinggi Badan:</span>
-                      <span class="hub-metric-val" id="hub-val-tinggi">- cm</span>
-                      <span class="hub-badge-ok" id="hub-badge-tinggi"><i data-lucide="check" style="width:12px;height:12px;"></i> Syarat Am</span>
-                    </div>
-
-                    <div class="hub-metric-row">
-                      <span class="hub-metric-lbl">Indeks BMI:</span>
-                      <span class="hub-metric-val" id="hub-val-bmi">-</span>
-                      <span class="hub-badge-ok" id="hub-badge-bmi"><i data-lucide="check" style="width:12px;height:12px;"></i> Julat 19 - 27</span>
-                    </div>
-
-                    <div class="hub-metric-row">
-                      <span class="hub-metric-lbl">Ukuran Dada (Lelaki):</span>
-                      <span class="hub-metric-val" id="hub-val-dada">-</span>
-                      <span class="hub-badge-ok" id="hub-badge-dada"><i data-lucide="check" style="width:12px;height:12px;"></i> &lt; 34" (86 cm)</span>
-                    </div>
-                  </div>
-
-                  <div style="font-size:11px;color:var(--slate-muted);margin-top:6px;">
-                    * Mengikut Garis Panduan Rasmi Jabatan Bomba dan Penyelamat Brunei.
-                  </div>
-                </div>
-
-                <!-- Document & General Requirements Matcher -->
-                <div class="hub-subpanel">
-                  <div class="hub-subpanel-title">
-                    <i data-lucide="file-check" style="color:#2563EB;width:16px;height:16px;"></i>
-                    <span>Padanan Dokumen & Kelayakan Rasmi</span>
-                  </div>
-
-                  <div>
-                    <div class="hub-doc-item">
-                      <span>1. Surat Panggilan & IC Brunei Pintar</span>
-                      <span class="hub-badge-ok" id="hub-doc-ic"><i data-lucide="check" style="width:11px;height:11px;"></i> Disahkan</span>
-                    </div>
-                    <div class="hub-doc-item">
-                      <span>2. Sijil Akademik & Transkrip Sah</span>
-                      <span class="hub-badge-ok" id="hub-doc-sijil"><i data-lucide="check" style="width:11px;height:11px;"></i> Lengkap</span>
-                    </div>
-                    <div class="hub-doc-item">
-                      <span>3. Deria: Pendengaran & Tidak Buta Warna</span>
-                      <span class="hub-badge-ok" id="hub-doc-deria"><i data-lucide="check" style="width:11px;height:11px;"></i> Lulus</span>
-                    </div>
-                    <div class="hub-doc-item">
-                      <span>4. Pemeriksaan Pegawai Perubatan Kerajaan</span>
-                      <span class="hub-badge-ok" id="hub-doc-medikal"><i data-lucide="check" style="width:11px;height:11px;"></i> Memuaskan</span>
-                    </div>
-                  </div>
-
-                  <div style="font-size:11px;color:var(--slate-muted);margin-top:6px;">
-                    * Pemohon perempuan disahkan belum berkahwin.
-                  </div>
-                </div>
-              </div>
-
-              <!-- Action Bar -->
-              <div class="hub-actions-bar">
-                <div style="font-size:12px;color:var(--slate-muted);" id="hub-footer-info">
-                  Menunjukkan rekod pemohon paling terkini yang dinilai oleh kaunter.
-                </div>
-                <div style="display:flex;gap:10px;">
-                  <button type="button" class="btn btn-sm btn-outlined" id="hub-btn-detail" onclick="viewLatestCandidateDetail()">
-                    <i data-lucide="eye"></i>
-                    <span>Lihat Terperinci</span>
-                  </button>
-                  <button type="button" class="btn btn-sm btn-red" id="hub-btn-print" onclick="printLatestCandidate()">
-                    <i data-lucide="printer"></i>
-                    <span>Cetak Laporan A4</span>
-                  </button>
-                  <button type="button" class="btn btn-sm btn-navy" onclick="navigateTo('kaunter')">
-                    <i data-lucide="plus"></i>
-                    <span>Saring Calon Baharu</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 5. Charts and Recent Activity -->
+          <!-- Charts and Recent Activity -->
           <div class="dashboard-grid">
             <div class="card">
               <div class="card-title">
@@ -1108,7 +995,7 @@
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=1.0.7"></script>
-  <script src="js/app.js?v=1.0.7"></script>
+  <script src="js/config.js?v=1.0.8"></script>
+  <script src="js/app.js?v=1.0.8"></script>
 </body>
 </html>
