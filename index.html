@@ -276,14 +276,31 @@
                   </div>
                 </div>
                 <div class="field-group">
-                  <label class="field-label" for="inp-tel">No. Telefon <span class="req">*</span></label>
-                  <input type="tel" class="field-input" id="inp-tel" placeholder="+673 8xxxxxx" required>
+                  <label class="field-label" for="inp-perkahwinan">Status Perkahwinan <span class="req">*</span></label>
+                  <select class="field-input" id="inp-perkahwinan" onchange="calcBMI()">
+                    <option value="Bujang">Bujang (Belum Berkahwin)</option>
+                    <option value="Berkahwin">Berkahwin</option>
+                  </select>
                 </div>
               </div>
 
-              <div class="field-group">
-                <label class="field-label" for="inp-emel">Alamat Emel</label>
-                <input type="email" class="field-input" id="inp-emel" placeholder="pemohon@domain.com">
+              <div class="grid-3" style="margin-top:12px;">
+                <div class="field-group">
+                  <label class="field-label" for="inp-kerakyatan">Status Kerakyatan <span class="req">*</span></label>
+                  <select class="field-input" id="inp-kerakyatan" onchange="calcBMI()">
+                    <option value="Rakyat Brunei Darussalam">Rakyat Brunei Darussalam (Kuning)</option>
+                    <option value="Penduduk Tetap">Penduduk Tetap (Ungu)</option>
+                    <option value="Bukan Warganegara">Bukan Warganegara (Hijau / Asing)</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="inp-tel">No. Telefon <span class="req">*</span></label>
+                  <input type="tel" class="field-input" id="inp-tel" placeholder="+673 8xxxxxx" required>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="inp-emel">Alamat Emel</label>
+                  <input type="email" class="field-input" id="inp-emel" placeholder="pemohon@domain.com">
+                </div>
               </div>
             </div>
 
@@ -303,7 +320,7 @@
                       <input type="number" step="0.1" min="120" max="220" class="stepper-input" id="inp-tinggi" value="168.0" required oninput="calcBMI()">
                       <button type="button" class="stepper-btn" onclick="stepVal('inp-tinggi', 0.5)">+</button>
                     </div>
-                    <small id="syarat-tinggi-info" style="color:var(--slate-muted);font-size:11.5px;margin-top:4px;display:block;">Syarat minimum jawatan: -</small>
+                    <small id="syarat-tinggi-info" style="color:var(--slate-muted);font-size:11.5px;margin-top:4px;display:block;">Syarat rasmi: Lelaki ≥ 1.61 m (161 cm) | Wanita ≥ 1.52 m (152 cm)</small>
                   </div>
 
                   <div class="field-group">
@@ -313,6 +330,16 @@
                       <input type="number" step="0.1" min="30" max="180" class="stepper-input" id="inp-berat" value="65.0" required oninput="calcBMI()">
                       <button type="button" class="stepper-btn" onclick="stepVal('inp-berat', 0.5)">+</button>
                     </div>
+                  </div>
+
+                  <div class="field-group" id="group-ukuran-dada">
+                    <label class="field-label">Ukuran Dada Biasa (Lelaki) <span class="req">*</span></label>
+                    <div class="stepper-wrapper">
+                      <button type="button" class="stepper-btn" onclick="stepVal('inp-dada', -0.5)">−</button>
+                      <input type="number" step="0.5" min="20" max="50" class="stepper-input" id="inp-dada" value="33.0" oninput="calcBMI()">
+                      <button type="button" class="stepper-btn" onclick="stepVal('inp-dada', 0.5)">+</button>
+                    </div>
+                    <small id="syarat-dada-info" style="color:var(--slate-muted);font-size:11.5px;margin-top:4px;display:block;">Syarat BFRD: &lt; 34" (86 cm) apabila tidak ditarik nafas (biasa)</small>
                   </div>
                 </div>
 
@@ -333,14 +360,14 @@
                     <div class="bmi-gauge-fill" id="bmi-gauge-fill" style="width:50%;background:var(--green);"></div>
                   </div>
                   <div class="bmi-gauge-labels">
-                    <span>Kurang (&lt;18.5)</span>
-                    <span>Ideal (18.5 - 25.0)</span>
-                    <span>Perhatian (25 - 27.5)</span>
-                    <span>Obes (&gt;27.5)</span>
+                    <span>Kurang (&lt;19.0)</span>
+                    <span>Ideal (19.0 - 27.0)</span>
+                    <span>Perhatian (27.1 - 29.5)</span>
+                    <span>Obes (&gt;29.5)</span>
                   </div>
 
                   <div style="margin-top:14px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;font-size:12px;color:var(--slate-dark);">
-                    <strong>Syarat Jawatan Terpilih:</strong> <span id="syarat-julat-bmi">-</span>
+                    <strong>Syarat Jawatan Terpilih:</strong> <span id="syarat-julat-bmi">BMI 19.0 - 27.0</span>
                   </div>
                 </div>
               </div>
@@ -363,23 +390,23 @@
                 </div>
                 <div class="doc-card checked" data-idx="1" onclick="toggleDoc(1)">
                   <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">2. Kad Pengenalan Pintar Brunei Asal / Pasport Sah <span class="req">*</span></div>
+                  <div class="doc-label">2. Kad Pengenalan Pintar Brunei Asal (Pengesahan Kerakyatan) <span class="req">*</span></div>
                 </div>
                 <div class="doc-card checked" data-idx="2" onclick="toggleDoc(2)">
                   <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">3. Salinan Diakui Sah Sijil Akademik & Transkrip</div>
+                  <div class="doc-label">3. Salinan Diakui Sah Sijil Akademik & Transkrip Asal <span class="req">*</span></div>
                 </div>
                 <div class="doc-card checked" data-idx="3" onclick="toggleDoc(3)">
                   <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
                   <div class="doc-label">4. Curriculum Vitae (CV) & Surat Permohonan Terkini</div>
                 </div>
-                <div class="doc-card" data-idx="4" onclick="toggleDoc(4)">
-                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;display:none;"></i></div>
-                  <div class="doc-label">5. Sijil Kebolehan Khas / Lesen Memandu (Jika ada)</div>
+                <div class="doc-card checked" data-idx="4" onclick="toggleDoc(4)">
+                  <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+                  <div class="doc-label">5. Deria & Penglihatan: Tiada masalah pendengaran & Tidak buta warna (Colour Blind) <span class="req">*</span></div>
                 </div>
                 <div class="doc-card checked" data-idx="5" onclick="toggleDoc(5)">
                   <div class="doc-checkbox"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-                  <div class="doc-label">6. Pasfoto Terkini Berukuran Pasport</div>
+                  <div class="doc-label">6. Status Kesihatan: Lulus Pemeriksaan Kesihatan Pegawai Perubatan Kerajaan <span class="req">*</span></div>
                 </div>
               </div>
             </div>
@@ -714,8 +741,12 @@
                 <div class="a4-field-value" id="print-umur">14/05/2003 (23 Tahun)</div>
               </div>
               <div class="a4-field">
-                <div class="a4-field-label">Jantina</div>
-                <div class="a4-field-value" id="print-jantina">Lelaki</div>
+                <div class="a4-field-label">Jantina / Perkahwinan</div>
+                <div class="a4-field-value" id="print-jantina">Lelaki (Bujang)</div>
+              </div>
+              <div class="a4-field">
+                <div class="a4-field-label">Status Kerakyatan</div>
+                <div class="a4-field-value" id="print-kerakyatan">Rakyat Brunei Darussalam</div>
               </div>
               <div class="a4-field">
                 <div class="a4-field-label">No. Telefon</div>
@@ -725,7 +756,7 @@
             <div class="a4-field-row" style="margin-bottom:0;">
               <div class="a4-field">
                 <div class="a4-field-label">Jawatan yang Dipohon</div>
-                <div class="a4-field-value" id="print-jawatan" style="color:var(--navy);">Ahli Bomba Lelaki Gred AB1</div>
+                <div class="a4-field-value" id="print-jawatan" style="color:var(--navy);">Ahli Bomba dan Penyelamat</div>
               </div>
             </div>
           </div>
@@ -744,9 +775,13 @@
                 <div class="val" id="print-berat">68.5 kg</div>
                 <div class="lbl">Berat Badan</div>
               </div>
+              <div class="a4-bmi-box" id="print-box-dada">
+                <div class="val" id="print-dada">33.0" (84 cm)</div>
+                <div class="lbl">Ukuran Dada Biasa</div>
+              </div>
               <div class="a4-bmi-box">
                 <div class="val" id="print-bmi">23.15</div>
-                <div class="lbl">Indeks Jisim Badan (BMI)</div>
+                <div class="lbl">Indeks BMI (19-27)</div>
               </div>
               <div class="a4-status-box a4-status-lulus" id="print-status-bmi">
                 LULUS
@@ -755,9 +790,9 @@
           </div>
         </div>
 
-        <!-- Bahagian 3: Status Semakan 6 Dokumen -->
+        <!-- Bahagian 3: Status Semakan 6 Dokumen & Syarat Am -->
         <div class="a4-section">
-          <div class="a4-section-header">BAHAGIAN 3: STATUS SEMAKAN DOKUMEN RASMI PEMOHON</div>
+          <div class="a4-section-header">BAHAGIAN 3: STATUS SEMAKAN DOKUMEN RASMI & SYARAT AM BFRD</div>
           <div class="a4-section-body">
             <ul class="a4-doc-list">
               <li class="a4-doc-item">
@@ -765,11 +800,11 @@
                 <span class="a4-doc-status-ok" id="print-doc-0">[ LENGKAP ]</span>
               </li>
               <li class="a4-doc-item">
-                <span>2. Kad Pengenalan Pintar Brunei Asal / Pasport Sah</span>
+                <span>2. Kad Pengenalan Pintar Brunei Asal (Pengesahan Kerakyatan)</span>
                 <span class="a4-doc-status-ok" id="print-doc-1">[ LENGKAP ]</span>
               </li>
               <li class="a4-doc-item">
-                <span>3. Salinan Diakui Sah Sijil Akademik & Transkrip</span>
+                <span>3. Salinan Diakui Sah Sijil Akademik & Transkrip Asal</span>
                 <span class="a4-doc-status-ok" id="print-doc-2">[ LENGKAP ]</span>
               </li>
               <li class="a4-doc-item">
@@ -777,11 +812,11 @@
                 <span class="a4-doc-status-ok" id="print-doc-3">[ LENGKAP ]</span>
               </li>
               <li class="a4-doc-item">
-                <span>5. Sijil Kebolehan Khas / Lesen Memandu (Jika berkaitan)</span>
+                <span>5. Deria & Penglihatan: Tiada masalah pendengaran & Tidak buta warna</span>
                 <span class="a4-doc-status-ok" id="print-doc-4">[ LENGKAP ]</span>
               </li>
               <li class="a4-doc-item">
-                <span>6. Pasfoto Terkini Berukuran Pasport</span>
+                <span>6. Status Kesihatan: Lulus Pemeriksaan Kesihatan Pegawai Perubatan Kerajaan</span>
                 <span class="a4-doc-status-ok" id="print-doc-5">[ LENGKAP ]</span>
               </li>
             </ul>
@@ -836,7 +871,7 @@
   <div id="toast-container"></div>
 
   <!-- App Scripts -->
-  <script src="js/config.js?v=1.0.4"></script>
-  <script src="js/app.js?v=1.0.4"></script>
+  <script src="js/config.js?v=1.0.6"></script>
+  <script src="js/app.js?v=1.0.6"></script>
 </body>
 </html>

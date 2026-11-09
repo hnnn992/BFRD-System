@@ -25,8 +25,83 @@ const STATE = {
   activeDetailData: null
 };
 
-// ── Tiada Data Tiruan (Persekitaran Pengeluaran Sebenar) ──
-const SEED_JAWATAN = [];
+// ── 6 Jawatan Rasmi Jabatan Bomba dan Penyelamat Brunei ──
+const OFFICIAL_JAWATAN = [
+  {
+    'Kod Jawatan': 'PBP',
+    'Nama Jawatan': 'Penguasa Bomba dan Penyelamat',
+    'Bahagian': 'Bahagian II',
+    'Min. Umur': 18,
+    'Maks. Umur': 35,
+    'Min. Tinggi Lelaki (cm)': 161,
+    'Min. Tinggi Wanita (cm)': 152,
+    'Min. BMI': 19.0,
+    'Maks. BMI': 27.0,
+    'Syarat Tambahan': 'Bahagian II | Umur: 18 - 35 tahun | Kelayakan Akademik: Ijazah Sarjana Muda'
+  },
+  {
+    'Kod Jawatan': 'TPBP',
+    'Nama Jawatan': 'Timbalan Penguasa Bomba dan Penyelamat',
+    'Bahagian': 'Bahagian III',
+    'Min. Umur': 18,
+    'Maks. Umur': 35,
+    'Min. Tinggi Lelaki (cm)': 161,
+    'Min. Tinggi Wanita (cm)': 152,
+    'Min. BMI': 19.0,
+    'Maks. BMI': 27.0,
+    'Syarat Tambahan': 'Bahagian III | Umur: 18 - 35 tahun | Kelayakan Akademik: Diploma Tertinggi Kebangsaan (HND)'
+  },
+  {
+    'Kod Jawatan': 'PPBP',
+    'Nama Jawatan': 'Penolong Penguasa Bomba dan Penyelamat',
+    'Bahagian': 'Bahagian III',
+    'Min. Umur': 18,
+    'Maks. Umur': 32,
+    'Min. Tinggi Lelaki (cm)': 161,
+    'Min. Tinggi Wanita (cm)': 152,
+    'Min. BMI': 19.0,
+    'Maks. BMI': 27.0,
+    'Syarat Tambahan': 'Bahagian III | Umur: 18 - 32 tahun | Kelayakan Akademik: Sijil Tertinggi Kebangsaan (HNC)'
+  },
+  {
+    'Kod Jawatan': 'PB',
+    'Nama Jawatan': 'Pegawai Balai',
+    'Bahagian': 'Bahagian III',
+    'Min. Umur': 18,
+    'Maks. Umur': 30,
+    'Min. Tinggi Lelaki (cm)': 161,
+    'Min. Tinggi Wanita (cm)': 152,
+    'Min. BMI': 19.0,
+    'Maks. BMI': 27.0,
+    'Syarat Tambahan': 'Bahagian III | Umur: 18 - 30 tahun | Kelayakan Akademik: Diploma Kebangsaan Peringkat Biasa (OND)'
+  },
+  {
+    'Kod Jawatan': 'TPB',
+    'Nama Jawatan': 'Timbalan Pegawai Balai',
+    'Bahagian': 'Bahagian IV',
+    'Min. Umur': 18,
+    'Maks. Umur': 26,
+    'Min. Tinggi Lelaki (cm)': 161,
+    'Min. Tinggi Wanita (cm)': 152,
+    'Min. BMI': 19.0,
+    'Maks. BMI': 27.0,
+    'Syarat Tambahan': 'Bahagian IV | Umur: 18 - 26 tahun | Kelayakan Akademik: Diploma Kebangsaan Peringkat Biasa (OND)'
+  },
+  {
+    'Kod Jawatan': 'ABP',
+    'Nama Jawatan': 'Ahli Bomba dan Penyelamat',
+    'Bahagian': 'Bahagian IV',
+    'Min. Umur': 18,
+    'Maks. Umur': 26,
+    'Min. Tinggi Lelaki (cm)': 161,
+    'Min. Tinggi Wanita (cm)': 152,
+    'Min. BMI': 19.0,
+    'Maks. BMI': 27.0,
+    'Syarat Tambahan': 'Bahagian IV | Umur: 18 - 26 tahun | Kelayakan Akademik: Kredit 4 matapelajaran dalam BC-GCE O Level'
+  }
+];
+
+const SEED_JAWATAN = OFFICIAL_JAWATAN;
 const SEED_PEMOHON = [];
 
 // ════════════════════════════════════════════════════════════
@@ -436,19 +511,32 @@ async function loadInitialData() {
 
   if (cachedSyarat && cachedTime && (Date.now() - Number(cachedTime) < SIX_HOURS)) {
     try {
-      STATE.jawatanList = JSON.parse(cachedSyarat);
+      const parsed = JSON.parse(cachedSyarat);
+      // Jika cache mengandungi jawatan contoh lama (BPN/BPK), gunakan syarat rasmi
+      if (Array.isArray(parsed) && parsed.length > 0 && !parsed.some(j => j['Kod Jawatan'] === 'BPN')) {
+        STATE.jawatanList = parsed;
+      } else {
+        STATE.jawatanList = OFFICIAL_JAWATAN;
+      }
     } catch (e) {
-      STATE.jawatanList = [];
+      STATE.jawatanList = OFFICIAL_JAWATAN;
     }
   } else {
     // Muat data syarat jawatan sebenar dari API Google Sheets
     const res = await apiGet('getSyaratJawatan');
-    if (res && res.success && Array.isArray(res.data)) {
-      STATE.jawatanList = res.data;
-      localStorage.setItem('cache_syarat', JSON.stringify(res.data));
+    if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+      // Jika data dari spreadsheet masih data mock lama, gabungkan atau gunakan rasmi
+      if (res.data.some(j => j['Kod Jawatan'] === 'BPN')) {
+        STATE.jawatanList = OFFICIAL_JAWATAN;
+      } else {
+        STATE.jawatanList = res.data;
+      }
+      localStorage.setItem('cache_syarat', JSON.stringify(STATE.jawatanList));
       localStorage.setItem('cache_syarat_time', String(Date.now()));
     } else {
-      STATE.jawatanList = [];
+      STATE.jawatanList = OFFICIAL_JAWATAN;
+      localStorage.setItem('cache_syarat', JSON.stringify(OFFICIAL_JAWATAN));
+      localStorage.setItem('cache_syarat_time', String(Date.now()));
     }
   }
 
@@ -624,6 +712,13 @@ function setJantina(val) {
       btn.classList.remove('active');
     }
   });
+
+  // Tunjukkan atau sembunyikan ukuran dada (hanya untuk lelaki mengikut Screen 08)
+  const groupDada = document.getElementById('group-ukuran-dada');
+  if (groupDada) {
+    groupDada.style.display = (val === 'Lelaki') ? 'block' : 'none';
+  }
+
   handleJawatanChange();
 }
 
@@ -649,6 +744,7 @@ function handleTarikhLahirChange() {
     age--;
   }
   out.value = `${age} Tahun`;
+  calcBMI();
   updateFormProgress();
 }
 
@@ -660,16 +756,17 @@ function handleJawatanChange() {
   const elInfo = document.getElementById('syarat-tinggi-info');
   const elJulat = document.getElementById('syarat-julat-bmi');
 
-  if (jawatan) {
-    const minT = STATE.jantina === 'Lelaki'
-      ? (jawatan['Min. Tinggi Lelaki (cm)'] || 0)
-      : (jawatan['Min. Tinggi Wanita (cm)'] || 0);
+  // Syarat Ketinggian Rasmi BFRD (Screen 08):
+  // Lelaki: Minimum 1.61 m (161 cm)
+  // Wanita: Minimum 1.52 m (152 cm)
+  const defaultMinT = STATE.jantina === 'Lelaki' ? 161 : 152;
+  const minT = jawatan ? (STATE.jantina === 'Lelaki' ? (parseFloat(jawatan['Min. Tinggi Lelaki (cm)']) || defaultMinT) : (parseFloat(jawatan['Min. Tinggi Wanita (cm)']) || defaultMinT)) : defaultMinT;
 
-    if (elInfo) elInfo.textContent = minT > 0 ? `Syarat minimum jawatan: ≥ ${minT} cm (${STATE.jantina})` : 'Tiada syarat ketinggian minimum khusus';
-    if (elJulat) elJulat.textContent = `BMI ${jawatan['Min. BMI'] || 18.5} - ${jawatan['Maks. BMI'] || 25.0}`;
-  } else {
-    if (elInfo) elInfo.textContent = 'Syarat minimum jawatan: -';
-    if (elJulat) elJulat.textContent = 'BMI 18.5 - 25.0 (Standard)';
+  if (elInfo) {
+    elInfo.textContent = `Syarat rasmi BFRD: Ketinggian minimum ≥ ${minT} cm (${STATE.jantina})`;
+  }
+  if (elJulat) {
+    elJulat.textContent = `BMI ${jawatan ? (jawatan['Min. BMI'] || '19.0') : '19.0'} - ${jawatan ? (jawatan['Maks. BMI'] || '27.0') : '27.0'} (Julat Rasmi BFRD)`;
   }
 
   calcBMI();
@@ -697,13 +794,26 @@ function toggleDoc(idx) {
 
 /**
  * Kalkulator BMI Reaktif & Enjin Penentuan Kelayakan Tempatan (Client-Side)
+ * Mengikut Garis Panduan Rasmi Jabatan Bomba dan Penyelamat Brunei:
+ *   - Lelaki: Tinggi ≥ 1.61 m (161 cm), Ukuran Dada < 34" (86 cm), BMI 19 - 27
+ *   - Wanita: Tinggi ≥ 1.52 m (152 cm), Belum Berkahwin, BMI 19 - 27
+ *   - Warganegara Brunei Darussalam
+ *   - Had umur mengikut jawatan (18 hingga 26/30/32/35 tahun)
  */
 function calcBMI() {
   const inpTinggi = document.getElementById('inp-tinggi');
   const inpBerat = document.getElementById('inp-berat');
+  const inpDada = document.getElementById('inp-dada');
+  const inpPerkahwinan = document.getElementById('inp-perkahwinan');
+  const inpKerakyatan = document.getElementById('inp-kerakyatan');
+  const inpUmur = document.getElementById('inp-umur');
 
   const tinggi = parseFloat(inpTinggi ? inpTinggi.value : 0) || 0;
   const berat = parseFloat(inpBerat ? inpBerat.value : 0) || 0;
+  const dada = parseFloat(inpDada ? inpDada.value : 0) || 0;
+  const umur = parseInt(inpUmur ? inpUmur.value : 0) || 0;
+  const perkahwinan = inpPerkahwinan ? inpPerkahwinan.value : 'Bujang';
+  const kerakyatan = inpKerakyatan ? inpKerakyatan.value : 'Rakyat Brunei Darussalam';
 
   let bmi = 0;
   if (tinggi > 0 && berat > 0) {
@@ -721,9 +831,14 @@ function calcBMI() {
   const jName = selJawatan ? selJawatan.value : '';
   const jawatan = STATE.jawatanList.find(j => j['Nama Jawatan'] === jName);
 
-  const minBMI = jawatan ? parseFloat(jawatan['Min. BMI']) || 18.5 : 18.5;
-  const maxBMI = jawatan ? parseFloat(jawatan['Maks. BMI']) || 25.0 : 25.0;
-  const minTinggi = jawatan ? (STATE.jantina === 'Lelaki' ? parseFloat(jawatan['Min. Tinggi Lelaki (cm)']) || 0 : parseFloat(jawatan['Min. Tinggi Wanita (cm)']) || 0) : 0;
+  // Piawaian Rasmi BFRD (Screen 08 & Screen 07)
+  const minBMI = jawatan ? parseFloat(jawatan['Min. BMI']) || 19.0 : 19.0;
+  const maxBMI = jawatan ? parseFloat(jawatan['Maks. BMI']) || 27.0 : 27.0;
+  const defaultMinT = STATE.jantina === 'Lelaki' ? 161.0 : 152.0;
+  const minTinggi = jawatan ? (STATE.jantina === 'Lelaki' ? parseFloat(jawatan['Min. Tinggi Lelaki (cm)']) || defaultMinT : parseFloat(jawatan['Min. Tinggi Wanita (cm)']) || defaultMinT) : defaultMinT;
+
+  const minUmur = (jawatan && jawatan['Min. Umur']) || 18;
+  const maxUmur = (jawatan && jawatan['Maks. Umur']) || 35;
 
   // Status BMI
   let statusBMI = 'Tidak Lulus';
@@ -746,7 +861,7 @@ function calcBMI() {
     gaugeColor = 'var(--gold)';
     gaugeWidth = '75%';
   } else if (bNum < minBMI) {
-    statusBMI = 'KURANG BERAT';
+    statusBMI = 'KURANG BERAT / GAGAL';
     gaugeWidth = '25%';
   } else {
     statusBMI = 'OBESITI / GAGAL';
@@ -767,27 +882,84 @@ function calcBMI() {
     elGauge.style.width = gaugeWidth;
   }
 
-  // Enjin Penentuan Kelayakan Akhir
-  const docWajib1 = STATE.docStatus[0]; // Surat Panggilan
-  const docWajib2 = STATE.docStatus[1]; // Kad Pengenalan
-  const docSemuaLengkap = STATE.docStatus.every(d => d === true);
-  const tinggiMelepasi = minTinggi === 0 || tinggi >= minTinggi;
+  // ── Penilaian Syarat Mengikut Garis Panduan Rasmi BFRD ──
+  const isuGagal = [];
+  const isuSemakan = [];
 
+  // 1. Ketinggian Minimum (Screen 08)
+  if (tinggi > 0 && tinggi < minTinggi) {
+    isuGagal.push(`Ketinggian ${tinggi} cm di bawah syarat minimum ${minTinggi} cm (${STATE.jantina})`);
+  }
+
+  // 2. Julat BMI (Screen 08)
+  if (bNum > 0) {
+    if (bNum < minBMI) {
+      isuGagal.push(`BMI ${bNum} kurang daripada had minimum 19.0`);
+    } else if (bNum > maxBMI + 2.5) {
+      isuGagal.push(`BMI ${bNum} melebihi had maksimum 27.0 (Obesiti)`);
+    } else if (bNum > maxBMI && bNum <= maxBMI + 2.5) {
+      isuSemakan.push(`BMI ${bNum} berada dalam zon perhatian (27.1 - 29.5)`);
+    }
+  }
+
+  // 3. Ukuran Dada untuk Lelaki (Screen 08: < 34" / 86 cm apabila tidak ditarik nafas)
+  if (STATE.jantina === 'Lelaki' && dada > 34) {
+    isuSemakan.push(`Ukuran dada ${dada}" melebihi had biasa (< 34")`);
+  }
+
+  // 4. Status Perkahwinan Wanita (Screen 06: Pemohon perempuan mestilah belum berkahwin)
+  if (STATE.jantina === 'Perempuan' && perkahwinan === 'Berkahwin') {
+    isuGagal.push('Pemohon perempuan mestilah belum berkahwin (Syarat Kelayakan Am)');
+  }
+
+  // 5. Kerakyatan (Screen 06: Rakyat Brunei Darussalam)
+  if (kerakyatan !== 'Rakyat Brunei Darussalam') {
+    isuGagal.push('Mestilah Rakyat Kebawah Duli Yang Maha Mulia Paduka Seri Baginda Sultan dan Yang Di-Pertuan');
+  }
+
+  // 6. Had Umur Jawatan (Screen 07)
+  if (umur > 0 && jawatan) {
+    if (umur < minUmur || umur > maxUmur) {
+      isuGagal.push(`Umur ${umur} tahun di luar kelayakan jawatan (${minUmur} - ${maxUmur} tahun)`);
+    }
+  }
+
+  // 7. Dokumen Wajib & Deria/Kesihatan (Screen 06)
+  const docWajib1 = STATE.docStatus[0]; // Surat Panggilan
+  const docWajib2 = STATE.docStatus[1]; // IC
+  const docWajib3 = STATE.docStatus[2]; // Sijil Akademik
+  const docDeria  = STATE.docStatus[4]; // Deria & Penglihatan
+  const docKesihatan = STATE.docStatus[5]; // Kesihatan Pegawai Perubatan
+
+  if (!docWajib1 || !docWajib2) {
+    isuGagal.push('Surat panggilan rasmi atau Kad Pengenalan belum disahkan');
+  }
+  if (!docWajib3) {
+    isuSemakan.push('Salinan diakui sah sijil akademik belum diserahkan');
+  }
+  if (!docDeria) {
+    isuGagal.push('Ujian deria / penglihatan belum disahkan melepasi syarat');
+  }
+  if (!docKesihatan) {
+    isuSemakan.push('Pemeriksaan kesihatan Pegawai Perubatan Kerajaan belum lengkap');
+  }
+
+  // Penentuan Keputusan Akhir
   let keputusan = 'Layak';
   let bannerClass = 'layak';
   let iconName = 'check-circle';
-  let descText = 'Memenuhi kriteria ketinggian, BMI, serta 6 dokumen lengkap disahkan.';
+  let descText = 'Memenuhi semua syarat kelayakan fizikal (Ketinggian, BMI 19-27) & syarat am BFRD.';
 
-  if (!docWajib1 || !docWajib2 || statusBMI.includes('GAGAL') || statusBMI.includes('KURANG') || !tinggiMelepasi) {
+  if (isuGagal.length > 0) {
     keputusan = 'Tidak Layak';
     bannerClass = 'tidak';
     iconName = 'x-circle';
-    descText = 'Tidak memenuhi syarat ketinggian minimum, BMI di luar julat, atau dokumen identiti asas tidak lengkap.';
-  } else if (!docSemuaLengkap || statusBMI === 'PERHATIAN') {
+    descText = isuGagal.join('. ') + '.';
+  } else if (isuSemakan.length > 0) {
     keputusan = 'Perlu Semakan';
     bannerClass = 'semakan';
     iconName = 'alert-triangle';
-    descText = 'Perlu semakan lanjut panel pemeriksa (BMI dalam zon perhatian atau dokumen sokongan khas belum diserahkan).';
+    descText = isuSemakan.join('. ') + '.';
   }
 
   const elBanner = document.getElementById('keputusan-banner');
@@ -838,6 +1010,9 @@ async function handleSimpanPemohon(e) {
   const emel = document.getElementById('inp-emel').value.trim();
   const tinggi = parseFloat(document.getElementById('inp-tinggi').value) || 0;
   const berat = parseFloat(document.getElementById('inp-berat').value) || 0;
+  const dada = parseFloat(document.getElementById('inp-dada')?.value) || 0;
+  const perkahwinan = document.getElementById('inp-perkahwinan')?.value || 'Bujang';
+  const kerakyatan = document.getElementById('inp-kerakyatan')?.value || 'Rakyat Brunei Darussalam';
   const bmiVal = parseFloat(document.getElementById('bmi-display-val').textContent) || 0;
   const catatan = document.getElementById('inp-catatan').value.trim();
 
@@ -857,6 +1032,9 @@ async function handleSimpanPemohon(e) {
     'Tarikh Lahir': tlahir,
     'Umur': umur,
     'Jantina': STATE.jantina,
+    'Status Perkahwinan': perkahwinan,
+    'Status Kerakyatan': kerakyatan,
+    'Ukuran Dada (inci)': (STATE.jantina === 'Lelaki') ? dada : 0,
     'No. Telefon': tel,
     'Emel': emel,
     'Jawatan Dipohon': jawatan,
@@ -906,7 +1084,7 @@ async function handleSimpanPemohon(e) {
 function resetFormSaringan() {
   document.getElementById('form-saringan').reset();
   setJantina('Lelaki');
-  STATE.docStatus = [true, true, true, true, false, true];
+  STATE.docStatus = [true, true, true, true, true, true];
 
   const cards = document.querySelectorAll('.doc-card');
   cards.forEach((card, idx) => {
@@ -940,13 +1118,33 @@ function openPrintModal(p) {
   document.getElementById('print-nama').textContent = p['Nama Penuh'] || '-';
   document.getElementById('print-ic').textContent = p['No. IC'] || '-';
   document.getElementById('print-umur').textContent = `${p['Tarikh Lahir'] || '-'} (${p['Umur'] || 0} Tahun)`;
-  document.getElementById('print-jantina').textContent = p['Jantina'] || 'Lelaki';
+  
+  const jantinaStr = p['Jantina'] || 'Lelaki';
+  const perkahwinanStr = p['Status Perkahwinan'] || 'Bujang';
+  document.getElementById('print-jantina').textContent = `${jantinaStr} (${perkahwinanStr})`;
+
+  const elKerakyatan = document.getElementById('print-kerakyatan');
+  if (elKerakyatan) elKerakyatan.textContent = p['Status Kerakyatan'] || 'Rakyat Brunei Darussalam';
+
   document.getElementById('print-tel').textContent = p['No. Telefon'] || '-';
   document.getElementById('print-jawatan').textContent = p['Jawatan Dipohon'] || '-';
 
   document.getElementById('print-tinggi').textContent = `${parseFloat(p['Tinggi (cm)'] || 0).toFixed(1)} cm`;
   document.getElementById('print-berat').textContent = `${parseFloat(p['Berat (kg)'] || 0).toFixed(1)} kg`;
   document.getElementById('print-bmi').textContent = parseFloat(p['Nilai BMI'] || 0).toFixed(2);
+
+  // Ukuran Dada (Lelaki sahaja)
+  const boxDada = document.getElementById('print-box-dada');
+  const elDada = document.getElementById('print-dada');
+  if (boxDada && elDada) {
+    if (jantinaStr === 'Lelaki') {
+      const dInci = parseFloat(p['Ukuran Dada (inci)']) || 33.0;
+      boxDada.style.display = 'block';
+      elDada.textContent = `${dInci}" (${Math.round(dInci * 2.54)} cm)`;
+    } else {
+      boxDada.style.display = 'none';
+    }
+  }
 
   const elStatBMI = document.getElementById('print-status-bmi');
   const sBmi = (p['Status BMI'] || 'Lulus').toUpperCase();
